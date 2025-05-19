@@ -80,7 +80,7 @@ class UTILITIES_API IdfObject
 
   // TODO: virtual destructor is bad news for performance, do we need it? AFAIK none of the destructors in the chain do actual resource cleanup?
   // Perhaps for nano signal slots though...? That means the move ctor and move assignment operator are deleted...
-  virtual ~IdfObject() = default;
+  virtual ~IdfObject();
 
   // If we can get by without the OS_ASSERT(m_impl) in these, we could just default all of them
   // IdfObject(const IdfObject& other) = default;

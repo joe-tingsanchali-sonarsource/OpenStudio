@@ -2044,6 +2044,8 @@ IdfObject::IdfObject(const IdfObject& other) : m_impl(other.m_impl) {
   OS_ASSERT(m_impl);
 }
 
+IdfObject::~IdfObject() = default;
+
 IdfObject& IdfObject::operator=(const IdfObject& other) {
   m_impl = other.m_impl;
   OS_ASSERT(m_impl);
