@@ -32,7 +32,7 @@ endif()
 
 
 # TODO: Previously just globbing for .rb files, I think we're missing a lot of files, the gemspecs in particular, the .pem SSL certs for rubygems, those rbs files too?
-glob_for_file_exts_and_prepare_for_embedded("${MODULE_ROOT}/lib" rubyFiles rubyEmbeddedPaths VERBOSE EXTENSIONS rb gemspec pem js css gif png json rbs yml)
+glob_for_file_exts_and_prepare_for_embedded("${MODULE_ROOT}/lib" rubyFiles rubyEmbeddedPaths VERBOSE EXTENSIONS rb gemspec pem js css csv gif png json rbs yml)
 list(APPEND FILES ${rubyFiles})
 list(APPEND EMBEDDED_PATHS ${rubyEmbeddedPaths})
 
