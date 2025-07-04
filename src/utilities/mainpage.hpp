@@ -114,7 +114,7 @@ namespace openstudio {
  *          functions for creating \link Unit Units\endlink from strings.
  *  \li \link QuantityFactory QuantityFactory \endlink - Singleton and related
  *          non-member functions for creating \link Quantity Quantities\endlink from strings.
- *  \li \link QuantityConverterSingleton QuantityConverter \endlink - Singleton and related
+ *  \li \link QuantityConverter QuantityConverter \endlink - Singleton and related
  *          non-member functions for converting \link Quantity Quantities\endlink and
  *          \link OSQuantityVector OSQuantityVectors \endlink to different units.
  *  \li OSOptionalQuantity - Class for always returning a Unit and optionally
