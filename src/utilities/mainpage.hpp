@@ -110,7 +110,7 @@ namespace openstudio {
  *
  *  \li Unit
  *  \li Quantity
- *  \li \link UnitFactorySingleton UnitFactory \endlink - Singleton and related non-member
+ *  \li \link UnitFactory UnitFactory \endlink - Singleton and related non-member
  *          functions for creating \link Unit Units\endlink from strings.
  *  \li \link QuantityFactory QuantityFactory \endlink - Singleton and related
  *          non-member functions for creating \link Quantity Quantities\endlink from strings.
