@@ -5,7 +5,6 @@
 
 #include "UUID.hpp"
 #include "String.hpp"
-#include "StaticInitializer.hpp"
 
 #include <sstream>
 
@@ -16,19 +15,13 @@
 namespace openstudio {
 
 namespace detail {
-  struct BoostGeneratorsInitializer : StaticInitializer<BoostGeneratorsInitializer>
-  {
-    static void initialize() {
-      createUUID();
-      toUUID(std::string("00000000-0000-0000-0000-000000000000"));
-    }
-  };
-  struct MakeSureBoostGeneratorsInitializerIsInitialized
-  {
-    MakeSureBoostGeneratorsInitializerIsInitialized() = default;
 
-    BoostGeneratorsInitializer m_i;
-  };
+  // TODO: I think we can fully remove this
+  inline const bool uuidInit = [] {
+    createUUID();
+    toUUID("00000000-0000-0000-0000-000000000000");
+    return true;
+  }();
 
 }  // namespace detail
 

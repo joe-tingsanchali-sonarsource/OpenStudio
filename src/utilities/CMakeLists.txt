@@ -60,7 +60,6 @@ set(core_src
   core/Queue.hpp
   core/RubyInterpreter.hpp
   core/RubyException.hpp
-  core/StaticInitializer.hpp
   core/String.hpp
   core/String.cpp
   core/StringHelpers.hpp
