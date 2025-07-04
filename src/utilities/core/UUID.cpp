@@ -14,39 +14,18 @@
 
 namespace openstudio {
 
-namespace detail {
-
-  // TODO: I think we can fully remove this
-  inline const bool uuidInit = [] {
-    createUUID();
-    toUUID("00000000-0000-0000-0000-000000000000");
-    return true;
-  }();
-
-}  // namespace detail
-
 UUID::UUID() : boost::uuids::uuid(boost::uuids::nil_uuid()) {}
 
 UUID::UUID(const boost::uuids::uuid& t_other) : boost::uuids::uuid(t_other) {}
 
 UUID UUID::random_generate() {
-  static boost::thread_specific_ptr<boost::uuids::random_generator> gen;
-
-  if (gen.get() == nullptr) {
-    gen.reset(new boost::uuids::random_generator);
-  }
-
-  return UUID((*gen)());
+  static thread_local boost::uuids::random_generator gen;
+  return UUID(gen());
 }
 
 UUID UUID::string_generate(const std::string& t_str) {
-  static boost::thread_specific_ptr<boost::uuids::string_generator> gen;
-
-  if (gen.get() == nullptr) {
-    gen.reset(new boost::uuids::string_generator);
-  }
-
-  return UUID((*gen)(t_str));
+  static thread_local boost::uuids::string_generator gen;
+  return UUID(gen(t_str));
 }
 
 UUID createUUID() {
