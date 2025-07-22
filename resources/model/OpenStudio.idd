@@ -22644,9 +22644,11 @@ OS:Controller:MechanicalVentilation,
        \key Standard62.1VentilationRateProcedure
        \key Standard62.1VentilationRateProcedureWithLimit
        \key IndoorAirQualityProcedure
-       \key ProportionalControl
-       \key ProportionalControlBasedOnOccupancySchedule
        \key ProportionalControlBasedOnDesignOccupancy
+       \key ProportionalControlBasedOnOccupancySchedule
+       \key IndoorAirQualityProcedureGenericContaminant
+       \key IndoorAirQualityProcedureCombined
+       \key ProportionalControlBasedOnDesignOARate
   A6, \field Thermal Zone
        \note A zone name or a zone list name may be used here
        \type object-list
