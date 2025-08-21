@@ -9968,6 +9968,28 @@ namespace osversion {
         ss << newObject;
         m_refactored.emplace_back(std::move(object), std::move(newObject));
 
+      } else if (iddname == "OS:People") {
+
+        // 1 Field has been modified from 3.10.0 to 3.10.1:
+        // ------------------------------------------------
+        // * System Outdoor Air Method * 4 - Removed ProportionalControl as mapping to ProportionalControlBasedonOccupancySchedule
+
+        auto iddObject = idd_3_10_1.getObject(iddname);
+        IdfObject newObject(iddObject.get());
+
+        for (size_t i = 0; i < object.numFields(); ++i) {
+          if ((value = object.getString(i))) {
+            if (i == 4) {
+              if (istringEqual(value.get(), "ProportionalControl")) {
+                newObject.setString(4, "ProportionalControlBasedonOccupancySchedule");
+              }
+            }
+          }
+        }
+
+        ss << newObject;
+        m_refactored.emplace_back(std::move(object), std::move(newObject));
+
         // No-op
       } else {
         ss << object;

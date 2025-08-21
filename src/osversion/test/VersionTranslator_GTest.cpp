@@ -4766,3 +4766,19 @@ TEST_F(OSVersionFixture, update_3_10_0_to_3_10_1_DXHeatingCoilSizingRatio) {
   ASSERT_TRUE(unitary2.getTarget(11));
   EXPECT_EQ("Coil Cooling DX Multi Speed 1", unitary2.getTarget(11)->nameString());  // Cooling Coil
 }
+
+TEST_F(OSVersionFixture, update_3_10_0_to_3_10_1_ControllerMechanicalVentilation) {
+  openstudio::path path = resourcesPath() / toPath("osversion/3_10_1/test_vt_ControllerMechanicalVentilation.osm");
+  osversion::VersionTranslator vt;
+  boost::optional<model::Model> model = vt.loadModel(path);
+  ASSERT_TRUE(model) << "Failed to load " << path;
+
+  openstudio::path outPath = resourcesPath() / toPath("osversion/3_10_1/test_vt_ControllerMechanicalVentilation_updated.osm");
+  model->save(outPath, true);
+
+  std::vector<WorkspaceObject> cs = model->getObjectsByType("OS:ControllerMechanicalVentilation");
+  ASSERT_EQ(1u, cs.size());
+  const auto& c = cs.front();
+
+  EXPECT_EQ("ProportionalControlBasedonOccupancySchedule", c.getString(4).get()); // System Outdoor Air Method
+}
