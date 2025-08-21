@@ -4780,5 +4780,5 @@ TEST_F(OSVersionFixture, update_3_10_0_to_3_10_1_ControllerMechanicalVentilation
   ASSERT_EQ(1u, cs.size());
   const auto& c = cs.front();
 
-  EXPECT_EQ("ProportionalControlBasedonOccupancySchedule", c.getString(4).get()); // System Outdoor Air Method
+  EXPECT_EQ("ProportionalControlBasedonOccupancySchedule", c.getString(4).get());  // System Outdoor Air Method
 }
