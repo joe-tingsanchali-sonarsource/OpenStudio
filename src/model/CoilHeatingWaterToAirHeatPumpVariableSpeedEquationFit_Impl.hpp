@@ -140,6 +140,10 @@ namespace model {
 
       void removeAllSpeeds();
 
+      AirflowNetworkEquivalentDuct getAirflowNetworkEquivalentDuct(double length, double diameter);
+
+      boost::optional<AirflowNetworkEquivalentDuct> airflowNetworkEquivalentDuct() const;
+
       //@}
      protected:
      private:

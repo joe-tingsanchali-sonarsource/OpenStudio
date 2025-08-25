@@ -19,6 +19,8 @@
 #include "ZoneHVACWaterToAirHeatPump_Impl.hpp"
 #include "AirLoopHVACUnitarySystem.hpp"
 #include "AirLoopHVACUnitarySystem_Impl.hpp"
+#include "AirflowNetworkEquivalentDuct.hpp"
+#include "AirflowNetworkEquivalentDuct_Impl.hpp"
 #include "Model.hpp"
 #include "Model_Impl.hpp"
 #include "Node.hpp"
@@ -364,6 +366,11 @@ namespace model {
       }
 
       children.push_back(energyPartLoadFractionCurve());
+
+      std::vector<AirflowNetworkEquivalentDuct> myAFNItems =
+        getObject<ModelObject>().getModelObjectSources<AirflowNetworkEquivalentDuct>(AirflowNetworkEquivalentDuct::iddObjectType());
+      children.insert(children.end(), myAFNItems.begin(), myAFNItems.end());
+
       return children;
     }
 
@@ -474,6 +481,32 @@ namespace model {
     void CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit_Impl::resetSpeedDataList() {
       bool result = setString(OS_Coil_Cooling_WaterToAirHeatPump_VariableSpeedEquationFitFields::SpeedDataList, "");
       OS_ASSERT(result);
+    }
+
+    AirflowNetworkEquivalentDuct CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit_Impl::getAirflowNetworkEquivalentDuct(double length, double diameter) {
+      boost::optional<AirflowNetworkEquivalentDuct> opt = airflowNetworkEquivalentDuct();
+      if (opt) {
+        if (opt->airPathLength() != length) {
+          opt->setAirPathLength(length);
+        }
+        if (opt->airPathHydraulicDiameter() != diameter) {
+          opt->setAirPathHydraulicDiameter(diameter);
+        }
+      }
+      return AirflowNetworkEquivalentDuct(model(), length, diameter, handle());
+    }
+
+    boost::optional<AirflowNetworkEquivalentDuct> CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit_Impl::airflowNetworkEquivalentDuct() const {
+      std::vector<AirflowNetworkEquivalentDuct> myAFN =
+        getObject<ModelObject>().getModelObjectSources<AirflowNetworkEquivalentDuct>(AirflowNetworkEquivalentDuct::iddObjectType());
+      auto count = myAFN.size();
+      if (count == 1) {
+        return myAFN[0];
+      } else if (count > 1) {
+        LOG(Warn, briefDescription() << " has more than one AirflowNetwork EquivalentDuct attached, returning first.");
+        return myAFN[0];
+      }
+      return boost::none;
     }
 
     boost::optional<double>
@@ -777,6 +810,14 @@ namespace model {
     std::shared_ptr<detail::CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit_Impl> impl)
     : WaterToAirComponent(std::move(impl)) {}
   /// @endcond
+
+  AirflowNetworkEquivalentDuct CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit::getAirflowNetworkEquivalentDuct(double length, double diameter) {
+    return getImpl<detail::CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit_Impl>()->getAirflowNetworkEquivalentDuct(length, diameter);
+  }
+
+  boost::optional<AirflowNetworkEquivalentDuct> CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit::airflowNetworkEquivalentDuct() const {
+    return getImpl<detail::CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit_Impl>()->airflowNetworkEquivalentDuct();
+  }
 
   boost::optional<double>
     CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit::autosizedGrossRatedTotalCoolingCapacityAtSelectedNominalSpeedLevel() const {

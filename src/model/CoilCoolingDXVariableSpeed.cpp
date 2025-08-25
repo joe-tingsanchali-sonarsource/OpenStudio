@@ -29,6 +29,8 @@
 #include "CoilSystemCoolingDXHeatExchangerAssisted_Impl.hpp"
 #include "CoilSystemIntegratedHeatPumpAirSource.hpp"
 #include "CoilSystemIntegratedHeatPumpAirSource_Impl.hpp"
+#include "AirflowNetworkEquivalentDuct.hpp"
+#include "AirflowNetworkEquivalentDuct_Impl.hpp"
 
 #include "Model.hpp"
 #include "Model_Impl.hpp"
@@ -515,6 +517,9 @@ namespace model {
           children.push_back(mo);
         }
       }
+      std::vector<AirflowNetworkEquivalentDuct> myAFNItems =
+        getObject<ModelObject>().getModelObjectSources<AirflowNetworkEquivalentDuct>(AirflowNetworkEquivalentDuct::iddObjectType());
+      children.insert(children.end(), myAFNItems.begin(), myAFNItems.end());
       return children;
     }
 
@@ -696,6 +701,32 @@ namespace model {
       }
 
       return result;
+    }
+
+    AirflowNetworkEquivalentDuct CoilCoolingDXVariableSpeed_Impl::getAirflowNetworkEquivalentDuct(double length, double diameter) {
+      boost::optional<AirflowNetworkEquivalentDuct> opt = airflowNetworkEquivalentDuct();
+      if (opt) {
+        if (opt->airPathLength() != length) {
+          opt->setAirPathLength(length);
+        }
+        if (opt->airPathHydraulicDiameter() != diameter) {
+          opt->setAirPathHydraulicDiameter(diameter);
+        }
+      }
+      return AirflowNetworkEquivalentDuct(model(), length, diameter, handle());
+    }
+
+    boost::optional<AirflowNetworkEquivalentDuct> CoilCoolingDXVariableSpeed_Impl::airflowNetworkEquivalentDuct() const {
+      std::vector<AirflowNetworkEquivalentDuct> myAFN =
+        getObject<ModelObject>().getModelObjectSources<AirflowNetworkEquivalentDuct>(AirflowNetworkEquivalentDuct::iddObjectType());
+      auto count = myAFN.size();
+      if (count == 1) {
+        return myAFN[0];
+      } else if (count > 1) {
+        LOG(Warn, briefDescription() << " has more than one AirflowNetwork EquivalentDuct attached, returning first.");
+        return myAFN[0];
+      }
+      return boost::none;
     }
 
     boost::optional<double> CoilCoolingDXVariableSpeed_Impl::autosizedGrossRatedTotalCoolingCapacityAtSelectedNominalSpeedLevel() const {
@@ -1126,6 +1157,14 @@ namespace model {
 
   boost::optional<double> CoilCoolingDXVariableSpeed::autosizedEvaporativeCondenserPumpRatedPowerConsumption() const {
     return getImpl<detail::CoilCoolingDXVariableSpeed_Impl>()->autosizedEvaporativeCondenserPumpRatedPowerConsumption();
+  }
+
+  AirflowNetworkEquivalentDuct CoilCoolingDXVariableSpeed::getAirflowNetworkEquivalentDuct(double length, double diameter) {
+    return getImpl<detail::CoilCoolingDXVariableSpeed_Impl>()->getAirflowNetworkEquivalentDuct(length, diameter);
+  }
+
+  boost::optional<AirflowNetworkEquivalentDuct> CoilCoolingDXVariableSpeed::airflowNetworkEquivalentDuct() const {
+    return getImpl<detail::CoilCoolingDXVariableSpeed_Impl>()->airflowNetworkEquivalentDuct();
   }
 
 }  // namespace model
