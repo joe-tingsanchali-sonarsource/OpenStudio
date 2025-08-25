@@ -9845,6 +9845,34 @@ namespace osversion {
         ss << newObject;
         m_refactored.emplace_back(std::move(object), std::move(newObject));
 
+      } else if (iddname == "OS:HeatPump:AirToWater:FuelFired:Heating") {
+
+        // 1 Field has been added from 3.10.0 to 3.10.1:
+        // ------------------------------------------------
+        // * Minimum Unloading Ratio * 31
+
+        auto iddObject = idd_3_10_1.getObject(iddname);
+        IdfObject newObject(iddObject.get());
+
+        newObject.setDouble(31, 0.25);
+
+        ss << newObject;
+        m_refactored.emplace_back(std::move(object), std::move(newObject));
+
+      } else if (iddname == "OS:HeatPump:AirToWater:FuelFired:Cooling") {
+
+        // 1 Field has been added from 3.10.0 to 3.10.1:
+        // ------------------------------------------------
+        // * Minimum Unloading Ratio * 26
+
+        auto iddObject = idd_3_10_1.getObject(iddname);
+        IdfObject newObject(iddObject.get());
+
+        newObject.setDouble(26, 0.25);
+
+        ss << newObject;
+        m_refactored.emplace_back(std::move(object), std::move(newObject));
+
         // No-op
       } else {
         ss << object;
