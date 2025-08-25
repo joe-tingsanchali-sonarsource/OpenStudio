@@ -1065,7 +1065,6 @@ namespace model {
     return getImpl<detail::HeatPumpAirToWaterFuelFiredHeating_Impl>()->setMinimumUnloadingRatio(minimumUnloadingRatio);
   }
 
-
   /// @cond
   HeatPumpAirToWaterFuelFiredHeating::HeatPumpAirToWaterFuelFiredHeating(std::shared_ptr<detail::HeatPumpAirToWaterFuelFiredHeating_Impl> impl)
     : StraightComponent(std::move(impl)) {}

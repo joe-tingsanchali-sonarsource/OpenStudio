@@ -4714,11 +4714,11 @@ TEST_F(OSVersionFixture, update_3_10_0_to_3_10_1_HeatPumpAirToWaterFuelFired) {
   ASSERT_EQ(1u, htgs.size());
   const auto& htg = htgs.front();
 
-  EXPECT_EQ(0.25, htg.getDouble(31).get());                           // Minimum Unloading Ratio
+  EXPECT_EQ(0.25, htg.getDouble(31).get());  // Minimum Unloading Ratio
 
   std::vector<WorkspaceObject> clgs = model->getObjectsByType("OS:HeatPump:AirToWater:FuelFired:Cooling");
   ASSERT_EQ(1u, clgs.size());
   const auto& clg = clgs.front();
 
-  EXPECT_EQ(0.25, clg.getDouble(26).get());                           // Minimum Unloading Ratio
+  EXPECT_EQ(0.25, clg.getDouble(26).get());  // Minimum Unloading Ratio
 }
