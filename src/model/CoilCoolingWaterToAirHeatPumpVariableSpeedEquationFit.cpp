@@ -483,7 +483,8 @@ namespace model {
       OS_ASSERT(result);
     }
 
-    AirflowNetworkEquivalentDuct CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit_Impl::getAirflowNetworkEquivalentDuct(double length, double diameter) {
+    AirflowNetworkEquivalentDuct CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit_Impl::getAirflowNetworkEquivalentDuct(double length,
+                                                                                                                             double diameter) {
       boost::optional<AirflowNetworkEquivalentDuct> opt = airflowNetworkEquivalentDuct();
       if (opt) {
         if (opt->airPathLength() != length) {
@@ -811,7 +812,8 @@ namespace model {
     : WaterToAirComponent(std::move(impl)) {}
   /// @endcond
 
-  AirflowNetworkEquivalentDuct CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit::getAirflowNetworkEquivalentDuct(double length, double diameter) {
+  AirflowNetworkEquivalentDuct CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit::getAirflowNetworkEquivalentDuct(double length,
+                                                                                                                      double diameter) {
     return getImpl<detail::CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit_Impl>()->getAirflowNetworkEquivalentDuct(length, diameter);
   }
 
