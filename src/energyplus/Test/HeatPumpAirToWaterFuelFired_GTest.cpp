@@ -205,5 +205,5 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_HeatPumpAirToWaterFuelFired) {
     curve13.nameString(),
     idf_ffhp_clg.getString(HeatPump_AirToWater_FuelFired_CoolingFields::AuxiliaryElectricEnergyInputRatioFunctionofPLRCurveName, false).get());
   EXPECT_EQ(13.0, idf_ffhp_clg.getDouble(HeatPump_AirToWater_FuelFired_CoolingFields::StandbyElectricPower, false).get());
-  EXPECT_EQ(0.15, getString.getDouble(HeatPump_AirToWater_FuelFired_CoolingFields::MinimumUnloadingRatio, false).get());
+  EXPECT_EQ(0.15, idf_ffhp_clg.getDouble(HeatPump_AirToWater_FuelFired_CoolingFields::MinimumUnloadingRatio, false).get());
 }
