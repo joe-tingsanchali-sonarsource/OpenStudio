@@ -241,4 +241,3 @@ class EquipmentNameGenerator
 };
 
 INSTANTIATE_TYPED_TEST_SUITE_P(SpaceLoad, ConvenienceTest, AllEquipmentTraitsTypes, EquipmentNameGenerator);
-

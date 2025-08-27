@@ -347,13 +347,15 @@ namespace model {
 
       bool setHotWaterEquipmentPowerPerFloorArea(double hotWaterEquipmentPowerPerFloorArea);
 
-      bool setHotWaterEquipmentPowerPerFloorArea(double hotWaterEquipmentPowerPerFloorArea, const boost::optional<HotWaterEquipment>& templateHotWaterEquipment);
+      bool setHotWaterEquipmentPowerPerFloorArea(double hotWaterEquipmentPowerPerFloorArea,
+                                                 const boost::optional<HotWaterEquipment>& templateHotWaterEquipment);
 
       boost::optional<double> hotWaterEquipmentPowerPerPerson() const;
 
       bool setHotWaterEquipmentPowerPerPerson(double hotWaterEquipmentPowerPerPerson);
 
-      bool setHotWaterEquipmentPowerPerPerson(double hotWaterEquipmentPowerPerPerson, const boost::optional<HotWaterEquipment>& templateHotWaterEquipment);
+      bool setHotWaterEquipmentPowerPerPerson(double hotWaterEquipmentPowerPerPerson,
+                                              const boost::optional<HotWaterEquipment>& templateHotWaterEquipment);
 
       double getHotWaterEquipmentDesignLevel(double floorArea, double numPeople) const;
 
