@@ -698,7 +698,8 @@ namespace model {
     }
 
     bool SizingSystem_Impl::setMaximumHeatingCapacityToCoolingCapacitySizingRatio(double maximumHeatingCapacityToCoolingCapacitySizingRatio) {
-      bool result = setDouble(OS_Sizing_SystemFields::MaximumHeatingCapacityToCoolingCapacitySizingRatio, maximumHeatingCapacityToCoolingCapacitySizingRatio);
+      bool result =
+        setDouble(OS_Sizing_SystemFields::MaximumHeatingCapacityToCoolingCapacitySizingRatio, maximumHeatingCapacityToCoolingCapacitySizingRatio);
       return result;
     }
 
@@ -1650,7 +1651,8 @@ namespace model {
   }
 
   bool SizingSystem::setMaximumHeatingCapacityToCoolingCapacitySizingRatio(double maximumHeatingCapacityToCoolingCapacitySizingRatio) {
-    return getImpl<detail::SizingSystem_Impl>()->setMaximumHeatingCapacityToCoolingCapacitySizingRatio(maximumHeatingCapacityToCoolingCapacitySizingRatio);
+    return getImpl<detail::SizingSystem_Impl>()->setMaximumHeatingCapacityToCoolingCapacitySizingRatio(
+      maximumHeatingCapacityToCoolingCapacitySizingRatio);
   }
 
 }  // namespace model
