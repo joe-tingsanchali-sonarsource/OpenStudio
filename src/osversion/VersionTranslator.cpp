@@ -9803,6 +9803,51 @@ namespace osversion {
         m_refactored.emplace_back(std::move(object), std::move(newObject));
 
         // No-op
+      } else if (iddname == "OS:Sizing:Zone") {
+
+        // 2 Fields have been added from 3.10.0 to 3.10.1:
+        // ------------------------------------------------
+        // * Heating Coil Sizing Method * 40
+        // * Maximum Heating Capacity To Cooling Load Sizing Ratio * 41
+
+        auto iddObject = idd_3_10_1.getObject(iddname);
+        IdfObject newObject(iddObject.get());
+
+        for (size_t i = 0; i < object.numFields(); ++i) {
+          if ((value = object.getString(i))) {
+            newObject.setString(i, value.get());
+          }
+        }
+
+        newObject.setString(40, "None");
+        newObject.setDouble(41, 1.0);
+
+        ss << newObject;
+        m_refactored.emplace_back(std::move(object), std::move(newObject));
+
+      } else if (iddname == "OS:Sizing:System") {
+
+        // 2 Fields have been added from 3.10.0 to 3.10.1:
+        // ------------------------------------------------
+        // * Heating Coil Sizing Method * 39
+        // * Maximum Heating Capacity To Cooling Capacity Sizing Ratio * 40
+
+        auto iddObject = idd_3_10_1.getObject(iddname);
+        IdfObject newObject(iddObject.get());
+
+        for (size_t i = 0; i < object.numFields(); ++i) {
+          if ((value = object.getString(i))) {
+            newObject.setString(i, value.get());
+          }
+        }
+
+        newObject.setString(39, "None");
+        newObject.setDouble(40, 1.0);
+
+        ss << newObject;
+        m_refactored.emplace_back(std::move(object), std::move(newObject));
+
+        // No-op
       } else {
         ss << object;
       }
