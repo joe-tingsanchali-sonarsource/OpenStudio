@@ -691,10 +691,9 @@ namespace model {
       OS_ASSERT(result);
     }
 
-    std::string SizingSystem_Impl::heatingCoilSizingMethod() const {
-      boost::optional<std::string> value = getString(OS_Sizing_SystemFields::HeatingCoilSizingMethod, true);
-      OS_ASSERT(value);
-      return value.get();
+    bool SizingSystem_Impl::setHeatingCoilSizingMethod(const std::string& heatingCoilSizingMethod) {
+      bool result = setString(OS_Sizing_SystemFields::HeatingCoilSizingMethod, heatingCoilSizingMethod);
+      return result;
     }
 
     bool SizingSystem_Impl::setMaximumHeatingCapacityToCoolingCapacitySizingRatio(double maximumHeatingCapacityToCoolingCapacitySizingRatio) {
@@ -1123,7 +1122,7 @@ namespace model {
     setCentralCoolingCapacityControlMethod("OnOff");
     autosizeOccupantDiversity();
     setHeatingCoilSizingMethod("None");
-    setMaximumHeatingCapacityToCoolingLoadSizingRatio(1.0);
+    setMaximumHeatingCapacityToCoolingCapacitySizingRatio(1.0);
   }
 
   IddObjectType SizingSystem::iddObjectType() {
