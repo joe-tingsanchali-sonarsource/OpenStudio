@@ -152,7 +152,8 @@ namespace model {
 
     bool setHeatingCoil(const HVACComponent& coil);
 
-    OS_DEPRECATED(3, 11, 0) bool setMinimumOutdoorDryBulbTemperatureforCompressorOperation(double minimumOutdoorDryBulbTemperatureforCompressorOperation);
+    OS_DEPRECATED(3, 11, 0)
+    bool setMinimumOutdoorDryBulbTemperatureforCompressorOperation(double minimumOutdoorDryBulbTemperatureforCompressorOperation);
 
     bool setDXHeatingCoilSizingRatio(double dXHeatingCoilSizingRatio);
 

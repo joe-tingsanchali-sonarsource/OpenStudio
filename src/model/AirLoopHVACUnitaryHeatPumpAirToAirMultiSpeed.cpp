@@ -108,7 +108,7 @@ namespace model {
       }
       return value.get();
     }
-    
+
     double AirLoopHVACUnitaryHeatPumpAirToAirMultiSpeed_Impl::dXHeatingCoilSizingRatio() const {
       boost::optional<double> value = getDouble(OS_AirLoopHVAC_UnitaryHeatPump_AirToAir_MultiSpeedFields::DXHeatingCoilSizingRatio, true);
       OS_ASSERT(value);
@@ -829,7 +829,7 @@ namespace model {
     }
 
     setSupplyAirFanPlacement("DrawThrough");
-    setDXHeatingCoilSizingRatio(1.0);    
+    setDXHeatingCoilSizingRatio(1.0);
     setMaximumOutdoorDryBulbTemperatureforSupplementalHeaterOperation(21.0);
 
     autosizeMaximumSupplyAirTemperaturefromSupplementalHeater();
