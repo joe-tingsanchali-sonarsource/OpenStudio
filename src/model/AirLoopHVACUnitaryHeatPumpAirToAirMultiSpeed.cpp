@@ -23,6 +23,8 @@
 #include <utilities/idd/OS_AirLoopHVAC_UnitaryHeatPump_AirToAir_MultiSpeed_FieldEnums.hxx>
 #include <utilities/idd/IddEnums.hxx>
 
+#include "../utilities/core/DeprecatedHelpers.hpp"
+
 namespace openstudio {
 namespace model {
 
@@ -106,10 +108,9 @@ namespace model {
       }
       return value.get();
     }
-
-    double AirLoopHVACUnitaryHeatPumpAirToAirMultiSpeed_Impl::minimumOutdoorDryBulbTemperatureforCompressorOperation() const {
-      boost::optional<double> value =
-        getDouble(OS_AirLoopHVAC_UnitaryHeatPump_AirToAir_MultiSpeedFields::MinimumOutdoorDryBulbTemperatureforCompressorOperation, true);
+    
+    double AirLoopHVACUnitaryHeatPumpAirToAirMultiSpeed_Impl::dXHeatingCoilSizingRatio() const {
+      boost::optional<double> value = getDouble(OS_AirLoopHVAC_UnitaryHeatPump_AirToAir_MultiSpeedFields::DXHeatingCoilSizingRatio, true);
       OS_ASSERT(value);
       return value.get();
     }
@@ -362,10 +363,8 @@ namespace model {
       return result;
     }
 
-    bool AirLoopHVACUnitaryHeatPumpAirToAirMultiSpeed_Impl::setMinimumOutdoorDryBulbTemperatureforCompressorOperation(
-      double minimumOutdoorDryBulbTemperatureforCompressorOperation) {
-      bool result = setDouble(OS_AirLoopHVAC_UnitaryHeatPump_AirToAir_MultiSpeedFields::MinimumOutdoorDryBulbTemperatureforCompressorOperation,
-                              minimumOutdoorDryBulbTemperatureforCompressorOperation);
+    bool AirLoopHVACUnitaryHeatPumpAirToAirMultiSpeed_Impl::setDXHeatingCoilSizingRatio(double dxHeatingCoilSizingRatio) {
+      bool result = setDouble(OS_AirLoopHVAC_UnitaryHeatPump_AirToAir_MultiSpeedFields::DXHeatingCoilSizingRatio, dxHeatingCoilSizingRatio);
       return result;
     }
 
@@ -830,7 +829,7 @@ namespace model {
     }
 
     setSupplyAirFanPlacement("DrawThrough");
-    setMinimumOutdoorDryBulbTemperatureforCompressorOperation(-8.0);
+    setDXHeatingCoilSizingRatio(1.0);    
     setMaximumOutdoorDryBulbTemperatureforSupplementalHeaterOperation(21.0);
 
     autosizeMaximumSupplyAirTemperaturefromSupplementalHeater();
@@ -851,6 +850,7 @@ namespace model {
     autosizeSpeed4SupplyAirFlowRateDuringCoolingOperation();
     auto schedule = model.alwaysOnDiscreteSchedule();
     setSupplyAirFanOperatingModeSchedule(schedule);
+    setDXHeatingCoilSizingRatio(1.0);
   }
 
   IddObjectType AirLoopHVACUnitaryHeatPumpAirToAirMultiSpeed::iddObjectType() {
@@ -886,8 +886,8 @@ namespace model {
     return getImpl<detail::AirLoopHVACUnitaryHeatPumpAirToAirMultiSpeed_Impl>()->heatingCoil();
   }
 
-  double AirLoopHVACUnitaryHeatPumpAirToAirMultiSpeed::minimumOutdoorDryBulbTemperatureforCompressorOperation() const {
-    return getImpl<detail::AirLoopHVACUnitaryHeatPumpAirToAirMultiSpeed_Impl>()->minimumOutdoorDryBulbTemperatureforCompressorOperation();
+  double AirLoopHVACUnitaryHeatPumpAirToAirMultiSpeed::dXHeatingCoilSizingRatio() const {
+    return getImpl<detail::AirLoopHVACUnitaryHeatPumpAirToAirMultiSpeed_Impl>()->dXHeatingCoilSizingRatio();
   }
 
   HVACComponent AirLoopHVACUnitaryHeatPumpAirToAirMultiSpeed::coolingCoil() const {
@@ -1038,10 +1038,8 @@ namespace model {
     return getImpl<detail::AirLoopHVACUnitaryHeatPumpAirToAirMultiSpeed_Impl>()->setHeatingCoil(coil);
   }
 
-  bool AirLoopHVACUnitaryHeatPumpAirToAirMultiSpeed::setMinimumOutdoorDryBulbTemperatureforCompressorOperation(
-    double minimumOutdoorDryBulbTemperatureforCompressorOperation) {
-    return getImpl<detail::AirLoopHVACUnitaryHeatPumpAirToAirMultiSpeed_Impl>()->setMinimumOutdoorDryBulbTemperatureforCompressorOperation(
-      minimumOutdoorDryBulbTemperatureforCompressorOperation);
+  bool AirLoopHVACUnitaryHeatPumpAirToAirMultiSpeed::setDXHeatingCoilSizingRatio(double dxHeatingCoilSizingRatio) {
+    return getImpl<detail::AirLoopHVACUnitaryHeatPumpAirToAirMultiSpeed_Impl>()->setDXHeatingCoilSizingRatio(dxHeatingCoilSizingRatio);
   }
 
   bool AirLoopHVACUnitaryHeatPumpAirToAirMultiSpeed::setCoolingCoil(const HVACComponent& coil) {
@@ -1227,6 +1225,18 @@ namespace model {
 
   boost::optional<double> AirLoopHVACUnitaryHeatPumpAirToAirMultiSpeed::autosizedSpeed4SupplyAirFlowRateDuringCoolingOperation() const {
     return getImpl<detail::AirLoopHVACUnitaryHeatPumpAirToAirMultiSpeed_Impl>()->autosizedSpeed4SupplyAirFlowRateDuringCoolingOperation();
+  }
+
+  // DEPRECATED
+  double AirLoopHVACUnitaryHeatPumpAirToAirMultiSpeed::minimumOutdoorDryBulbTemperatureforCompressorOperation() const {
+    DEPRECATED_AT_MSG(3, 11, 0, "TODO.");
+    return -999;
+  }
+
+  bool AirLoopHVACUnitaryHeatPumpAirToAirMultiSpeed::setMinimumOutdoorDryBulbTemperatureforCompressorOperation(
+    double minimumOutdoorDryBulbTemperatureforCompressorOperation) {
+    DEPRECATED_AT_MSG(3, 11, 0, "TODO.");
+    return false;
   }
 
 }  // namespace model
