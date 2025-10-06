@@ -10,6 +10,7 @@
 #
 ######################################################################
 
+require 'pathname'
 require File.dirname(__FILE__) + '/SubProjectClassGenerator.rb'
 
 class ModelObjectField
@@ -406,7 +407,6 @@ class ModelClassGenerator < SubProjectClassGenerator
 
   def initialize(className, baseClassName, pImpl, qobject, iddObjectType)
     super(className, baseClassName, pImpl, qobject)
-    @iddObjectType = iddObjectType
     @hasRealFields = false
     @hasScheduleFields = false
 
@@ -421,14 +421,25 @@ class ModelClassGenerator < SubProjectClassGenerator
       'WaterToWaterComponent',
       'ZoneHVACComponent'].include?(baseClassName)
 
-    if not @iddObjectType.empty?
+    if not iddObjectType.empty?
       require 'openstudio'
 
       raise "ModelObjects follow the pImpl idiom. Add -p to the command line." if not @pImpl
 
-      @iddObjectType = @iddObjectType.to_IddObjectType
-      @idfObject = OpenStudio::IdfObject.new(@iddObjectType)
-      @iddObject = @idfObject.iddObject
+      begin
+        @iddObjectType = iddObjectType.to_IddObjectType
+        idfObject = OpenStudio::IdfObject.new(iddObjectType)
+        @iddObject = idfObject.iddObject
+      rescue
+        idd_path = (Pathname.new(Dir.pwd) / "../../resources/model/OpenStudio.idd").realpath
+        raise "Could not find IDD on disk at #{idd_path}" if not idd_path.file?
+        iddFile = OpenStudio::IddFile.load(idd_path.to_s).get()
+        iddObject_ = iddFile.getObject(iddObjectType)
+        raise "Could not find #{iddObjectType} in the OpenStudio.idd at #{idd_path}" if iddObject_.empty?
+        @iddObject = iddObject_.get
+        @iddObjectType = FakeIddObjectType.new(iddObjectType)
+      end
+
 
       # Find required non-extensible fields, split out by object-list and data
       @nonextensibleFields = []
@@ -463,7 +474,7 @@ class ModelClassGenerator < SubProjectClassGenerator
   def cppIncludes()
     result = String.new
 
-    if @idfObject
+    if @iddObject
 
       # include object list field classes
       # include IddFactory.hxx if there is a non-boolean choice field
@@ -528,7 +539,7 @@ class ModelClassGenerator < SubProjectClassGenerator
 
   def hppSubProjectForwardDeclarations
     result = String.new
-    if @idfObject
+    if @iddObject
       preamble = "  // TODO: Check the following class names against object getters and setters.\n"
       @objectListClassNames.each { |className|
         result << preamble
@@ -542,7 +553,7 @@ class ModelClassGenerator < SubProjectClassGenerator
 
   def implHppSubProjectForwardDeclarations
     result = String.new
-    if @idfObject
+    if @iddObject
       result = hppSubProjectForwardDeclarations
     end
     return result
@@ -551,7 +562,7 @@ class ModelClassGenerator < SubProjectClassGenerator
   def hppPreClass()
     result = String.new
 
-    if @idfObject
+    if @iddObject
       result << "  /** " << className << " is a " << baseClassName
       result << " that wraps the OpenStudio IDD object '" << iddObjectType.valueDescription
       result << "'. */\n"
@@ -565,7 +576,7 @@ class ModelClassGenerator < SubProjectClassGenerator
   def hppConstructors()
     result = String.new
 
-    if @idfObject
+    if @iddObject
 
       if (not @iddObject.properties.unique)
         result << "    explicit " << className << "(const Model& model);\n\n"
@@ -581,7 +592,7 @@ class ModelClassGenerator < SubProjectClassGenerator
   def implHppConstructors()
     result = String.new
 
-    if @idfObject
+    if @iddObject
 
       implConstructorStart = String.new
       implConstructorStart << "      " << @className << "_Impl("
@@ -608,7 +619,7 @@ class ModelClassGenerator < SubProjectClassGenerator
   def cppConstructors()
     result = String.new
 
-    if @idfObject
+    if @iddObject
 
 
       implConstructorStart = String.new
@@ -641,7 +652,7 @@ class ModelClassGenerator < SubProjectClassGenerator
   def cppPublicClassConstructors()
     result = String.new
 
-    if @idfObject
+    if @iddObject
 
       if (not iddObject.properties.unique)
 
@@ -686,7 +697,7 @@ class ModelClassGenerator < SubProjectClassGenerator
   def hppPublicMethods()
     result = String.new
 
-    if @idfObject
+    if @iddObject
 
       result << "    static IddObjectType iddObjectType();\n\n"
 
@@ -798,7 +809,7 @@ class ModelClassGenerator < SubProjectClassGenerator
   def implHppPublicMethods()
     result = String.new
 
-    if @idfObject
+    if @iddObject
 
       result << "      /** @name Virtual Methods */\n"
 
@@ -929,7 +940,7 @@ class ModelClassGenerator < SubProjectClassGenerator
   def cppPublicMethods()
     result = String.new
 
-    if @idfObject
+    if @iddObject
 
       result << "    const std::vector<std::string>& " << @className << "_Impl::outputVariableNames() const {\n"
       result << "      static std::vector<std::string> result;\n"
@@ -1212,7 +1223,7 @@ class ModelClassGenerator < SubProjectClassGenerator
   def cppPublicClassPublicMethods()
     result = String.new
 
-    if @idfObject
+    if @iddObject
 
       result << "  IddObjectType " << @className << "::iddObjectType() {\n"
       result << "    return {IddObjectType::" << @iddObjectType.valueName << "};\n"
@@ -1306,7 +1317,7 @@ class ModelClassGenerator < SubProjectClassGenerator
   def hppProtectedFriends()
     result = String.new
 
-    if @idfObject
+    if @iddObject
       result << "    friend class Model;\n"
       result << "    friend class IdfObject;\n"
       result << "    friend class openstudio::detail::IdfObject_Impl;\n"
@@ -1318,7 +1329,7 @@ class ModelClassGenerator < SubProjectClassGenerator
   def hppProtectedMethods()
     result = String.new
 
-    if @idfObject
+    if @iddObject
 
       if (@iddObject.properties.unique)
         result << "    explicit " << @className << "(Model& model);\n\n"
@@ -1334,7 +1345,7 @@ class ModelClassGenerator < SubProjectClassGenerator
   def implHppProtectedMethods()
     result = String.new
 
-    if @idfObject
+    if @iddObject
 
     else
       result = super
@@ -1346,7 +1357,7 @@ class ModelClassGenerator < SubProjectClassGenerator
   def cppProtectedMethods()
     result = String.new
 
-    if @idfObject
+    if @iddObject
 
     else
       result = super
@@ -1358,7 +1369,7 @@ class ModelClassGenerator < SubProjectClassGenerator
   def cppPublicClassProtectedMethods()
     result = String.new
 
-    if @idfObject
+    if @iddObject
 
       if (iddObject.properties.unique)
         result << "  " << @className << "::" << @className << "(Model& model)\n"
@@ -1375,7 +1386,7 @@ class ModelClassGenerator < SubProjectClassGenerator
   def implHppPrivateMethods()
     result = String.new
 
-    if @idfObject
+    if @iddObject
 
       # Optional getters for required objects
       any = false
@@ -1403,7 +1414,7 @@ class ModelClassGenerator < SubProjectClassGenerator
   def cppPrivateMethods()
     result = String.new
 
-    if @idfObject
+    if @iddObject
 
       # Optional getters for required objects
       @nonextensibleFields.each { |field|
