@@ -11313,11 +11313,12 @@ OS:AirLoopHVAC:UnitaryHeatPump:AirToAir:MultiSpeed,
         \object-list HeatingCoilsElectricMultiStage
         \object-list HeatingCoilsGasMultiStage
         \object-list HeatingCoilsDXMultiSpeed
-   N1 , \field Minimum Outdoor Dry-Bulb Temperature for Compressor Operation
+   N1,  \field DX Heating Coil Sizing Ratio
         \type real
-        \minimum -20.0
-        \units C
         \required-field
+        \minimum> 0
+        \note Used to adjust heat pump heating capacity with respect to DX cooling capacity
+        \note used only for heat pump configurations (i.e., a DX cooling and DX heating coil is used)
    A11, \field Cooling Coil
         \required-field
         \note Needs to match in the DX Cooling Coil object
@@ -11512,7 +11513,7 @@ OS:AirLoopHVAC:UnitaryCoolOnly,
        \key No
 
 OS:AirLoopHVAC:UnitaryHeatPump:AirToAir,
-       \min-fields 17
+       \min-fields 19
   A1, \field Handle
        \type handle
        \required-field
@@ -11614,7 +11615,7 @@ OS:AirLoopHVAC:UnitaryHeatPump:AirToAir,
        \note entire simulation period.
        \type object-list
        \object-list ScheduleNames
-  A13; \field Dehumidification Control Type
+  A13, \field Dehumidification Control Type
        \note None = meet sensible load only
        \note Multimode = activate enhanced dehumidification mode
        \note as needed and meet sensible load.  Valid only with
@@ -11632,6 +11633,12 @@ OS:AirLoopHVAC:UnitaryHeatPump:AirToAir,
        \key None
        \key Multimode
        \key CoolReheat
+  N6;  \field DX Heating Coil Sizing Ratio
+       \type real
+       \required-field
+       \minimum> 0
+       \note Used to adjust heat pump heating capacity with respect to DX cooling capacity
+       \note used only for heat pump configurations (i.e., a DX cooling and DX heating coil is used).
 
 OS:AirLoopHVAC:UnitaryHeatCool:VAVChangeoverBypass,
    A1, \field Handle
@@ -30283,7 +30290,7 @@ OS:ZoneHVAC:LowTemperatureRadiant:VariableFlow,
         \object-list ScheduleNames
 
 OS:ZoneHVAC:PackagedTerminalHeatPump,
-       \min-fields 25
+       \min-fields 26
   A1, \field Handle
        \type handle
        \required-field
@@ -30430,7 +30437,7 @@ OS:ZoneHVAC:PackagedTerminalHeatPump,
        \default DrawThrough
        \key BlowThrough
        \key DrawThrough
-  A14; \field Supply Air Fan Operating Mode Schedule Name
+  A14, \field Supply Air Fan Operating Mode Schedule Name
        \note Enter the name of a schedule that controls fan operation. Schedule values of 0 denote
        \note cycling fan operation (fan cycles with cooling or heating coil). Schedule Name values greater
        \note than 0 denote constant fan operation (fan runs continually regardless of coil operation).
@@ -30438,6 +30445,12 @@ OS:ZoneHVAC:PackagedTerminalHeatPump,
        \required-field
        \type object-list
        \object-list ScheduleNames
+  N12; \field DX Heating Coil Sizing Ratio
+       \type real
+       \required-field
+       \minimum> 0
+       \note Used to adjust heat pump heating capacity with respect to DX cooling capacity
+       \note used only for heat pump configurations (i.e., a DX cooling and DX heating coil is used).
 
 OS:ZoneHVAC:PackagedTerminalAirConditioner,
        \min-fields 17
@@ -30746,7 +30759,7 @@ OS:ZoneHVAC:TerminalUnit:VariableRefrigerantFlow,
        \note When terminal unit is used in air loop and is load controlled, this zone's thermostat will control operation.
 
 OS:ZoneHVAC:WaterToAirHeatPump,
-        \min-fields 23
+        \min-fields 26
    A1,  \field Handle
         \type handle
         \required-field
@@ -30887,10 +30900,16 @@ OS:ZoneHVAC:WaterToAirHeatPump,
         \note Constant results in 100% water flow regardless of compressor PLR
         \note Cycling results in water flow that matches compressor PLR
         \note ConstantOnDemand results in 100% water flow whenever the coil is on, but is 0% whenever the coil has no load
-   A17; \field Design Specification ZoneHVAC Sizing Object Name
+   A17, \field Design Specification ZoneHVAC Sizing Object Name
         \note Enter the name of a DesignSpecificationZoneHVACSizing object.
         \type object-list
         \object-list DesignSpecificationZoneHVACSizingName
+   N9;  \field DX Heating Coil Sizing Ratio
+        \type real
+        \required-field
+        \minimum> 0
+        \note Used to adjust heat pump heating capacity with respect to DX cooling capacity
+        \note used only for heat pump configurations (i.e., a DX cooling and DX heating coil is used).
 
 OS:ZoneHVAC:UnitHeater,
        \min-fields 10
