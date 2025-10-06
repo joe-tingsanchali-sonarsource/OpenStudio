@@ -363,7 +363,7 @@ namespace energyplus {
     // TODO: field 'Design Specification ZoneHVAC Sizing' isn't implemented since the object isn't wrapped in SDK
 
     // DXHeatingCoilSizingRatio
-    if ((value = modelObject.dxHeatingCoilSizingRatio())) {
+    if ((value = modelObject.dXHeatingCoilSizingRatio())) {
       idfObject.setDouble(ZoneHVAC_WaterToAirHeatPumpFields::DXHeatingCoilSizingRatio, value.get());
     }
 

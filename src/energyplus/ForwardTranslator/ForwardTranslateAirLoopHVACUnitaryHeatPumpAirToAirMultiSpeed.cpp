@@ -81,7 +81,7 @@ namespace energyplus {
     }
 
     // DXHeatingCoilSizingRatio
-    if ((value = modelObject.dxHeatingCoilSizingRatio())) {
+    if ((value = modelObject.dXHeatingCoilSizingRatio())) {
       idfObject.setDouble(AirLoopHVAC_UnitaryHeatPump_AirToAir_MultiSpeedFields::DXHeatingCoilSizingRatio, value.get());
     }
 

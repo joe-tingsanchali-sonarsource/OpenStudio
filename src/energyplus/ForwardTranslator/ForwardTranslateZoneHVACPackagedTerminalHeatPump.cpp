@@ -426,7 +426,7 @@ namespace energyplus {
 
     // DXHeatingCoilSizingRatio
 
-    if ((value = modelObject.dxHeatingCoilSizingRatio())) {
+    if ((value = modelObject.dXHeatingCoilSizingRatio())) {
       idfObject.setDouble(ZoneHVAC_PackagedTerminalHeatPumpFields::DXHeatingCoilSizingRatio, value.get());
     }
 
