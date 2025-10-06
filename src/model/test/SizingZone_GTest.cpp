@@ -429,7 +429,7 @@ TEST_F(ModelFixture, SizingZone_GettersSetters) {
 
   // Maximum Heating Capacity To Cooling Load Sizing Ratio: Double
   // Default value from IDD, set in Ctor
-  EXPECT_EQ(0.005, sz.maximumHeatingCapacityToCoolingLoadSizingRatio());
+  EXPECT_EQ(1.0, sz.maximumHeatingCapacityToCoolingLoadSizingRatio());
   // Set
   EXPECT_TRUE(sz.setMaximumHeatingCapacityToCoolingLoadSizingRatio(3.0));
   EXPECT_EQ(3.0, sz.maximumHeatingCapacityToCoolingLoadSizingRatio());
