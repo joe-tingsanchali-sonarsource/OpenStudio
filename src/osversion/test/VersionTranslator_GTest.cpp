@@ -4724,3 +4724,15 @@ TEST_F(OSVersionFixture, update_3_10_0_to_3_10_1_HeatPumpAirToWaterFuelFired) {
   EXPECT_EQ(0.0, clg.getDouble(26).get());   // Standby Electric Power
   EXPECT_EQ(0.25, clg.getDouble(27).get());  // Minimum Unloading Ratio
 }
+
+TEST_F(OSVersionFixture, update_3_10_0_to_3_10_1_DXHeatingCoilSizingRatio) {
+  openstudio::path path = resourcesPath() / toPath("osversion/3_10_1/test_vt_DXHeatingCoilSizingRatio.osm");
+  osversion::VersionTranslator vt;
+  boost::optional<model::Model> model = vt.loadModel(path);
+  ASSERT_TRUE(model) << "Failed to load " << path;
+
+  openstudio::path outPath = resourcesPath() / toPath("osversion/3_10_1/test_vt_DXHeatingCoilSizingRatio_updated.osm");
+  model->save(outPath, true);
+
+  // TODO
+}

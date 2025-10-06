@@ -9887,6 +9887,86 @@ namespace osversion {
         m_refactored.push_back(RefactoredObjectData(object, newObject));
         ss << newObject;
 
+      } else if (iddname == "OS:ZoneHVAC:PackagedTerminalHeatPump") {
+
+        // 1 Field has been inserted from 3.10.0 to 3.10.1:
+        // ------------------------------------------------
+        // * DX Heating Coil Sizing Ratio * 25
+
+        auto iddObject = idd_3_10_1.getObject(iddname);
+        IdfObject newObject(iddObject.get());
+
+        for (size_t i = 0; i < object.numFields(); ++i) {
+          if ((value = object.getString(i))) {
+            newObject.setString(i, value.get());
+          }
+        }
+
+        newObject.setString(25, 1.0);
+
+        m_refactored.push_back(RefactoredObjectData(object, newObject));
+        ss << newObject;
+
+      } else if (iddname == "OS:ZoneHVAC:WaterToAirHeatPump") {
+
+        // 1 Field has been inserted from 3.10.0 to 3.10.1:
+        // ------------------------------------------------
+        // * DX Heating Coil Sizing Ratio * 25
+
+        auto iddObject = idd_3_10_1.getObject(iddname);
+        IdfObject newObject(iddObject.get());
+
+        for (size_t i = 0; i < object.numFields(); ++i) {
+          if ((value = object.getString(i))) {
+            newObject.setString(i, value.get());
+          }
+        }
+
+        newObject.setString(25, 1.0);
+
+        m_refactored.push_back(RefactoredObjectData(object, newObject));
+        ss << newObject;
+
+      } else if (iddname == "OS:AirLoopHVAC:UnitaryHeatPump:AirToAir") {
+
+        // 1 Field has been inserted from 3.10.0 to 3.10.1:
+        // ------------------------------------------------
+        // * DX Heating Coil Sizing Ratio * 18
+
+        auto iddObject = idd_3_10_1.getObject(iddname);
+        IdfObject newObject(iddObject.get());
+
+        for (size_t i = 0; i < object.numFields(); ++i) {
+          if ((value = object.getString(i))) {
+            newObject.setString(i, value.get());
+          }
+        }
+
+        newObject.setString(18, 1.0);
+
+        m_refactored.push_back(RefactoredObjectData(object, newObject));
+        ss << newObject;
+
+      } else if (iddname == "OS:AirLoopHVAC:UnitaryHeatPump:AirToAir:MultiSpeed") {
+
+        // 1 Field has been inserted from 3.10.0 to 3.10.1:
+        // ------------------------------------------------
+        // * DX Heating Coil Sizing Ratio * 10
+
+        auto iddObject = idd_3_10_1.getObject(iddname);
+        IdfObject newObject(iddObject.get());
+
+        for (size_t i = 0; i < object.numFields(); ++i) {
+          if ((value = object.getString(i))) {
+            newObject.setString(i, value.get());
+          }
+        }
+
+        newObject.setString(10, 1.0);
+
+        m_refactored.push_back(RefactoredObjectData(object, newObject));
+        ss << newObject;
+
         // No-op
       } else {
         ss << object;
