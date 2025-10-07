@@ -4749,20 +4749,20 @@ TEST_F(OSVersionFixture, update_3_10_0_to_3_10_1_DXHeatingCoilSizingRatio) {
   EXPECT_TRUE(wahp.isEmpty(24));             // Availability Manager List Name
   EXPECT_EQ(1.0, wahp.getDouble(25).get());  // DX Heating Coil Sizing Ratio
 
-  std::vector<WorkspaceObject> unitarys = model->getObjectsByType("OS:AirLoopHVAC:UnitaryHeatPump:AirToAir");
-  ASSERT_EQ(1u, unitarys.size());
-  const auto& unitary = unitarys.front();
+  std::vector<WorkspaceObject> unitarys1 = model->getObjectsByType("OS:AirLoopHVAC:UnitaryHeatPump:AirToAir");
+  ASSERT_EQ(1u, unitarys1.size());
+  const auto& unitary1 = unitarys1.front();
 
-  EXPECT_TRUE(unitary.isEmpty(17));             // Supply Air Fan Operating Mode Schedule Name
-  EXPECT_EQ(1.0, unitary.getDouble(18).get());  // DX Heating Coil Sizing Ratio
+  EXPECT_TRUE(unitary1.isEmpty(17));             // Supply Air Fan Operating Mode Schedule Name
+  EXPECT_EQ(1.0, unitary1.getDouble(18).get());  // DX Heating Coil Sizing Ratio
 
-  unitarys = model->getObjectsByType("OS:AirLoopHVAC:UnitaryHeatPump:AirToAir:MultiSpeed");
-  ASSERT_EQ(1u, unitarys.size());
-  unitary = unitarys.front();
+  std::vector<WorkspaceObject> unitarys2 = model->getObjectsByType("OS:AirLoopHVAC:UnitaryHeatPump:AirToAir:MultiSpeed");
+  ASSERT_EQ(1u, unitarys2.size());
+  const auto& unitary2 = unitarys2.front();
 
-  ASSERT_TRUE(unitary.getTarget(9));
-  EXPECT_EQ("Coil Heating Electric Multi Stage 1", unitary.getTarget(9)->nameString());  // Heating Coil
-  EXPECT_EQ(1.0, unitary.getDouble(10).get());                                           // DX Heating Coil Sizing Ratio
-  ASSERT_TRUE(unitary.getTarget(11));
-  EXPECT_EQ("Coil Cooling DX Multi Speed 1", unitary.getTarget(11)->nameString());  // Cooling Coil
+  ASSERT_TRUE(unitary2.getTarget(9));
+  EXPECT_EQ("Coil Heating Electric Multi Stage 1", unitary2.getTarget(9)->nameString());  // Heating Coil
+  EXPECT_EQ(1.0, unitary2.getDouble(10).get());                                           // DX Heating Coil Sizing Ratio
+  ASSERT_TRUE(unitary2.getTarget(11));
+  EXPECT_EQ("Coil Cooling DX Multi Speed 1", unitary2.getTarget(11)->nameString());  // Cooling Coil
 }
