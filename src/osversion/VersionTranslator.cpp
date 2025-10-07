@@ -9902,7 +9902,7 @@ namespace osversion {
           }
         }
 
-        newObject.setString(25, 1.0);
+        newObject.setDouble(25, 1.0);
 
         m_refactored.push_back(RefactoredObjectData(object, newObject));
         ss << newObject;
@@ -9922,7 +9922,7 @@ namespace osversion {
           }
         }
 
-        newObject.setString(25, 1.0);
+        newObject.setDouble(25, 1.0);
 
         m_refactored.push_back(RefactoredObjectData(object, newObject));
         ss << newObject;
@@ -9942,7 +9942,7 @@ namespace osversion {
           }
         }
 
-        newObject.setString(18, 1.0);
+        newObject.setDouble(18, 1.0);
 
         m_refactored.push_back(RefactoredObjectData(object, newObject));
         ss << newObject;
@@ -9962,7 +9962,7 @@ namespace osversion {
           }
         }
 
-        newObject.setString(10, 1.0);
+        newObject.setDouble(10, 1.0);
 
         m_refactored.push_back(RefactoredObjectData(object, newObject));
         ss << newObject;

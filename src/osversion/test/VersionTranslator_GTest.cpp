@@ -4734,5 +4734,35 @@ TEST_F(OSVersionFixture, update_3_10_0_to_3_10_1_DXHeatingCoilSizingRatio) {
   openstudio::path outPath = resourcesPath() / toPath("osversion/3_10_1/test_vt_DXHeatingCoilSizingRatio_updated.osm");
   model->save(outPath, true);
 
-  // TODO
+  std::vector<WorkspaceObject> pthps = model->getObjectsByType("OS:ZoneHVAC:PackagedTerminalHeatPump");
+  ASSERT_EQ(1u, pthps.size());
+  const auto& pthp = pthps.front();
+
+  ASSERT_TRUE(pthp.getTarget(24));
+  EXPECT_EQ("Always Off Discrete", pthp.getTarget(24)->nameString());  // Supply Air Fan Operating Mode Schedule Name
+  EXPECT_EQ(1.0, pthp.getDouble(25).get());                            // DX Heating Coil Sizing Ratio
+
+  std::vector<WorkspaceObject> wahps = model->getObjectsByType("OS:ZoneHVAC:WaterToAirHeatPump");
+  ASSERT_EQ(1u, wahps.size());
+  const auto& wahp = wahps.front();
+
+  EXPECT_TRUE(wahp.isEmpty(24));             // Availability Manager List Name
+  EXPECT_EQ(1.0, wahp.getDouble(25).get());  // DX Heating Coil Sizing Ratio
+
+  std::vector<WorkspaceObject> unitarys = model->getObjectsByType("OS:AirLoopHVAC:UnitaryHeatPump:AirToAir");
+  ASSERT_EQ(1u, unitarys.size());
+  const auto& unitary = unitarys.front();
+
+  EXPECT_TRUE(unitary.isEmpty(17));             // Supply Air Fan Operating Mode Schedule Name
+  EXPECT_EQ(1.0, unitary.getDouble(18).get());  // DX Heating Coil Sizing Ratio
+
+  std::vector<WorkspaceObject> unitarys = model->getObjectsByType("OS:AirLoopHVAC:UnitaryHeatPump:AirToAir:MultiSpeed");
+  ASSERT_EQ(1u, unitarys.size());
+  const auto& unitary = unitarys.front();
+
+  ASSERT_TRUE(unitary.getTarget(9));
+  EXPECT_EQ("Coil Heating Electric Multi Stage 1", unitary.getTarget(9)->nameString());  // Heating Coil
+  EXPECT_EQ(1.0, unitary.getDouble(10).get());                                           // DX Heating Coil Sizing Ratio
+  ASSERT_TRUE(unitary.getTarget(11));
+  EXPECT_EQ("Coil Cooling DX Multi Speed 1", unitary.getTarget(11)->nameString());  // Cooling Coil
 }
