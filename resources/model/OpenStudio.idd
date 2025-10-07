@@ -14889,20 +14889,20 @@ OS:HeatPump:AirToWater:Heating,
         \type alpha
         \note Enter a unique name for this air-to-water heat pump
         \reference HeatPumpAirToWaterHeating
-   A3 , \field Availability Schedule Name Heating
+   A3 , \field Availability Schedule Name
         \required-field
         \type object-list
         \object-list ScheduleNames
-        \note Enter the name of a schedule that defines the availability of the unit in cooling mode
+        \note Enter the name of a schedule that defines the availability of the unit in heating mode
         \note Schedule values of 0 denote the unit is off. All other values denote the unit is available
         \note If this field is left blank, the unit is available the entire simulation
-   N1 , \field Rated Inlet Air Temperature in Heating Mode
+   N1 , \field Rated Inlet Air Temperature
         \required-field
         \type real
         \units C
         \note inlet air dry-bulb temperature corresponding to rated heat pump performance
         \note (capacity, COP).
-   N2 , \field Rated Air Flow Rate in Heating Mode
+   N2 , \field Rated Air Flow Rate
         \required-field
         \type real
         \units m3/s
@@ -14910,13 +14910,13 @@ OS:HeatPump:AirToWater:Heating,
         \autosizable
         \note air flow rate corresponding to rated heat pump performance
         \note (capacity, COP).
-   N3 , \field Rated Leaving Water Temperature in Heating Mode
+   N3 , \field Rated Leaving Water Temperature
         \required-field
         \type real
         \units C
         \note outlet water temperature corresponding to rated heat pump performance
         \note (heating capacity, COP).
-   N4 , \field Rated Water Flow Rate in Heating Mode
+   N4 , \field Rated Water Flow Rate
         \required-field
         \type real
         \units m3/s
@@ -14925,29 +14925,29 @@ OS:HeatPump:AirToWater:Heating,
         \autosizable
         \note Condenser water flow rate corresponding to rated heat pump performance
         \note (capacity, COP).
-   N5,  \field Minimum Outdoor Air Temperature in Heating Mode
+   N5,  \field Minimum Outdoor Air Temperature
         \required-field
         \type real
         \units C
         \note Enter the minimum outdoor temperature allowed for heating operation
         \note Heating is disabled below this temperature
-   N6,  \field Maximum Outdoor Air Temperature in Heating Mode
+   N6,  \field Maximum Outdoor Air Temperature
         \required-field
         \type real
         \units C
         \note Enter the maximum outdoor temperature allowed for heating operation
         \note Heating is disabled above this temperature
-   A4,  \field Minimum Leaving Water Temperature Curve Name in Heating Mode
+   A4,  \field Minimum Leaving Water Temperature Curve Name
         \type object-list
         \object-list UniVariateFunctions
         \note quadratic curve = a + b*OAT is typical, other univariate curves may be used
         \note OAT = Outdoor Dry-Bulb Temperature
-   A5,  \field Maximum Leaving Water Temperature Curve Name in Heating Mode
+   A5,  \field Maximum Leaving Water Temperature Curve Name
         \type object-list
         \object-list UniVariateFunctions
         \note quadratic curve = a + b*OAT is typical, other univariate curves may be used
         \note OAT = Outdoor Dry-Bulb Temperature
-   N7,  \field Sizing Factor for Heating
+   N7,  \field Sizing Factor
         \required-field
         \note Multiplies the autosized capacity and flow rates
         \type real
@@ -14962,12 +14962,12 @@ OS:HeatPump:AirToWater:Heating,
         \type object-list
         \object-list ConnectionNames
         \note The node connects to the hot water loop
-   A8, \field Speed Data List
+   A8,  \field Speed Data List
         \required-field
         \type object-list
         \object-list ModelObjectLists
         \note The minimum number of speeds is 0 (no heating) and the maximum is 5.
-   A9;  \field Booster Mode On Heating Speed
+   A9;  \field Booster Mode On Speed
         \note This field indicates that the heat pump has a booster mode enabled for heating operation.
         \note The heat pump will operate at a higher capacity during heating operation.
         \note If omitted the booster mode is not enabled.
@@ -14985,20 +14985,20 @@ OS:HeatPump:AirToWater:Cooling,
         \type alpha
         \note Enter a unique name for this air-to-water heat pump
         \reference HeatPumpAirToWaterCooling
-   A3 , \field Availability Schedule Name Cooling
+   A3 , \field Availability Schedule Name
         \required-field
         \type object-list
         \object-list ScheduleNames
         \note Enter the name of a schedule that defines the availability of the unit in cooling mode
         \note Schedule values of 0 denote the unit is off. All other values denote the unit is available
         \note If this field is left blank, the unit is available the entire simulation
-   N1 , \field Rated Inlet Air Temperature in Cooling Mode
+   N1 , \field Rated Inlet Air Temperature
         \required-field
         \type real
         \units C
         \note inlet air dry-bulb temperature corresponding to rated heat pump performance
         \note (capacity, COP).
-   N2 , \field Rated Air Flow Rate in Cooling Mode
+   N2 , \field Rated Air Flow Rate
         \required-field
         \type real
         \units m3/s
@@ -15006,13 +15006,13 @@ OS:HeatPump:AirToWater:Cooling,
         \autosizable
         \note air flow rate corresponding to rated heat pump performance
         \note (capacity, COP).
-   N3 , \field Rated Leaving Water Temperature in Cooling Mode
+   N3 , \field Rated Leaving Water Temperature
         \required-field
         \type real
         \units C
         \note outlet water temperature corresponding to rated heat pump performance
         \note (cooling capacity, COP).
-   N4 , \field Rated Water Flow Rate in Cooling Mode
+   N4 , \field Rated Water Flow Rate
         \required-field
         \type real
         \units m3/s
@@ -15021,24 +15021,24 @@ OS:HeatPump:AirToWater:Cooling,
         \autosizable
         \note Condenser water flow rate corresponding to rated heat pump performance
         \note (capacity, COP).
-   N5,  \field Minimum Outdoor Air Temperature in Cooling Mode
+   N5,  \field Minimum Outdoor Air Temperature
         \required-field
         \type real
         \units C
         \note Enter the minimum outdoor temperature allowed for cooling operation
         \note Cooling is disabled below this temperature
-   N6,  \field Maximum Outdoor Air Temperature in Cooling Mode
+   N6,  \field Maximum Outdoor Air Temperature
         \required-field
         \type real
         \units C
         \note Enter the maximum outdoor temperature allowed for cooling operation
         \note Cooling is disabled above this temperature
-   A4,  \field Minimum Leaving Water Temperature Curve Name in Cooling Mode
+   A4,  \field Minimum Leaving Water Temperature Curve Name
         \type object-list
         \object-list UniVariateFunctions
         \note quadratic curve = a + b*OAT is typical, other univariate curves may be used
         \note OAT = Outdoor Dry-Bulb Temperature
-   A5,  \field Maximum Leaving Water Temperature Curve Name in Cooling Mode
+   A5,  \field Maximum Leaving Water Temperature Curve Name
         \type object-list
         \object-list UniVariateFunctions
         \note quadratic curve = a + b*OAT is typical, other univariate curves may be used
@@ -15058,12 +15058,12 @@ OS:HeatPump:AirToWater:Cooling,
         \type object-list
         \object-list ConnectionNames
         \note The node connects to the hot water loop
-   A8, \field Speed Data List
+   A8,  \field Speed Data List
         \required-field
         \type object-list
         \object-list ModelObjectLists
         \note The minimum number of speeds is 0 (no cooling) and the maximum is 5.
-   A9;  \field Booster Mode On Cooling Speed
+   A9;  \field Booster Mode On Speed
         \note This field indicates that the heat pump has a booster mode enabled for cooling operation.
         \note The heat pump will operate at a higher capacity during cooling operation.
         \note If omitted the booster mode is not enabled.
