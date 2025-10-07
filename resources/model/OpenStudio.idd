@@ -14932,13 +14932,18 @@ OS:HeatPump:AirToWater,
         \note Schedule values control operating mode: 0=off, 1=cooling, 2=heating
         \type object-list
         \object-list ScheduleNames
-   N2 , \field Rated Inlet Air Temperature in Heating Mode
+   N2,  \field Minimum Part Load Ratio
+        \required-field
+        \note Below this operating limit compressor cycling will occur
+        \type real
+        \minimum 0.0
+   N3 , \field Rated Inlet Air Temperature in Heating Mode
         \required-field
         \type real
         \units C
         \note inlet air dry-bulb temperature corresponding to rated heat pump performance
         \note (capacity, COP).
-   N3 , \field Rated Air Flow Rate in Heating Mode
+   N4 , \field Rated Air Flow Rate in Heating Mode
         \required-field
         \type real
         \units m3/s
@@ -14946,13 +14951,13 @@ OS:HeatPump:AirToWater,
         \autosizable
         \note air flow rate corresponding to rated heat pump performance
         \note (capacity, COP).
-   N4 , \field Rated Leaving Water Temperature in Heating Mode
+   N5 , \field Rated Leaving Water Temperature in Heating Mode
         \required-field
         \type real
         \units C
         \note outlet water temperature corresponding to rated heat pump performance
         \note (heating capacity, COP).
-   N5 , \field Rated Water Flow Rate in Heating Mode
+   N6 , \field Rated Water Flow Rate in Heating Mode
         \required-field
         \type real
         \units m3/s
@@ -14961,13 +14966,13 @@ OS:HeatPump:AirToWater,
         \autosizable
         \note Condenser water flow rate corresponding to rated heat pump performance
         \note (capacity, COP).
-   N6,  \field Minimum Outdoor Air Temperature in Heating Mode
+   N7,  \field Minimum Outdoor Air Temperature in Heating Mode
         \required-field
         \type real
         \units C
         \note Enter the minimum outdoor temperature allowed for heating operation
         \note Heating is disabled below this temperature
-   N7,  \field Maximum Outdoor Air Temperature in Heating Mode
+   N8,  \field Maximum Outdoor Air Temperature in Heating Mode
         \required-field
         \type real
         \units C
@@ -14983,11 +14988,6 @@ OS:HeatPump:AirToWater,
         \object-list UniVariateFunctions
         \note quadratic curve = a + b*OAT is typical, other univariate curves may be used
         \note OAT = Outdoor Dry-Bulb Temperature
-   N8,  \field Minimum Part Load Ratio
-        \required-field
-        \note Below this operating limit compressor cycling will occur
-        \type real
-        \minimum 0.0
    N9,  \field Sizing Factor for Heating
         \required-field
         \note Multiplies the autosized capacity and flow rates
