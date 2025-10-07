@@ -920,6 +920,9 @@ set(${target_name}_src
   HeatPumpAirToWaterFuelFiredCooling.hpp
   HeatPumpAirToWaterFuelFiredCooling_Impl.hpp
   HeatPumpAirToWaterFuelFiredCooling.cpp
+  HeatPumpAirToWaterHeating.hpp
+  HeatPumpAirToWaterHeating_Impl.hpp
+  HeatPumpAirToWaterHeating.cpp
   HeatPumpAirToWaterHeatingSpeedData.hpp
   HeatPumpAirToWaterHeatingSpeedData_Impl.hpp
   HeatPumpAirToWaterHeatingSpeedData.cpp
