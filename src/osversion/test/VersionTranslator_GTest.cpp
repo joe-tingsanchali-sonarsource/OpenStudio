@@ -4756,9 +4756,9 @@ TEST_F(OSVersionFixture, update_3_10_0_to_3_10_1_DXHeatingCoilSizingRatio) {
   EXPECT_TRUE(unitary.isEmpty(17));             // Supply Air Fan Operating Mode Schedule Name
   EXPECT_EQ(1.0, unitary.getDouble(18).get());  // DX Heating Coil Sizing Ratio
 
-  std::vector<WorkspaceObject> unitarys = model->getObjectsByType("OS:AirLoopHVAC:UnitaryHeatPump:AirToAir:MultiSpeed");
+  unitarys = model->getObjectsByType("OS:AirLoopHVAC:UnitaryHeatPump:AirToAir:MultiSpeed");
   ASSERT_EQ(1u, unitarys.size());
-  const auto& unitary = unitarys.front();
+  unitary = unitarys.front();
 
   ASSERT_TRUE(unitary.getTarget(9));
   EXPECT_EQ("Coil Heating Electric Multi Stage 1", unitary.getTarget(9)->nameString());  // Heating Coil
