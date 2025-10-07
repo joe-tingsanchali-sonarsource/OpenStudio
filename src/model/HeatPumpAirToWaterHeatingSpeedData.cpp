@@ -255,26 +255,29 @@ namespace model {
                                                                          const Curve& heatingEnergyInputRatioFunctionofPLRCurve)
     : ParentObject(HeatPumpAirToWaterHeatingSpeedData::iddObjectType(), model) {
 
-    OS_ASSERT(getImpl<detail::HeatPumpAirToWaterHeatingSpeedData_Impl>());
+    auto impl = getImpl<detail::HeatPumpAirToWaterHeatingSpeedData_Impl>();
+    OS_ASSERT(impl);
 
     autosizeRatedHeatingCapacity();
     setRatedCOPforHeating(3.0);
 
     bool ok = setNormalizedHeatingCapacityFunctionofTemperatureCurve(normalizedHeatingCapacityFunctionofTemperatureCurve);
     if (!ok) {
-      remove();
+      // We don't call remove() (which would do ParentObject::remove()) because that would try to remove the curves too if they aren't being used,
+      // so we call ModelObject::remove() directly
+      impl->detail::ModelObject_Impl::remove();
       LOG_AND_THROW("Unable to set " << briefDescription() << "'s Capacity Curve to "
                                      << normalizedHeatingCapacityFunctionofTemperatureCurve.briefDescription() << ".");
     }
     ok = setHeatingEnergyInputRatioFunctionofTemperatureCurve(heatingEnergyInputRatioFunctionofTemperatureCurve);
     if (!ok) {
-      remove();
+      impl->detail::ModelObject_Impl::remove();
       LOG_AND_THROW("Unable to set " << briefDescription() << "'s EIRfT Curve to "
                                      << heatingEnergyInputRatioFunctionofTemperatureCurve.briefDescription() << ".");
     }
     ok = setHeatingEnergyInputRatioFunctionofPLRCurve(heatingEnergyInputRatioFunctionofPLRCurve);
     if (!ok) {
-      remove();
+      impl->detail::ModelObject_Impl::remove();
       LOG_AND_THROW("Unable to set " << briefDescription() << "'s EIRfPLR Curve to " << heatingEnergyInputRatioFunctionofPLRCurve.briefDescription()
                                      << ".");
     }
