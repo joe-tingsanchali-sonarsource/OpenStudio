@@ -923,6 +923,9 @@ set(${target_name}_src
   HeatPumpAirToWaterHeatingSpeedData.hpp
   HeatPumpAirToWaterHeatingSpeedData_Impl.hpp
   HeatPumpAirToWaterHeatingSpeedData.cpp
+  HeatPumpAirToWaterCoolingSpeedData.hpp
+  HeatPumpAirToWaterCoolingSpeedData_Impl.hpp
+  HeatPumpAirToWaterCoolingSpeedData.cpp
   HeatPumpWaterToWaterEquationFitCooling.hpp
   HeatPumpWaterToWaterEquationFitCooling_Impl.hpp
   HeatPumpWaterToWaterEquationFitCooling.cpp
@@ -2167,6 +2170,7 @@ set(${target_name}_test_src
   test/HeatPumpAirToWaterFuelFiredHeating_GTest.cpp
   test/HeatPumpAirToWaterFuelFiredCooling_GTest.cpp
   test/HeatPumpAirToWaterHeatingSpeedData_GTest.cpp
+  test/HeatPumpAirToWaterCoolingSpeedData_GTest.cpp
   test/HeatPumpWaterToWaterEquationFitHeating_GTest.cpp
   test/HeatPumpWaterToWaterEquationFitCooling_GTest.cpp
   test/HeatPumpPlantLoopEIRHeating_GTest.cpp
