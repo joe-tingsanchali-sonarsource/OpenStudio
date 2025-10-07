@@ -73,29 +73,46 @@ TEST_F(ModelFixture, HeatPumpAirToWaterHeatingSpeedData_GettersSetters) {
 }
 
 TEST_F(ModelFixture, HeatPumpAirToWaterHeatingSpeedData_CreateInvalid) {
-  Model m;
-  CurveBiquadratic bivariate(m);
-  CurveQuadratic univariate(m);
-
-  // Valid
   {
-    HeatPumpAirToWaterHeatingSpeedData awhpHCSpeed(m, bivariate, bivariate, univariate);
-    EXPECT_EQ(1, m.getConcreteModelObjects<HeatPumpAirToWaterHeatingSpeedData>().size());
-    EXPECT_EQ(1, m.getConcreteModelObjects<CurveBiquadratic>().size());
-    EXPECT_EQ(1, m.getConcreteModelObjects<CurveQuadratic>().size());
-    awhpHCSpeed.remove();
+    Model m;
+    CurveQuadratic univariate(m);
+    CurveBiquadratic bivariate(m);
+
+    EXPECT_EQ(1, univariate.numVariables());
+    EXPECT_EQ(2, bivariate.numVariables());
+
+    // Valid
+    {
+      HeatPumpAirToWaterHeatingSpeedData awhpHCSpeed(m, bivariate, bivariate, univariate);
+      EXPECT_EQ(1, m.getConcreteModelObjects<HeatPumpAirToWaterHeatingSpeedData>().size());
+      EXPECT_EQ(1, m.getConcreteModelObjects<CurveBiquadratic>().size());
+      EXPECT_EQ(1, m.getConcreteModelObjects<CurveQuadratic>().size());
+    }
+
+    // Invalid: wrong curve type
+    EXPECT_THROW({ HeatPumpAirToWaterHeatingSpeedData(m, bivariate, univariate, univariate); }, openstudio::Exception);
+    EXPECT_THROW({ HeatPumpAirToWaterHeatingSpeedData(m, univariate, bivariate, univariate); }, openstudio::Exception);
+    EXPECT_THROW({ HeatPumpAirToWaterHeatingSpeedData(m, bivariate, bivariate, bivariate); }, openstudio::Exception);
     EXPECT_EQ(1, m.getConcreteModelObjects<HeatPumpAirToWaterHeatingSpeedData>().size());
     EXPECT_EQ(1, m.getConcreteModelObjects<CurveBiquadratic>().size());
     EXPECT_EQ(1, m.getConcreteModelObjects<CurveQuadratic>().size());
   }
 
-  // Invalid: wrong curve type
-  EXPECT_THROW(HeatPumpAirToWaterHeatingSpeedData(m, bivariate, univariate, univariate), Exception);
-  EXPECT_THROW(HeatPumpAirToWaterHeatingSpeedData(m, univariate, bivariate, univariate), Exception);
-  EXPECT_THROW(HeatPumpAirToWaterHeatingSpeedData(m, bivariate, bivariate, bivariate), Exception);
-  EXPECT_EQ(0, m.getConcreteModelObjects<HeatPumpAirToWaterHeatingSpeedData>().size());
-  EXPECT_EQ(1, m.getConcreteModelObjects<CurveBiquadratic>().size());
-  EXPECT_EQ(1, m.getConcreteModelObjects<CurveQuadratic>().size());
+  // There is a nasty side effect that curves may be removed if ctor failed and they are not used anywhere else, so we'll want to call
+  // ModelObject::remove() and not HeatPumpAirToWaterHeatingSpeedData::remove() (=ParentObject::remove) in the ctor
+  {
+    Model m;
+    CurveQuadratic univariate(m);
+    CurveBiquadratic bivariate(m);
+    EXPECT_EQ(0, univariate.directUseCount());
+    EXPECT_EQ(0, bivariate.directUseCount());
+
+    EXPECT_THROW({ HeatPumpAirToWaterHeatingSpeedData(m, bivariate, univariate, univariate); }, openstudio::Exception);
+    EXPECT_EQ(0, m.getConcreteModelObjects<HeatPumpAirToWaterHeatingSpeedData>().size());
+    // Curves should not be removed in case the expliclit ctor with curves failed
+    EXPECT_EQ(1, m.getConcreteModelObjects<CurveBiquadratic>().size());
+    EXPECT_EQ(1, m.getConcreteModelObjects<CurveQuadratic>().size());
+  }
 }
 
 TEST_F(ModelFixture, HeatPumpAirToWaterHeatingSpeedData_clone_remove) {
@@ -126,6 +143,25 @@ TEST_F(ModelFixture, HeatPumpAirToWaterHeatingSpeedData_clone_remove) {
   EXPECT_EQ(2, m.getConcreteModelObjects<HeatPumpAirToWaterHeatingSpeedData>().size());
   EXPECT_EQ(2, m.getConcreteModelObjects<CurveBiquadratic>().size());
   EXPECT_EQ(1, m.getConcreteModelObjects<CurveQuadratic>().size());
+
+  {
+    Model m2;
+    auto awhpHCSpeedClone2 = awhpHCSpeed.clone(m2).cast<HeatPumpAirToWaterHeatingSpeedData>();
+    EXPECT_EQ(cap, awhpHCSpeedClone2.ratedHeatingCapacity().get());
+    EXPECT_EQ(cop, awhpHCSpeedClone2.ratedCOPforHeating());
+    EXPECT_NE(capFT, awhpHCSpeedClone2.normalizedHeatingCapacityFunctionofTemperatureCurve());
+    EXPECT_NE(eirFT, awhpHCSpeedClone2.heatingEnergyInputRatioFunctionofTemperatureCurve());
+    EXPECT_NE(eirFPLR, awhpHCSpeedClone2.heatingEnergyInputRatioFunctionofPLRCurve());
+
+    EXPECT_EQ(1, m2.getConcreteModelObjects<HeatPumpAirToWaterHeatingSpeedData>().size());
+    EXPECT_EQ(2, m2.getConcreteModelObjects<CurveBiquadratic>().size());
+    EXPECT_EQ(1, m2.getConcreteModelObjects<CurveQuadratic>().size());
+    auto rmed = awhpHCSpeedClone2.remove();
+    EXPECT_EQ(4u, rmed.size());
+    EXPECT_EQ(0, m2.getConcreteModelObjects<HeatPumpAirToWaterHeatingSpeedData>().size());
+    EXPECT_EQ(0, m2.getConcreteModelObjects<CurveBiquadratic>().size());
+    EXPECT_EQ(0, m2.getConcreteModelObjects<CurveQuadratic>().size());
+  }
 
   auto rmed = awhpHCSpeed.remove();
   EXPECT_EQ(1u, rmed.size());

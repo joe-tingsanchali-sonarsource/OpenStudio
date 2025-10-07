@@ -39,7 +39,11 @@ namespace model {
 
       virtual IddObjectType iddObjectType() const override;
 
-      // TODO: clone, children, remove?
+      // Overriding clone and children here because we want to try to remove the Curves (if they aren't used by something else)
+      // So we list them as children. But ParentObject_Impl::clone would also clone them, so we override clone to call ModelObject_Impl::clone
+      virtual ModelObject clone(Model model) const override;
+
+      virtual std::vector<ModelObject> children() const override;
 
       //@}
       /** @name Getters */

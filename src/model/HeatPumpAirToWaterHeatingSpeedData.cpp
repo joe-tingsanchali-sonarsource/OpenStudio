@@ -51,6 +51,26 @@ namespace model {
       return HeatPumpAirToWaterHeatingSpeedData::iddObjectType();
     }
 
+    std::vector<ModelObject> HeatPumpAirToWaterHeatingSpeedData_Impl::children() const {
+      std::vector<ModelObject> children;
+      if (auto c_ = optionalNormalizedHeatingCapacityFunctionofTemperatureCurve()) {
+        children.push_back(*c_);
+      }
+      if (auto c_ = optionalHeatingEnergyInputRatioFunctionofTemperatureCurve()) {
+        children.push_back(*c_);
+      }
+      if (auto c_ = optionalHeatingEnergyInputRatioFunctionofPLRCurve()) {
+        children.push_back(*c_);
+      }
+
+      return children;
+    }
+
+    ModelObject HeatPumpAirToWaterHeatingSpeedData_Impl::clone(Model model) const {
+      // Don't clone the curves (listed as children)
+      return ModelObject_Impl::clone(model);  // NOLINT(bugprone-parent-virtual-call)
+    }
+
     boost::optional<double> HeatPumpAirToWaterHeatingSpeedData_Impl::ratedHeatingCapacity() const {
       return getDouble(OS_HeatPump_AirToWater_Heating_SpeedDataFields::RatedHeatingCapacity, true);
     }
