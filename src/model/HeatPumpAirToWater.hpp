@@ -74,9 +74,7 @@ namespace model {
 
     double heatPumpDefrostTimePeriodFraction() const;
 
-    boost::optional<double> resistiveDefrostHeaterCapacity() const;
-
-    bool isResistiveDefrostHeaterCapacityAutosized() const;
+    double resistiveDefrostHeaterCapacity() const;
 
     boost::optional<Curve> defrostEnergyInputRatioFunctionofTemperatureCurve() const;
 
@@ -124,8 +122,6 @@ namespace model {
 
     bool setResistiveDefrostHeaterCapacity(double resistiveDefrostHeaterCapacity);
 
-    void autosizeResistiveDefrostHeaterCapacity();
-
     bool setDefrostEnergyInputRatioFunctionofTemperatureCurve(const Curve& defrostEnergyInputRatioFunctionofTemperatureCurve);
 
     void resetDefrostEnergyInputRatioFunctionofTemperatureCurve();
@@ -161,7 +157,11 @@ namespace model {
     boost::optional<PlantLoop> heatingLoop() const;
 
     // Autosize methods
-    boost::optional<double> autosizedResistiveDefrostHeaterCapacity() const;
+    boost::optional<double> autosizedRatedAirFlowRateinHeatingMode() const;
+    boost::optional<double> autosizedRatedWaterFlowRateinHeatingMode() const;
+    boost::optional<double> autosizedRatedAirFlowRateinCoolingMode() const;
+    boost::optional<double> autosizedRatedWaterFlowRateinCoolingMode() const;
+
     //@}
    protected:
     /// @cond

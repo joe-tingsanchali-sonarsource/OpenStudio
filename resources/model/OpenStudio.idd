@@ -14949,7 +14949,6 @@ OS:HeatPump:AirToWater,
         \required-field
         \type real
         \minimum 0.0
-        \autosizable
         \units W
         \note only applicable if resistive defrost strategy is specified
         \ip-units W

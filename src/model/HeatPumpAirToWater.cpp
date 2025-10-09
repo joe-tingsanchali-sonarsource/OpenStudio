@@ -269,21 +269,10 @@ namespace model {
       return value.get();
     }
 
-    boost::optional<double> HeatPumpAirToWater_Impl::resistiveDefrostHeaterCapacity() const {
-      return getDouble(OS_HeatPump_AirToWaterFields::ResistiveDefrostHeaterCapacity, true);
-    }
-
-    bool HeatPumpAirToWater_Impl::isResistiveDefrostHeaterCapacityAutosized() const {
-      bool result = false;
-      boost::optional<std::string> value = getString(OS_HeatPump_AirToWaterFields::ResistiveDefrostHeaterCapacity, true);
-      if (value) {
-        result = openstudio::istringEqual(value.get(), "autosize");
-      }
-      return result;
-    }
-
-    boost::optional<double> HeatPumpAirToWater_Impl::autosizedResistiveDefrostHeaterCapacity() const {
-      return getAutosizedValue("TODO_CHECK_SQL Resistive Defrost Heater Capacity", "W");
+    double HeatPumpAirToWater_Impl::resistiveDefrostHeaterCapacity() const {
+      boost::optional<double> value = getDouble(OS_HeatPump_AirToWaterFields::ResistiveDefrostHeaterCapacity, true);
+      OS_ASSERT(value);
+      return value.get();
     }
 
     boost::optional<Curve> HeatPumpAirToWater_Impl::defrostEnergyInputRatioFunctionofTemperatureCurve() const {
@@ -399,11 +388,6 @@ namespace model {
       return result;
     }
 
-    void HeatPumpAirToWater_Impl::autosizeResistiveDefrostHeaterCapacity() {
-      const bool result = setString(OS_HeatPump_AirToWaterFields::ResistiveDefrostHeaterCapacity, "autosize");
-      OS_ASSERT(result);
-    }
-
     bool
       HeatPumpAirToWater_Impl::setDefrostEnergyInputRatioFunctionofTemperatureCurve(const Curve& defrostEnergyInputRatioFunctionofTemperatureCurve) {
       const bool result = setPointer(OS_HeatPump_AirToWaterFields::DefrostEnergyInputRatioFunctionofTemperatureCurveName,
@@ -479,15 +463,25 @@ namespace model {
       OS_ASSERT(result);
     }
 
-    void HeatPumpAirToWater_Impl::autosize() {
-      autosizeResistiveDefrostHeaterCapacity();
+    boost::optional<double> HeatPumpAirToWater_Impl::autosizedRatedAirFlowRateinHeatingMode() const {
+      return getAutosizedValue("Design Size Source Side Volume Flow Rate", "m3/s", "HeatPump:AirToWater:Heating");
     }
 
-    void HeatPumpAirToWater_Impl::applySizingValues() {
-      if (boost::optional<double> val_ = autosizedResistiveDefrostHeaterCapacity()) {
-        setResistiveDefrostHeaterCapacity(*val_);
-      }
+    boost::optional<double> HeatPumpAirToWater_Impl::autosizedRatedWaterFlowRateinHeatingMode() const {
+      return getAutosizedValue("Design Size Load Side Volume Flow Rate", "m3/s", "HeatPump:AirToWater:Heating");
     }
+
+    boost::optional<double> HeatPumpAirToWater_Impl::autosizedRatedAirFlowRateinCoolingMode() const {
+      return getAutosizedValue("Design Size Source Side Volume Flow Rate", "m3/s", "HeatPump:AirToWater:Cooling");
+    }
+
+    boost::optional<double> HeatPumpAirToWater_Impl::autosizedRatedWaterFlowRateinCoolingMode() const {
+      return getAutosizedValue("Design Size Load Side Volume Flow Rate", "m3/s", "HeatPump:AirToWater:Cooling");
+    }
+
+    void HeatPumpAirToWater_Impl::autosize() {}
+
+    void HeatPumpAirToWater_Impl::applySizingValues() {}
 
     boost::optional<PlantLoop> HeatPumpAirToWater_Impl::coolingLoop() const {
       if (auto mode_ = coolingOperationMode()) {
@@ -581,16 +575,8 @@ namespace model {
     return getImpl<detail::HeatPumpAirToWater_Impl>()->heatPumpDefrostTimePeriodFraction();
   }
 
-  boost::optional<double> HeatPumpAirToWater::resistiveDefrostHeaterCapacity() const {
+  double HeatPumpAirToWater::resistiveDefrostHeaterCapacity() const {
     return getImpl<detail::HeatPumpAirToWater_Impl>()->resistiveDefrostHeaterCapacity();
-  }
-
-  bool HeatPumpAirToWater::isResistiveDefrostHeaterCapacityAutosized() const {
-    return getImpl<detail::HeatPumpAirToWater_Impl>()->isResistiveDefrostHeaterCapacityAutosized();
-  }
-
-  boost::optional<double> HeatPumpAirToWater::autosizedResistiveDefrostHeaterCapacity() const {
-    return getImpl<detail::HeatPumpAirToWater_Impl>()->autosizedResistiveDefrostHeaterCapacity();
   }
 
   boost::optional<Curve> HeatPumpAirToWater::defrostEnergyInputRatioFunctionofTemperatureCurve() const {
@@ -676,10 +662,6 @@ namespace model {
 
   bool HeatPumpAirToWater::setResistiveDefrostHeaterCapacity(double resistiveDefrostHeaterCapacity) {
     return getImpl<detail::HeatPumpAirToWater_Impl>()->setResistiveDefrostHeaterCapacity(resistiveDefrostHeaterCapacity);
-  }
-
-  void HeatPumpAirToWater::autosizeResistiveDefrostHeaterCapacity() {
-    getImpl<detail::HeatPumpAirToWater_Impl>()->autosizeResistiveDefrostHeaterCapacity();
   }
 
   bool HeatPumpAirToWater::setDefrostEnergyInputRatioFunctionofTemperatureCurve(const Curve& defrostEnergyInputRatioFunctionofTemperatureCurve) {

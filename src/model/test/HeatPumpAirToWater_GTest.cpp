@@ -111,20 +111,13 @@ TEST_F(ModelFixture, HeatPumpAirToWater_GettersSetters) {
 
   // Resistive Defrost Heater Capacity: Required Double
   // Ctor default
-  ASSERT_TRUE(heatPumpAirToWater.resistiveDefrostHeaterCapacity());
-  EXPECT_EQ(0.0, heatPumpAirToWater.resistiveDefrostHeaterCapacity().get());
-  // Autosize
-  heatPumpAirToWater.autosizeResistiveDefrostHeaterCapacity();
-  EXPECT_TRUE(heatPumpAirToWater.isResistiveDefrostHeaterCapacityAutosized());
+  EXPECT_EQ(0.0, heatPumpAirToWater.resistiveDefrostHeaterCapacity());
   // Set
   EXPECT_TRUE(heatPumpAirToWater.setResistiveDefrostHeaterCapacity(1.2));
-  ASSERT_TRUE(heatPumpAirToWater.resistiveDefrostHeaterCapacity());
-  EXPECT_EQ(1.2, heatPumpAirToWater.resistiveDefrostHeaterCapacity().get());
+  EXPECT_EQ(1.2, heatPumpAirToWater.resistiveDefrostHeaterCapacity());
   // Bad Value
   EXPECT_FALSE(heatPumpAirToWater.setResistiveDefrostHeaterCapacity(-10.0));
-  ASSERT_TRUE(heatPumpAirToWater.resistiveDefrostHeaterCapacity());
-  EXPECT_EQ(1.2, heatPumpAirToWater.resistiveDefrostHeaterCapacity().get());
-  EXPECT_FALSE(heatPumpAirToWater.isResistiveDefrostHeaterCapacityAutosized());
+  EXPECT_EQ(1.2, heatPumpAirToWater.resistiveDefrostHeaterCapacity());
 
   // Defrost Energy Input Ratio Function of Temperature Curve Name: Optional Object, BivariateFunctions
   CurveBicubic defrostEnergyInputRatioFunctionofTemperatureCurve(m);
