@@ -9968,7 +9968,7 @@ namespace osversion {
         ss << newObject;
         m_refactored.emplace_back(std::move(object), std::move(newObject));
 
-      } else if (iddname == "OS:People") {
+      } else if (iddname == "OS:Controller:MechanicalVentilation") {
 
         // 1 Field has been modified from 3.10.0 to 3.10.1:
         // ------------------------------------------------
@@ -9982,7 +9982,11 @@ namespace osversion {
             if (i == 4) {
               if (istringEqual(value.get(), "ProportionalControl")) {
                 newObject.setString(4, "ProportionalControlBasedonOccupancySchedule");
+              } else {
+                newObject.setString(i, value.get());
               }
+            } else {
+              newObject.setString(i, value.get());
             }
           }
         }

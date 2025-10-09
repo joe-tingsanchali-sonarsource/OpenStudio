@@ -4776,7 +4776,7 @@ TEST_F(OSVersionFixture, update_3_10_0_to_3_10_1_ControllerMechanicalVentilation
   openstudio::path outPath = resourcesPath() / toPath("osversion/3_10_1/test_vt_ControllerMechanicalVentilation_updated.osm");
   model->save(outPath, true);
 
-  std::vector<WorkspaceObject> cntrls = model->getObjectsByType("OS:ControllerMechanicalVentilation");
+  std::vector<WorkspaceObject> cntrls = model->getObjectsByType("OS:Controller:MechanicalVentilation");
   ASSERT_EQ(1u, cntrls.size());
   const auto& cntrl = cntrls.front();
 
