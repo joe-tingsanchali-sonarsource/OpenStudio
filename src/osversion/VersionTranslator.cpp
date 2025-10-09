@@ -9781,6 +9781,27 @@ namespace osversion {
         m_refactored.emplace_back(std::move(object), std::move(newObject));
 
         // No-op
+      } else if (iddname == "OS:ThermalStorage:ChilledWater:Stratified") {
+
+        // 1 Field was made required from 3.10.0 to 3.10.1:
+        // ------------------------------------------------
+        // * Nominal Cooling Capacity * 10
+
+        auto iddObject = idd_3_10_1.getObject(iddname);
+        IdfObject newObject(iddObject.get());
+
+        for (size_t i = 0; i < object.numFields(); ++i) {
+          if ((value = object.getString(i))) {
+            newObject.setString(i, value.get());
+          } else if (i == 10) {
+            newObject.setString(i, "Autosize");
+          }
+        }
+
+        ss << newObject;
+        m_refactored.emplace_back(std::move(object), std::move(newObject));
+
+        // No-op
       } else {
         ss << object;
       }
@@ -9789,6 +9810,5 @@ namespace osversion {
     return ss.str();
 
   }  // end update_3_10_0_to_3_10_1
-
 }  // namespace osversion
 }  // namespace openstudio

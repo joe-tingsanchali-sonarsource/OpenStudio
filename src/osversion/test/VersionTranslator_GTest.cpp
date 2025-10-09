@@ -4649,3 +4649,29 @@ TEST_F(OSVersionFixture, update_3_10_0_to_3_10_1_SiteWaterMainsTemperature) {
   EXPECT_EQ(1.0, swmt.getDouble(5).get());                           // Temperature Multiplier
   EXPECT_EQ(0.0, swmt.getDouble(6).get());                           // Temperature Offset
 }
+
+TEST_F(OSVersionFixture, update_3_10_0_to_3_10_1_ThermalStorageChilledWaterStratified) {
+  openstudio::path path = resourcesPath() / toPath("osversion/3_10_1/test_vt_ThermalStorageChilledWaterStratified.osm");
+  osversion::VersionTranslator vt;
+  boost::optional<model::Model> model = vt.loadModel(path);
+  ASSERT_TRUE(model) << "Failed to load " << path;
+
+  openstudio::path outPath = resourcesPath() / toPath("osversion/3_10_1/test_vt_ThermalStorageChilledWaterStratified_updated.osm");
+  model->save(outPath, true);
+
+  std::vector<WorkspaceObject> tss = model->getObjectsByType("OS:ThermalStorage:ChilledWater:Stratified");
+  ASSERT_EQ(1u, tss.size());
+  const auto& ts = tss.front();
+
+  EXPECT_EQ("Thermal Storage Chilled Water Stratified 1", ts.getString(1).get());  // Name
+
+  // Before insertion: Minimum Temperature Limit
+  EXPECT_TRUE(ts.isEmpty(9));
+
+  // New Field: Nominal Cooling Capacity
+  EXPECT_EQ("Autosize", ts.getString(10).get());
+
+  // After insertion and also last field: Ambient Temperature Indicator
+  ASSERT_TRUE(ts.getTarget(11));
+  EXPECT_EQ("Schedule Ruleset 1", ts.getTarget(11)->nameString());
+}

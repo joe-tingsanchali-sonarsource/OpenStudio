@@ -157,6 +157,15 @@ namespace model {
       return getDouble(OS_ThermalStorage_ChilledWater_StratifiedFields::NominalCoolingCapacity, true);
     }
 
+    bool ThermalStorageChilledWaterStratified_Impl::isNominalCoolingCapacityAutosized() const {
+      bool result = false;
+      boost::optional<std::string> value = getString(OS_ThermalStorage_ChilledWater_StratifiedFields::NominalCoolingCapacity, true);
+      if (value) {
+        result = openstudio::istringEqual(value.get(), "autosize");
+      }
+      return result;
+    }
+
     std::string ThermalStorageChilledWaterStratified_Impl::ambientTemperatureIndicator() const {
       boost::optional<std::string> value = getString(OS_ThermalStorage_ChilledWater_StratifiedFields::AmbientTemperatureIndicator, true);
       OS_ASSERT(value);
@@ -434,16 +443,12 @@ namespace model {
       bool result(false);
       if (nominalCoolingCapacity) {
         result = setDouble(OS_ThermalStorage_ChilledWater_StratifiedFields::NominalCoolingCapacity, nominalCoolingCapacity.get());
-      } else {
-        resetNominalCoolingCapacity();
-        result = true;
       }
-      OS_ASSERT(result);
       return result;
     }
 
-    void ThermalStorageChilledWaterStratified_Impl::resetNominalCoolingCapacity() {
-      bool result = setString(OS_ThermalStorage_ChilledWater_StratifiedFields::NominalCoolingCapacity, "");
+    void ThermalStorageChilledWaterStratified_Impl::autosizeNominalCoolingCapacity() {
+      bool result = setString(OS_ThermalStorage_ChilledWater_StratifiedFields::NominalCoolingCapacity, "autosize");
       OS_ASSERT(result);
     }
 
@@ -752,6 +757,7 @@ namespace model {
     OS_ASSERT(ok);
     ok = setDeadbandTemperatureDifference(2.5);
     OS_ASSERT(ok);
+    autosizeNominalCoolingCapacity();
     ok = setAmbientTemperatureIndicator("Outdoors");
     OS_ASSERT(ok);
 
@@ -842,6 +848,10 @@ namespace model {
 
   boost::optional<double> ThermalStorageChilledWaterStratified::nominalCoolingCapacity() const {
     return getImpl<detail::ThermalStorageChilledWaterStratified_Impl>()->nominalCoolingCapacity();
+  }
+
+  bool ThermalStorageChilledWaterStratified::isNominalCoolingCapacityAutosized() const {
+    return getImpl<detail::ThermalStorageChilledWaterStratified_Impl>()->isNominalCoolingCapacityAutosized();
   }
 
   std::string ThermalStorageChilledWaterStratified::ambientTemperatureIndicator() const {
@@ -1028,8 +1038,8 @@ namespace model {
     return getImpl<detail::ThermalStorageChilledWaterStratified_Impl>()->setNominalCoolingCapacity(nominalCoolingCapacity);
   }
 
-  void ThermalStorageChilledWaterStratified::resetNominalCoolingCapacity() {
-    getImpl<detail::ThermalStorageChilledWaterStratified_Impl>()->resetNominalCoolingCapacity();
+  void ThermalStorageChilledWaterStratified::autosizeNominalCoolingCapacity() {
+    getImpl<detail::ThermalStorageChilledWaterStratified_Impl>()->autosizeNominalCoolingCapacity();
   }
 
   bool ThermalStorageChilledWaterStratified::setAmbientTemperatureIndicator(const std::string& ambientTemperatureIndicator) {
