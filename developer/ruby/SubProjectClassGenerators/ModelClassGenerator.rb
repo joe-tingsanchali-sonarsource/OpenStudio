@@ -851,7 +851,7 @@ class ModelClassGenerator < SubProjectClassGenerator
         result << "      virtual std::vector<ScheduleTypeKey> getScheduleTypeKeys(const Schedule& schedule) const override;\n\n"
       end
 
-      if @derivesHVACComponent || @baseClassName == 'ParentObject'
+      if @derivesHVACComponent || @baseClassName == 'ParentObject' || @baseClassName == 'ResourceObject'
         result << "      // TODO: You may need to override these since base is " << @baseClassName << "\n"
         result << "      // virtual ModelObject clone(Model model) const override;\n\n"
 
