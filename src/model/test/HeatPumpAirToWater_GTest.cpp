@@ -314,9 +314,9 @@ TEST_F(ModelFixture, HeatPumpAirToWater_Clone) {
     Model m2;
     auto awhpClone2 = awhp.clone(m2).cast<HeatPumpAirToWater>();
     EXPECT_EQ(1, m2.getConcreteModelObjects<HeatPumpAirToWater>().size());
-    EXPECT_EQ(2, m2.getConcreteModelObjects<HeatPumpAirToWaterCooling>().size());
+    EXPECT_EQ(1, m2.getConcreteModelObjects<HeatPumpAirToWaterCooling>().size());
     EXPECT_EQ(5, m2.getConcreteModelObjects<HeatPumpAirToWaterCoolingSpeedData>().size());
-    EXPECT_EQ(2, m2.getConcreteModelObjects<HeatPumpAirToWaterHeating>().size());
+    EXPECT_EQ(1, m2.getConcreteModelObjects<HeatPumpAirToWaterHeating>().size());
     EXPECT_EQ(5, m2.getConcreteModelObjects<HeatPumpAirToWaterHeatingSpeedData>().size());
     EXPECT_EQ((5 + 5) * 3, m.getModelObjects<Curve>().size());
   }

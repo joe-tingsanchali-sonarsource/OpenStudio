@@ -111,6 +111,7 @@ namespace model {
     }
 
     ModelObject HeatPumpAirToWaterCooling_Impl::clone(Model model) const {
+      const bool same_model = this->model() == model;
       // This handles resetting the ports, and bypassing ParentObject::clone so it doesn't clone children
       auto t_clone = StraightComponent_Impl::clone(model).cast<HeatPumpAirToWaterCooling>();
 
@@ -121,7 +122,12 @@ namespace model {
       OS_ASSERT(ok);
 
       for (const auto& speed : speeds()) {
-        ok = t_clone.addSpeed(speed);
+        if (same_model) {
+          ok = t_clone.addSpeed(speed);
+        } else {
+          auto speedClone = speed.clone(model).cast<HeatPumpAirToWaterCoolingSpeedData>();
+          ok = t_clone.addSpeed(speedClone);
+        }
         OS_ASSERT(ok);
       }
 
