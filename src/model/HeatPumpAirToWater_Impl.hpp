@@ -68,6 +68,9 @@ namespace model {
       virtual std::vector<FuelType> heatingFuelTypes() const override;
       virtual std::vector<AppGFuelType> appGHeatingFuelTypes() const override;
 
+      virtual std::vector<EMSActuatorNames> emsActuatorNames() const override;
+      virtual std::vector<std::string> emsInternalVariableNames() const override;
+
       //@}
       /** @name Getters */
       //@{

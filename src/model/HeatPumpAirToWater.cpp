@@ -503,6 +503,21 @@ namespace model {
       return boost::none;
     }
 
+    std::vector<EMSActuatorNames> HeatPumpAirToWater_Impl::emsActuatorNames() const {
+      std::vector<EMSActuatorNames> actuators{{"HeatPump:AirToWater", "Operating Mode"}};
+      if (auto mode_ = heatingOperationMode()) {
+        actuators.emplace_back("HeatPump:AirToWater", "Defrost Flag");
+        actuators.emplace_back("HeatPump:AirToWater", "Entering Water Temperature");
+        actuators.emplace_back("HeatPump:AirToWater", "Leaving Water Temperature");
+      }
+      return actuators;
+    }
+
+    std::vector<std::string> HeatPumpAirToWater_Impl::emsInternalVariableNames() const {
+      std::vector<std::string> types;
+      return types;
+    }
+
   }  // namespace detail
 
   HeatPumpAirToWater::HeatPumpAirToWater(const Model& model) : StraightComponent(HeatPumpAirToWater::iddObjectType(), model) {
