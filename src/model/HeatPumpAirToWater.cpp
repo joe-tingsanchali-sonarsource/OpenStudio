@@ -723,6 +723,22 @@ namespace model {
     return getImpl<detail::HeatPumpAirToWater_Impl>()->heatingLoop();
   }
 
+  boost::optional<double> HeatPumpAirToWater::autosizedRatedAirFlowRateinCoolingMode() const {
+    return getImpl<detail::HeatPumpAirToWater_Impl>()->autosizedRatedAirFlowRateinCoolingMode();
+  }
+
+  boost::optional<double> HeatPumpAirToWater::autosizedRatedWaterFlowRateinCoolingMode() const {
+    return getImpl<detail::HeatPumpAirToWater_Impl>()->autosizedRatedWaterFlowRateinCoolingMode();
+  }
+
+  boost::optional<double> HeatPumpAirToWater::autosizedRatedAirFlowRateinHeatingMode() const {
+    return getImpl<detail::HeatPumpAirToWater_Impl>()->autosizedRatedAirFlowRateinHeatingMode();
+  }
+
+  boost::optional<double> HeatPumpAirToWater::autosizedRatedWaterFlowRateinHeatingMode() const {
+    return getImpl<detail::HeatPumpAirToWater_Impl>()->autosizedRatedWaterFlowRateinHeatingMode();
+  }
+
   /// @cond
   HeatPumpAirToWater::HeatPumpAirToWater(std::shared_ptr<detail::HeatPumpAirToWater_Impl> impl) : StraightComponent(std::move(impl)) {}
   /// @endcond

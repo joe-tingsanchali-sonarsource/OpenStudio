@@ -195,11 +195,6 @@ namespace model {
       return result;
     }
 
-    boost::optional<double> HeatPumpAirToWaterHeating_Impl::autosizedRatedAirFlowRate() const {
-      LOG_AND_THROW("TODO: need to use the name of the WRAPPER object");
-      return getAutosizedValue("Design Size Source Side Volume Flow Rate", "m3/s");
-    }
-
     double HeatPumpAirToWaterHeating_Impl::ratedLeavingWaterTemperature() const {
       boost::optional<double> value = getDouble(OS_HeatPump_AirToWater_HeatingFields::RatedLeavingWaterTemperature, true);
       OS_ASSERT(value);
@@ -217,11 +212,6 @@ namespace model {
         result = openstudio::istringEqual(value.get(), "autosize");
       }
       return result;
-    }
-
-    boost::optional<double> HeatPumpAirToWaterHeating_Impl::autosizedRatedWaterFlowRate() const {
-      LOG_AND_THROW("TODO: need to use the name of the WRAPPER object");
-      return getAutosizedValue("Design Size Load Side Volume Flow Rate", "m3/s");
     }
 
     double HeatPumpAirToWaterHeating_Impl::minimumOutdoorAirTemperature() const {
@@ -340,6 +330,22 @@ namespace model {
     void HeatPumpAirToWaterHeating_Impl::resetBoosterModeOnSpeed() {
       const bool result = setString(OS_HeatPump_AirToWater_HeatingFields::BoosterModeOnSpeed, "");
       OS_ASSERT(result);
+    }
+
+    boost::optional<double> HeatPumpAirToWaterHeating_Impl::autosizedRatedAirFlowRate() const {
+      boost::optional<double> result;
+      if (auto awhp_ = heatPumpAirToWater()) {
+        result = awhp_->autosizedRatedAirFlowRateinHeatingMode();
+      }
+      return result;
+    }
+
+    boost::optional<double> HeatPumpAirToWaterHeating_Impl::autosizedRatedWaterFlowRate() const {
+      boost::optional<double> result;
+      if (auto awhp_ = heatPumpAirToWater()) {
+        result = awhp_->autosizedRatedWaterFlowRateinHeatingMode();
+      }
+      return result;
     }
 
     void HeatPumpAirToWaterHeating_Impl::autosize() {
