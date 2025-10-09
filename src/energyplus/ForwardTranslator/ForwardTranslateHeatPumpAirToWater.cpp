@@ -103,7 +103,7 @@ namespace energyplus {
     }
 
     // Chilled Water Outlet Node Name: Optional Node
-    if (boost::optional<ModelObject> mo_ = modelObject.inletModelObject()) {
+    if (boost::optional<ModelObject> mo_ = modelObject.outletModelObject()) {
       if (boost::optional<Node> node_ = mo_->optionalCast<Node>()) {
         idfObject.setString(HeatPump_AirToWaterFields::ChilledWaterOutletNodeName, node_->nameString());
       }
@@ -114,7 +114,7 @@ namespace energyplus {
     const unsigned number_fields =
       static_cast<unsigned>(HeatPump_AirToWaterFields::CoolingEnergyInputRatioFunctionofPLRCurveNameatSpeed1) - startIndex + 1;
 
-    auto getFieldIndex = [startIndex](HeatPump_AirToWaterFields::domain field) -> unsigned {
+    auto getFieldIndex = [&startIndex](HeatPump_AirToWaterFields::domain field) -> unsigned {
       return startIndex + (static_cast<unsigned>(field) - static_cast<unsigned>(HeatPump_AirToWaterFields::RatedCoolingCapacityatSpeed1));
     };
 

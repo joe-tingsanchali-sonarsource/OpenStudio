@@ -306,7 +306,6 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_HeatPumpAirToWater) {
     ASSERT_EQ(1u, idfObjs.size());
 
     const auto& idfObject = idfObjs.front();
-    EXPECT_EQ("AWHP Heating Avail Schedule", idfObject.getString(HeatPump_AirToWaterFields::AvailabilityScheduleNameHeating).get());
     EXPECT_EQ("ScheduledModes", idfObject.getString(HeatPump_AirToWaterFields::OperatingModeControlMethod).get());
     EXPECT_EQ("CoolingPriority", idfObject.getString(HeatPump_AirToWaterFields::OperatingModeControlOptionforMultipleUnit).get());
     EXPECT_EQ("AWHP Operating Mode Control Schedule", idfObject.getString(HeatPump_AirToWaterFields::OperatingModeControlScheduleName).get());
@@ -329,6 +328,7 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_HeatPumpAirToWater) {
     EXPECT_EQ(1.8, idfObject.getDouble(HeatPump_AirToWaterFields::MaximumAmbientTemperatureforCrankcaseHeaterOperation).get());
 
     // Heating
+    EXPECT_EQ("AWHP Heating Avail Schedule", idfObject.getString(HeatPump_AirToWaterFields::AvailabilityScheduleNameHeating).get());
     EXPECT_EQ(0.4, idfObject.getDouble(HeatPump_AirToWaterFields::RatedInletAirTemperatureinHeatingMode).get());
     // EXPECT_EQ("Autosize", idfObject.getString(HeatPump_AirToWaterFields::RatedAirFlowRateinHeatingMode).get());
     EXPECT_EQ(0.5, idfObject.getDouble(HeatPump_AirToWaterFields::RatedAirFlowRateinHeatingMode).get());
@@ -443,11 +443,269 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_HeatPumpAirToWater) {
     EXPECT_EQ("AWHP Air Inlet Node", oaNodeList.front().getString(0).get());
     EXPECT_EQ("AWHP Air Outlet Node", oaNodeList.front().getString(1).get());
 
+    EXPECT_EQ(1, w.getObjectsByType(IddObjectType::PlantLoop).size());
+
     std::vector<Expected> expecteds = {
       Expected{.isHeating = true,
                .plantName = hwLoop.nameString(),
                .inletNodeName = awhp_hc.inletModelObject()->nameString(),
                .outletNodeName = awhp_hc.outletModelObject()->nameString()},
+    };
+    for (const auto& e : expecteds) {
+      auto p_ = w.getObjectByTypeAndName(IddObjectType::PlantLoop, e.plantName);
+      ASSERT_TRUE(p_.is_initialized()) << "Cannot find PlantLoop named " << e.plantName;
+      WorkspaceObject idf_plant = p_.get();
+      WorkspaceObject idf_brlist = idf_plant.getTarget(PlantLoopFields::PlantSideBranchListName).get();
+
+      // Should have at three branches: supply inlet, the one with the AWHP, supply outlet.
+      ASSERT_EQ(3, idf_brlist.extensibleGroups().size()) << "Failed for " << e.plantName;
+      // Get the AWHP one
+      auto w_eg = idf_brlist.extensibleGroups()[1].cast<WorkspaceExtensibleGroup>();
+      WorkspaceObject idf_branch = w_eg.getTarget(BranchListExtensibleFields::BranchName).get();
+
+      // There should be only one equipment on the branch
+      ASSERT_EQ(1, idf_branch.extensibleGroups().size());
+      auto w_eg2 = idf_branch.extensibleGroups()[0].cast<WorkspaceExtensibleGroup>();
+
+      ASSERT_EQ(w_eg2.getString(BranchExtensibleFields::ComponentName).get(), awhp.nameString());
+      ASSERT_EQ(w_eg2.getString(BranchExtensibleFields::ComponentInletNodeName).get(), e.inletNodeName);
+      ASSERT_EQ(w_eg2.getString(BranchExtensibleFields::ComponentOutletNodeName).get(), e.outletNodeName);
+
+      WorkspaceObject idf_plant_op = p_->getTarget(PlantLoopFields::PlantEquipmentOperationSchemeName).get();
+      // Should have created a Cooling Load one only
+      ASSERT_EQ(1, idf_plant_op.extensibleGroups().size());
+      auto w_eg_schemes = idf_plant_op.extensibleGroups()[0].cast<WorkspaceExtensibleGroup>();
+      ASSERT_EQ(e.isHeating ? "PlantEquipmentOperation:HeatingLoad" : "PlantEquipmentOperation:CoolingLoad",
+                w_eg_schemes.getString(PlantEquipmentOperationSchemesExtensibleFields::ControlSchemeObjectType).get());
+
+      // Get the Operation Scheme
+      auto op_scheme_ = w_eg_schemes.getTarget(PlantEquipmentOperationSchemesExtensibleFields::ControlSchemeName);
+      ASSERT_TRUE(op_scheme_);
+
+      // Get the Plant Equipment List of this CoolingLoad/HeatingLoad scheme
+      // There should only be one Load Range
+      ASSERT_EQ(1u, op_scheme_->extensibleGroups().size());
+
+      // Load range 1
+      w_eg = op_scheme_->extensibleGroups()[0].cast<WorkspaceExtensibleGroup>();
+      boost::optional<WorkspaceObject> peq_list_;
+      if (e.isHeating) {
+        peq_list_ = w_eg.getTarget(PlantEquipmentOperation_HeatingLoadExtensibleFields::RangeEquipmentListName);
+      } else {
+        peq_list_ = w_eg.getTarget(PlantEquipmentOperation_CoolingLoadExtensibleFields::RangeEquipmentListName);
+      }
+      ASSERT_TRUE(peq_list_);
+
+      // Should have one equipment on it: HeatPump:AirToWater
+      auto peqs = peq_list_->extensibleGroups();
+      ASSERT_EQ(1, peqs.size());
+      ASSERT_EQ("HeatPump:AirToWater", peqs.front().getString(PlantEquipmentListExtensibleFields::EquipmentObjectType).get());
+      ASSERT_EQ(awhp.nameString(), peqs.front().getString(PlantEquipmentListExtensibleFields::EquipmentName).get());
+    }
+  }
+
+  PlantLoop chwLoop = createLoop(m, "ChW Loop");
+  EXPECT_TRUE(chwLoop.addSupplyBranchForComponent(awhp_cc));
+
+  // On both a Heating and a Cooling Loop
+  {
+    Workspace w = ft.translateModel(m);
+
+    m.save("awhp.osm");
+    w.save("awhp.idf", true);
+    const auto idfObjs = w.getObjectsByType(IddObjectType::HeatPump_AirToWater);
+    ASSERT_EQ(1u, idfObjs.size());
+
+    const auto& idfObject = idfObjs.front();
+    EXPECT_EQ("ScheduledModes", idfObject.getString(HeatPump_AirToWaterFields::OperatingModeControlMethod).get());
+    EXPECT_EQ("CoolingPriority", idfObject.getString(HeatPump_AirToWaterFields::OperatingModeControlOptionforMultipleUnit).get());
+    EXPECT_EQ("AWHP Operating Mode Control Schedule", idfObject.getString(HeatPump_AirToWaterFields::OperatingModeControlScheduleName).get());
+    EXPECT_EQ(0.6, idfObject.getDouble(HeatPump_AirToWaterFields::MinimumPartLoadRatio).get());
+
+    EXPECT_EQ("AWHP Air Inlet Node", idfObject.getString(HeatPump_AirToWaterFields::AirInletNodeName).get());
+    EXPECT_EQ("AWHP Air Outlet Node", idfObject.getString(HeatPump_AirToWaterFields::AirOutletNodeName).get());
+
+    EXPECT_EQ(0.9, idfObject.getDouble(HeatPump_AirToWaterFields::MaximumOutdoorDryBulbTemperatureForDefrostOperation).get());
+    EXPECT_EQ("TimedEmpirical", idfObject.getString(HeatPump_AirToWaterFields::HeatPumpDefrostControl).get());
+    EXPECT_EQ(1.1, idfObject.getDouble(HeatPump_AirToWaterFields::HeatPumpDefrostTimePeriodFraction).get());
+    EXPECT_EQ(100.0, idfObject.getDouble(HeatPump_AirToWaterFields::ResistiveDefrostHeaterCapacity).get());
+    EXPECT_EQ("AWHP Defrost EIR FT Curve",
+              idfObject.getString(HeatPump_AirToWaterFields::DefrostEnergyInputRatioFunctionofTemperatureCurveName).get());
+    EXPECT_EQ(14, idfObject.getInt(HeatPump_AirToWaterFields::HeatPumpMultiplier).get());
+    EXPECT_EQ("FixedSpeed", idfObject.getString(HeatPump_AirToWaterFields::ControlType).get());
+    EXPECT_EQ(1.6, idfObject.getDouble(HeatPump_AirToWaterFields::CrankcaseHeaterCapacity).get());
+    EXPECT_EQ("AWHP Crankcase Heater Cap FT Curve",
+              idfObject.getString(HeatPump_AirToWaterFields::CrankcaseHeaterCapacityFunctionofTemperatureCurveName).get());
+    EXPECT_EQ(1.8, idfObject.getDouble(HeatPump_AirToWaterFields::MaximumAmbientTemperatureforCrankcaseHeaterOperation).get());
+
+    // Heating
+    EXPECT_EQ("AWHP Heating Avail Schedule", idfObject.getString(HeatPump_AirToWaterFields::AvailabilityScheduleNameHeating).get());
+    EXPECT_EQ(0.4, idfObject.getDouble(HeatPump_AirToWaterFields::RatedInletAirTemperatureinHeatingMode).get());
+    // EXPECT_EQ("Autosize", idfObject.getString(HeatPump_AirToWaterFields::RatedAirFlowRateinHeatingMode).get());
+    EXPECT_EQ(0.5, idfObject.getDouble(HeatPump_AirToWaterFields::RatedAirFlowRateinHeatingMode).get());
+    EXPECT_EQ(0.6, idfObject.getDouble(HeatPump_AirToWaterFields::RatedLeavingWaterTemperatureinHeatingMode).get());
+    // EXPECT_EQ("Autosize", idfObject.getString(HeatPump_AirToWaterFields::RatedWaterFlowRateinHeatingMode).get());
+    EXPECT_EQ(0.7, idfObject.getDouble(HeatPump_AirToWaterFields::RatedWaterFlowRateinHeatingMode).get());
+    EXPECT_EQ(0.8, idfObject.getDouble(HeatPump_AirToWaterFields::MinimumOutdoorAirTemperatureinHeatingMode).get());
+    EXPECT_EQ(0.9, idfObject.getDouble(HeatPump_AirToWaterFields::MaximumOutdoorAirTemperatureinHeatingMode).get());
+    EXPECT_EQ("AWHP Heating MinLWT Curve",
+              idfObject.getString(HeatPump_AirToWaterFields::MinimumLeavingWaterTemperatureCurveNameinHeatingMode).get());
+    EXPECT_EQ("AWHP Heating MaxLWT Curve",
+              idfObject.getString(HeatPump_AirToWaterFields::MaximumLeavingWaterTemperatureCurveNameinHeatingMode).get());
+
+    EXPECT_EQ(1.2, idfObject.getDouble(HeatPump_AirToWaterFields::SizingFactorforHeating).get());
+
+    EXPECT_EQ(awhp_hc.inletModelObject()->nameString(), idfObject.getString(HeatPump_AirToWaterFields::HotWaterInletNodeName).get());
+    EXPECT_EQ(awhp_hc.outletModelObject()->nameString(), idfObject.getString(HeatPump_AirToWaterFields::HotWaterOutletNodeName).get());
+
+    EXPECT_EQ(5, idfObject.getInt(HeatPump_AirToWaterFields::NumberofSpeedsforHeating).get());
+
+    // EXPECT_EQ("Autosize", idfObject.getString(HeatPump_AirToWaterFields::RatedHeatingCapacityatSpeed1).get());
+    EXPECT_EQ(1000.0, idfObject.getDouble(HeatPump_AirToWaterFields::RatedHeatingCapacityatSpeed1).get());
+    EXPECT_EQ(4.0, idfObject.getDouble(HeatPump_AirToWaterFields::RatedCOPforHeatingatSpeed1).get());
+    EXPECT_EQ("AWHP Heating Speed 1 CapFT Curve",
+              idfObject.getString(HeatPump_AirToWaterFields::NormalizedHeatingCapacityFunctionofTemperatureCurveNameatSpeed1).get());
+    EXPECT_EQ("AWHP Heating Speed 1 EIRfT Curve",
+              idfObject.getString(HeatPump_AirToWaterFields::HeatingEnergyInputRatioFunctionofTemperatureCurveNameatSpeed1).get());
+    EXPECT_EQ("AWHP Heating Speed 1 EIRfPLR Curve",
+              idfObject.getString(HeatPump_AirToWaterFields::HeatingEnergyInputRatioFunctionofPLRCurveNameatSpeed1).get());
+    EXPECT_EQ(2000.0, idfObject.getDouble(HeatPump_AirToWaterFields::RatedHeatingCapacityatSpeed2).get());
+    EXPECT_EQ(3.9, idfObject.getDouble(HeatPump_AirToWaterFields::RatedCOPforHeatingatSpeed2).get());
+    EXPECT_EQ("AWHP Heating Speed 2 CapFT Curve",
+              idfObject.getString(HeatPump_AirToWaterFields::NormalizedHeatingCapacityFunctionofTemperatureCurveNameatSpeed2).get());
+    EXPECT_EQ("AWHP Heating Speed 2 EIRfT Curve",
+              idfObject.getString(HeatPump_AirToWaterFields::HeatingEnergyInputRatioFunctionofTemperatureCurveNameatSpeed2).get());
+    EXPECT_EQ("AWHP Heating Speed 2 EIRfPLR Curve",
+              idfObject.getString(HeatPump_AirToWaterFields::HeatingEnergyInputRatioFunctionofPLRCurveNameatSpeed2).get());
+    EXPECT_EQ(3000.0, idfObject.getDouble(HeatPump_AirToWaterFields::RatedHeatingCapacityatSpeed3).get());
+    EXPECT_EQ(3.8, idfObject.getDouble(HeatPump_AirToWaterFields::RatedCOPforHeatingatSpeed3).get());
+    EXPECT_EQ("AWHP Heating Speed 3 CapFT Curve",
+              idfObject.getString(HeatPump_AirToWaterFields::NormalizedHeatingCapacityFunctionofTemperatureCurveNameatSpeed3).get());
+    EXPECT_EQ("AWHP Heating Speed 3 EIRfT Curve",
+              idfObject.getString(HeatPump_AirToWaterFields::HeatingEnergyInputRatioFunctionofTemperatureCurveNameatSpeed3).get());
+    EXPECT_EQ("AWHP Heating Speed 3 EIRfPLR Curve",
+              idfObject.getString(HeatPump_AirToWaterFields::HeatingEnergyInputRatioFunctionofPLRCurveNameatSpeed3).get());
+    EXPECT_EQ(4000.0, idfObject.getDouble(HeatPump_AirToWaterFields::RatedHeatingCapacityatSpeed4).get());
+    EXPECT_EQ(3.7, idfObject.getDouble(HeatPump_AirToWaterFields::RatedCOPforHeatingatSpeed4).get());
+    EXPECT_EQ("AWHP Heating Speed 4 CapFT Curve",
+              idfObject.getString(HeatPump_AirToWaterFields::NormalizedHeatingCapacityFunctionofTemperatureCurveNameatSpeed4).get());
+    EXPECT_EQ("AWHP Heating Speed 4 EIRfT Curve",
+              idfObject.getString(HeatPump_AirToWaterFields::HeatingEnergyInputRatioFunctionofTemperatureCurveNameatSpeed4).get());
+    EXPECT_EQ("AWHP Heating Speed 4 EIRfPLR Curve",
+              idfObject.getString(HeatPump_AirToWaterFields::HeatingEnergyInputRatioFunctionofPLRCurveNameatSpeed4).get());
+    EXPECT_EQ("Autosize", idfObject.getString(HeatPump_AirToWaterFields::RatedHeatingCapacityatSpeed5).get());
+    EXPECT_EQ(3.6, idfObject.getDouble(HeatPump_AirToWaterFields::RatedCOPforHeatingatSpeed5).get());
+    EXPECT_EQ("AWHP Heating Speed 5 CapFT Curve",
+              idfObject.getString(HeatPump_AirToWaterFields::NormalizedHeatingCapacityFunctionofTemperatureCurveNameatSpeed5).get());
+    EXPECT_EQ("AWHP Heating Speed 5 EIRfT Curve",
+              idfObject.getString(HeatPump_AirToWaterFields::HeatingEnergyInputRatioFunctionofTemperatureCurveNameatSpeed5).get());
+    EXPECT_EQ("AWHP Heating Speed 5 EIRfPLR Curve",
+              idfObject.getString(HeatPump_AirToWaterFields::HeatingEnergyInputRatioFunctionofPLRCurveNameatSpeed5).get());
+    EXPECT_EQ("Yes", idfObject.getString(HeatPump_AirToWaterFields::BoosterModeOnHeating).get());
+    EXPECT_EQ(6000.0, idfObject.getDouble(HeatPump_AirToWaterFields::RatedHeatingCapacityinBoosterMode).get());
+    EXPECT_EQ(3.0, idfObject.getDouble(HeatPump_AirToWaterFields::RatedHeatingCOPinBoosterMode).get());
+    EXPECT_EQ("AWHP Heating Booster Mode On Speed CapFT Curve",
+              idfObject.getString(HeatPump_AirToWaterFields::NormalizedHeatingCapacityFunctionofTemperatureCurveNameinBoosterMode).get());
+    EXPECT_EQ("AWHP Heating Booster Mode On Speed EIRfT Curve",
+              idfObject.getString(HeatPump_AirToWaterFields::HeatingEnergyInputRatioFunctionofTemperatureCurveNameinBoosterMode).get());
+    EXPECT_EQ("AWHP Heating Booster Mode On Speed EIRfPLR Curve",
+              idfObject.getString(HeatPump_AirToWaterFields::HeatingEnergyInputRatioFunctionofPLRCurveNameinBoosterMode).get());
+
+    // COOLING
+    EXPECT_EQ("AWHP Cooling Avail Schedule", idfObject.getString(HeatPump_AirToWaterFields::AvailabilityScheduleNameCooling).get());
+    EXPECT_EQ(0.6, idfObject.getDouble(HeatPump_AirToWaterFields::RatedInletAirTemperatureinCoolingMode).get());
+    // EXPECT_EQ("Autosize", idfObject.getString(HeatPump_AirToWaterFields::RatedAirFlowRateinCoolingMode).get());
+    EXPECT_EQ(0.7, idfObject.getDouble(HeatPump_AirToWaterFields::RatedAirFlowRateinCoolingMode).get());
+    EXPECT_EQ(0.8, idfObject.getDouble(HeatPump_AirToWaterFields::RatedLeavingWaterTemperatureinCoolingMode).get());
+    // EXPECT_EQ("Autosize", idfObject.getString(HeatPump_AirToWaterFields::RatedWaterFlowRateinCoolingMode).get());
+    EXPECT_EQ(0.9, idfObject.getDouble(HeatPump_AirToWaterFields::RatedWaterFlowRateinCoolingMode).get());
+    EXPECT_EQ(-5.0, idfObject.getDouble(HeatPump_AirToWaterFields::MinimumOutdoorAirTemperatureinCoolingMode).get());
+    EXPECT_EQ(50.0, idfObject.getDouble(HeatPump_AirToWaterFields::MaximumOutdoorAirTemperatureinCoolingMode).get());
+    EXPECT_EQ("AWHP Cooling MinLWT Curve",
+              idfObject.getString(HeatPump_AirToWaterFields::MinimumLeavingWaterTemperatureCurveNameinCoolingMode).get());
+    EXPECT_EQ("AWHP Cooling MaxLWT Curve",
+              idfObject.getString(HeatPump_AirToWaterFields::MaximumLeavingWaterTemperatureCurveNameinCoolingMode).get());
+
+    EXPECT_EQ(1.5, idfObject.getDouble(HeatPump_AirToWaterFields::SizingFactorforCooling).get());
+
+    EXPECT_EQ(awhp_cc.inletModelObject()->nameString(), idfObject.getString(HeatPump_AirToWaterFields::ChilledWaterInletNodeName).get());
+    EXPECT_EQ(awhp_cc.outletModelObject()->nameString(), idfObject.getString(HeatPump_AirToWaterFields::ChilledWaterOutletNodeName).get());
+
+    EXPECT_EQ(5, idfObject.getInt(HeatPump_AirToWaterFields::NumberofSpeedsforCooling).get());
+
+    // EXPECT_EQ("Autosize", idfObject.getString(HeatPump_AirToWaterFields::RatedCoolingCapacityatSpeed1).get());
+    EXPECT_EQ(2000.0, idfObject.getDouble(HeatPump_AirToWaterFields::RatedCoolingCapacityatSpeed1).get());
+    EXPECT_EQ(4.5, idfObject.getDouble(HeatPump_AirToWaterFields::RatedCOPforCoolingatSpeed1).get());
+    EXPECT_EQ("AWHP Cooling Speed 1 CapFT Curve",
+              idfObject.getString(HeatPump_AirToWaterFields::NormalizedCoolingCapacityFunctionofTemperatureCurveNameatSpeed1).get());
+    EXPECT_EQ("AWHP Cooling Speed 1 EIRfT Curve",
+              idfObject.getString(HeatPump_AirToWaterFields::CoolingEnergyInputRatioFunctionofTemperatureCurveNameatSpeed1).get());
+    EXPECT_EQ("AWHP Cooling Speed 1 EIRfPLR Curve",
+              idfObject.getString(HeatPump_AirToWaterFields::CoolingEnergyInputRatioFunctionofPLRCurveNameatSpeed1).get());
+    EXPECT_EQ(4000.0, idfObject.getDouble(HeatPump_AirToWaterFields::RatedCoolingCapacityatSpeed2).get());
+    EXPECT_EQ(4.4, idfObject.getDouble(HeatPump_AirToWaterFields::RatedCOPforCoolingatSpeed2).get());
+    EXPECT_EQ("AWHP Cooling Speed 2 CapFT Curve",
+              idfObject.getString(HeatPump_AirToWaterFields::NormalizedCoolingCapacityFunctionofTemperatureCurveNameatSpeed2).get());
+    EXPECT_EQ("AWHP Cooling Speed 2 EIRfT Curve",
+              idfObject.getString(HeatPump_AirToWaterFields::CoolingEnergyInputRatioFunctionofTemperatureCurveNameatSpeed2).get());
+    EXPECT_EQ("AWHP Cooling Speed 2 EIRfPLR Curve",
+              idfObject.getString(HeatPump_AirToWaterFields::CoolingEnergyInputRatioFunctionofPLRCurveNameatSpeed2).get());
+    EXPECT_EQ(6000.0, idfObject.getDouble(HeatPump_AirToWaterFields::RatedCoolingCapacityatSpeed3).get());
+    EXPECT_EQ(4.3, idfObject.getDouble(HeatPump_AirToWaterFields::RatedCOPforCoolingatSpeed3).get());
+    EXPECT_EQ("AWHP Cooling Speed 3 CapFT Curve",
+              idfObject.getString(HeatPump_AirToWaterFields::NormalizedCoolingCapacityFunctionofTemperatureCurveNameatSpeed3).get());
+    EXPECT_EQ("AWHP Cooling Speed 3 EIRfT Curve",
+              idfObject.getString(HeatPump_AirToWaterFields::CoolingEnergyInputRatioFunctionofTemperatureCurveNameatSpeed3).get());
+    EXPECT_EQ("AWHP Cooling Speed 3 EIRfPLR Curve",
+              idfObject.getString(HeatPump_AirToWaterFields::CoolingEnergyInputRatioFunctionofPLRCurveNameatSpeed3).get());
+    EXPECT_EQ(8000.0, idfObject.getDouble(HeatPump_AirToWaterFields::RatedCoolingCapacityatSpeed4).get());
+    EXPECT_EQ(4.2, idfObject.getDouble(HeatPump_AirToWaterFields::RatedCOPforCoolingatSpeed4).get());
+    EXPECT_EQ("AWHP Cooling Speed 4 CapFT Curve",
+              idfObject.getString(HeatPump_AirToWaterFields::NormalizedCoolingCapacityFunctionofTemperatureCurveNameatSpeed4).get());
+    EXPECT_EQ("AWHP Cooling Speed 4 EIRfT Curve",
+              idfObject.getString(HeatPump_AirToWaterFields::CoolingEnergyInputRatioFunctionofTemperatureCurveNameatSpeed4).get());
+    EXPECT_EQ("AWHP Cooling Speed 4 EIRfPLR Curve",
+              idfObject.getString(HeatPump_AirToWaterFields::CoolingEnergyInputRatioFunctionofPLRCurveNameatSpeed4).get());
+    EXPECT_EQ("Autosize", idfObject.getString(HeatPump_AirToWaterFields::RatedCoolingCapacityatSpeed5).get());
+    EXPECT_EQ(4.1, idfObject.getDouble(HeatPump_AirToWaterFields::RatedCOPforCoolingatSpeed5).get());
+    EXPECT_EQ("AWHP Cooling Speed 5 CapFT Curve",
+              idfObject.getString(HeatPump_AirToWaterFields::NormalizedCoolingCapacityFunctionofTemperatureCurveNameatSpeed5).get());
+    EXPECT_EQ("AWHP Cooling Speed 5 EIRfT Curve",
+              idfObject.getString(HeatPump_AirToWaterFields::CoolingEnergyInputRatioFunctionofTemperatureCurveNameatSpeed5).get());
+    EXPECT_EQ("AWHP Cooling Speed 5 EIRfPLR Curve",
+              idfObject.getString(HeatPump_AirToWaterFields::CoolingEnergyInputRatioFunctionofPLRCurveNameatSpeed5).get());
+    EXPECT_EQ("Yes", idfObject.getString(HeatPump_AirToWaterFields::BoosterModeOnCooling).get());
+    EXPECT_EQ(12000.0, idfObject.getDouble(HeatPump_AirToWaterFields::RatedCoolingCapacityinBoosterMode).get());
+    EXPECT_EQ(3.5, idfObject.getDouble(HeatPump_AirToWaterFields::RatedCoolingCOPinBoosterMode).get());
+    EXPECT_EQ("AWHP Cooling Booster Mode On Speed CapFT Curve",
+              idfObject.getString(HeatPump_AirToWaterFields::NormalizedCoolingCapacityFunctionofTemperatureCurveNameinBoosterMode).get());
+    EXPECT_EQ("AWHP Cooling Booster Mode On Speed EIRfT Curve",
+              idfObject.getString(HeatPump_AirToWaterFields::CoolingEnergyInputRatioFunctionofTemperatureCurveNameinBoosterMode).get());
+    EXPECT_EQ("AWHP Cooling Booster Mode On Speed EIRfPLR Curve",
+              idfObject.getString(HeatPump_AirToWaterFields::CoolingEnergyInputRatioFunctionofPLRCurveNameinBoosterMode).get());
+
+    const size_t expectedNumCurves = 1                   // defrostEnergyInputRatioFunctionofTemperatureCurve
+                                     + 1                 // crankcaseHeaterCapacityFunctionofTemperatureCurve
+                                     + 2 * 2             // awhp_hc/cc min/max LWT curves
+                                     + 2 * (5 + 1) * 3;  // awhp_hc/cc: 5 speeds + one booster mode, each with 3 curves
+    EXPECT_EQ(expectedNumCurves,
+              w.getObjectsByType(IddObjectType::Curve_Biquadratic).size() + w.getObjectsByType(IddObjectType::Curve_Quadratic).size());
+    auto oaNodeList = w.getObjectsByType(IddObjectType::OutdoorAir_NodeList);
+    ASSERT_EQ(1, oaNodeList.size());
+    EXPECT_EQ("AWHP Air Inlet Node", oaNodeList.front().getString(0).get());
+    EXPECT_EQ("AWHP Air Outlet Node", oaNodeList.front().getString(1).get());
+
+    EXPECT_EQ(2, w.getObjectsByType(IddObjectType::PlantLoop).size());
+
+    std::vector<Expected> expecteds = {
+      Expected{.isHeating = true,
+               .plantName = hwLoop.nameString(),
+               .inletNodeName = awhp_hc.inletModelObject()->nameString(),
+               .outletNodeName = awhp_hc.outletModelObject()->nameString()},
+      Expected{.isHeating = false,
+               .plantName = chwLoop.nameString(),
+               .inletNodeName = awhp_cc.inletModelObject()->nameString(),
+               .outletNodeName = awhp_cc.outletModelObject()->nameString()},
     };
     for (const auto& e : expecteds) {
       auto p_ = w.getObjectByTypeAndName(IddObjectType::PlantLoop, e.plantName);
