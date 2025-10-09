@@ -14880,7 +14880,7 @@ OS:HeatPump:AirToWater:FuelFired:Cooling,
 
 OS:HeatPump:AirToWater,
         \memo air-to-water heat pump system which provides either chilled or hot water with single- or variable speed compressors.
-        \min-fields 47
+        \min-fields 20
    A1,  \field Handle
         \required-field
         \type handle
