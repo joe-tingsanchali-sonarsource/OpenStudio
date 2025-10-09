@@ -154,6 +154,8 @@ namespace model {
     ModelObject HeatPumpAirToWater_Impl::clone(Model model) const {
       auto t_clone = StraightComponent_Impl::clone(model).cast<HeatPumpAirToWater>();
       // We clone the operation modes, because the autosizing is reported at the wrapper level
+      // AND more importantly in OS, the modes are the the PlantLoops and that's what triggers the translation of the first wrapper (this object) it
+      // finds attached to it, so we must ensure they are unique
       if (auto coolingOpMode_ = coolingOperationMode()) {
         auto coolingOpModeClone = coolingOpMode_->clone(model).cast<HeatPumpAirToWaterCooling>();
         bool ok = t_clone.setCoolingOperationMode(coolingOpModeClone);
@@ -171,24 +173,15 @@ namespace model {
     std::vector<IdfObject> HeatPumpAirToWater_Impl::remove() {
       std::vector<IdfObject> result;
 
-      // Don't delete the underlying HeatPumpAirToWaterCooling / Heating objects if used by several HeatPumpAirToWater
+      // We are the only one using these cooling/heating operation modes but design, remove it (it will remove the children too)
+      // But first reset so it's marked as removable
       if (auto coolingOpMode_ = coolingOperationMode()) {
-        if (coolingOpMode_->heatPumpAirToWaters().size() > 1) {
-          resetCoolingOperationMode();
-        } else {
-          // If we are the only one using this cooling operation mode, remove it (it will remove the children too)
-          resetCoolingOperationMode();  // Need to reset so it's marked as removable first
-          result = coolingOpMode_->remove();
-        }
+        resetCoolingOperationMode();
+        result = coolingOpMode_->remove();
       }
       if (auto heatingOpMode_ = heatingOperationMode()) {
-        if (heatingOpMode_->heatPumpAirToWaters().size() > 1) {
-          resetHeatingOperationMode();
-        } else {
-          // If we are the only one using this heating operation mode, remove it (it will remove the children too)
-          resetHeatingOperationMode();
-          openstudio::detail::concat_helper(result, heatingOpMode_->remove());
-        }
+        resetHeatingOperationMode();
+        openstudio::detail::concat_helper(result, heatingOpMode_->remove());
       }
       openstudio::detail::concat_helper(result, StraightComponent_Impl::remove());
       return result;
@@ -459,6 +452,10 @@ namespace model {
     }
 
     bool HeatPumpAirToWater_Impl::setHeatingOperationMode(const HeatPumpAirToWaterHeating& heatingOperationMode) {
+      if (auto awhp_ = heatingOperationMode.heatPumpAirToWater(); awhp_ && awhp_->handle() != this->handle()) {
+        LOG(Warn, "This HeatPumpAirToWaterCooling object is already assigned to a HeatPumpAirToWater object. Cannot assign it again.");
+        return false;
+      }
       const bool result = setPointer(OS_HeatPump_AirToWaterFields::HeatingOperationMode, heatingOperationMode.handle());
       return result;
     }
@@ -469,6 +466,10 @@ namespace model {
     }
 
     bool HeatPumpAirToWater_Impl::setCoolingOperationMode(const HeatPumpAirToWaterCooling& coolingOperationMode) {
+      if (auto awhp_ = coolingOperationMode.heatPumpAirToWater(); awhp_ && awhp_->handle() != this->handle()) {
+        LOG(Warn, "This HeatPumpAirToWaterCooling object is already assigned to a HeatPumpAirToWater object. Cannot assign it again.");
+        return false;
+      }
       const bool result = setPointer(OS_HeatPump_AirToWaterFields::CoolingOperationMode, coolingOperationMode.handle());
       return result;
     }

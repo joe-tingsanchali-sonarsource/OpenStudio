@@ -428,22 +428,25 @@ TEST_F(ModelFixture, HeatPumpAirToWaterCooling_containingHVACComponent) {
     EXPECT_TRUE(awhp_cc.addSpeed(speed));
   }
   EXPECT_FALSE(awhp_cc.containingHVACComponent());
-  EXPECT_EQ(0, awhp_cc.heatPumpAirToWaters().size());
+  EXPECT_FALSE(awhp_cc.heatPumpAirToWater());
 
   EXPECT_TRUE(awhp.setCoolingOperationMode(awhp_cc));
   ASSERT_TRUE(awhp_cc.containingHVACComponent());
   EXPECT_EQ(awhp, awhp_cc.containingHVACComponent().get());
-  EXPECT_EQ(1, awhp_cc.heatPumpAirToWaters().size());
+  ASSERT_TRUE(awhp_cc.heatPumpAirToWater());
+  EXPECT_EQ(awhp, awhp_cc.heatPumpAirToWater().get());
   EXPECT_EQ(5, m.getConcreteModelObjects<HeatPumpAirToWaterCoolingSpeedData>().size());
   // Each speed has 3 curves
   EXPECT_EQ(5 * 3, m.getModelObjects<Curve>().size());
 
-  EXPECT_TRUE(awhp2.setCoolingOperationMode(awhp_cc));
+  // Already assigned to another AWHP, not letting it be assigned again
+  EXPECT_FALSE(awhp2.setCoolingOperationMode(awhp_cc));
   ASSERT_TRUE(awhp_cc.containingHVACComponent());
-  EXPECT_EQ(2, awhp_cc.heatPumpAirToWaters().size());
+  ASSERT_TRUE(awhp_cc.heatPumpAirToWater());
+  EXPECT_EQ(awhp, awhp_cc.heatPumpAirToWater().get());
 
   EXPECT_TRUE(awhp.coolingOperationMode());
-  EXPECT_TRUE(awhp2.coolingOperationMode());
+  EXPECT_FALSE(awhp2.coolingOperationMode());
   EXPECT_FALSE(awhp.heatingOperationMode());
   EXPECT_FALSE(awhp2.heatingOperationMode());
 
@@ -463,12 +466,12 @@ TEST_F(ModelFixture, HeatPumpAirToWaterCooling_containingHVACComponent) {
   EXPECT_EQ(5, m.getConcreteModelObjects<HeatPumpAirToWaterCoolingSpeedData>().size());
   EXPECT_EQ(5 * 3, m.getModelObjects<Curve>().size());
 
-  // Remove the first awhp
-  auto rmed = awhp.remove();
+  // Remove the second awhp
+  auto rmed = awhp2.remove();
   EXPECT_EQ(1, rmed.size()) << getObjectNames(rmed);
-  EXPECT_EQ(1, awhp_cc.heatPumpAirToWaters().size());
+  EXPECT_TRUE(awhp_cc.heatPumpAirToWater());
   ASSERT_TRUE(awhp_cc.containingHVACComponent());
-  EXPECT_EQ(awhp2, awhp_cc.containingHVACComponent().get());
+  EXPECT_EQ(awhp, awhp_cc.containingHVACComponent().get());
   EXPECT_EQ(1, m.getConcreteModelObjects<HeatPumpAirToWater>().size());
   EXPECT_EQ(1, m.getConcreteModelObjects<HeatPumpAirToWaterCooling>().size());
   EXPECT_EQ(1, m.getConcreteModelObjects<ModelObjectList>().size());
@@ -485,8 +488,8 @@ TEST_F(ModelFixture, HeatPumpAirToWaterCooling_containingHVACComponent) {
   EXPECT_EQ(5, m.getConcreteModelObjects<HeatPumpAirToWaterCoolingSpeedData>().size());
   EXPECT_EQ(5 * 3, m.getModelObjects<Curve>().size());
 
-  // Remove the second awhp: this time it's not shared by any other object so it should remove everything
-  rmed = awhp2.remove();
+  // Remove the first awhp: this time it's gone!
+  rmed = awhp.remove();
   const unsigned expectedRemoved =
     1 /* HeatPumpAirToWater */ + 1 /* HeatPumpAirToWaterCooling */ + 1 /* ModelObjectList */ + 5 * (1 /* SpeedData */ + 3 /* Curves */);
   EXPECT_EQ(expectedRemoved, rmed.size()) << getObjectNames(rmed);

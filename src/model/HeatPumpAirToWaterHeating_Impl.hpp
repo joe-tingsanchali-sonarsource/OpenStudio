@@ -158,8 +158,8 @@ namespace model {
       bool removeSpeed(unsigned index);
       void removeAllSpeeds();
 
-      // Convenience function to return all HeatPumpAirToWater objects that reference this heating coil
-      std::vector<HeatPumpAirToWater> heatPumpAirToWaters() const;
+      // Convenience function to return the HeatPumpAirToWater object that reference this heating coil if any
+      boost::optional<HeatPumpAirToWater> heatPumpAirToWater() const;
 
       // Autosize methods
 

@@ -95,19 +95,22 @@ namespace model {
     }
 
     boost::optional<HVACComponent> HeatPumpAirToWaterHeating_Impl::containingHVACComponent() const {
-      auto awhps = getObject<ModelObject>().getModelObjectSources<HVACComponent>(HeatPumpAirToWater::iddObjectType());
-      auto count = awhps.size();
-      if (count == 1) {
-        return awhps[0];
-      } else if (count > 1) {
-        LOG(Warn, briefDescription() << " is referenced by more than one CoilHeatingElectricMultiStage, returning the first");
-        return awhps[0];
+      auto awhp_ = heatPumpAirToWater();
+      if (awhp_) {
+        return std::move(*awhp_);
       }
       return boost::none;
     }
 
-    std::vector<HeatPumpAirToWater> HeatPumpAirToWaterHeating_Impl::heatPumpAirToWaters() const {
-      return getObject<ModelObject>().getModelObjectSources<HeatPumpAirToWater>(HeatPumpAirToWater::iddObjectType());
+    boost::optional<HeatPumpAirToWater> HeatPumpAirToWaterHeating_Impl::heatPumpAirToWater() const {
+      auto awhps = getObject<ModelObject>().getModelObjectSources<HeatPumpAirToWater>(HeatPumpAirToWater::iddObjectType());
+      if (awhps.empty()) {
+        return boost::none;
+      }
+      if (awhps.size() > 1) {
+        LOG(Error, briefDescription() << " is referenced by more than one HeatPumpAirToWater, returning the first");
+      }
+      return awhps[0];
     }
 
     ModelObject HeatPumpAirToWaterHeating_Impl::clone(Model model) const {
@@ -702,8 +705,8 @@ namespace model {
     return getImpl<detail::HeatPumpAirToWaterHeating_Impl>()->removeSpeed(index);
   }
 
-  std::vector<HeatPumpAirToWater> HeatPumpAirToWaterHeating::heatPumpAirToWaters() const {
-    return getImpl<detail::HeatPumpAirToWaterHeating_Impl>()->heatPumpAirToWaters();
+  boost::optional<HeatPumpAirToWater> HeatPumpAirToWaterHeating::heatPumpAirToWater() const {
+    return getImpl<detail::HeatPumpAirToWaterHeating_Impl>()->heatPumpAirToWater();
   }
 
   /// @cond
