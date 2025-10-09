@@ -5,16 +5,17 @@
 
 #include "ModelFixture.hpp"
 
-#include "../HeatPumpAirToWaterHeating.hpp"
-#include "../HeatPumpAirToWaterHeating_Impl.hpp"
+#include "../HeatPumpAirToWaterCooling.hpp"
+#include "../HeatPumpAirToWaterCooling_Impl.hpp"
 
-#include "../HeatPumpAirToWaterHeatingSpeedData.hpp"
-#include "../HeatPumpAirToWaterHeatingSpeedData_Impl.hpp"
+#include "../HeatPumpAirToWaterCoolingSpeedData.hpp"
+#include "../HeatPumpAirToWaterCoolingSpeedData_Impl.hpp"
 
 #include "../Model.hpp"
 #include "../Schedule.hpp"
 #include "../ScheduleConstant.hpp"
 #include "../Curve.hpp"
+#include "../Curve_Impl.hpp"
 #include "../CurveCubic.hpp"
 #include "../CurveBicubic.hpp"
 
@@ -22,23 +23,18 @@
 #include "../PlantLoop.hpp"
 #include "../Node.hpp"
 #include "../Node_Impl.hpp"
-#include "../Splitter.hpp"
 
 #include "../ModelObjectList.hpp"
 #include "../ModelObjectList_Impl.hpp"
 
-#include <algorithm>
-#include <fmt/format.h>
-#include <fmt/ranges.h>
-
 using namespace openstudio;
 using namespace openstudio::model;
 
-TEST_F(ModelFixture, HeatPumpAirToWaterHeating_GettersSetters) {
+TEST_F(ModelFixture, HeatPumpAirToWaterCooling_GettersSetters) {
   Model m;
-  HeatPumpAirToWaterHeating awhp(m);
+  HeatPumpAirToWaterCooling awhp(m);
 
-  awhp.setName("My HeatPumpAirToWaterHeating");
+  awhp.setName("My HeatPumpAirToWaterCooling");
 
   // Availability Schedule Name: Required Object
   // Ctor default: Always On
@@ -128,7 +124,7 @@ TEST_F(ModelFixture, HeatPumpAirToWaterHeating_GettersSetters) {
   EXPECT_EQ(1.2, awhp.sizingFactor());
 
   // Booster Mode On Speed: Optional Object
-  HeatPumpAirToWaterHeatingSpeedData boosterModeOnSpeed(m);
+  HeatPumpAirToWaterCoolingSpeedData boosterModeOnSpeed(m);
   EXPECT_TRUE(awhp.setBoosterModeOnSpeed(boosterModeOnSpeed));
   ASSERT_TRUE(awhp.boosterModeOnSpeed());
   EXPECT_EQ(boosterModeOnSpeed, awhp.boosterModeOnSpeed().get());
@@ -136,27 +132,27 @@ TEST_F(ModelFixture, HeatPumpAirToWaterHeating_GettersSetters) {
   EXPECT_FALSE(awhp.boosterModeOnSpeed());
 }
 
-TEST_F(ModelFixture, HeatPumpAirToWaterHeating_HeatCoolFuelTypes) {
+TEST_F(ModelFixture, HeatPumpAirToWaterCooling_HeatCoolFuelTypes) {
   Model m;
-  HeatPumpAirToWaterHeating awhp(m);
+  HeatPumpAirToWaterCooling awhp(m);
 
-  EXPECT_EQ(ComponentType(ComponentType::Heating), awhp.componentType());
-  testFuelTypeEquality({}, awhp.coolingFuelTypes());
-  testFuelTypeEquality({FuelType::Electricity}, awhp.heatingFuelTypes());
-  testAppGFuelTypeEquality({AppGFuelType::HeatPump}, awhp.appGHeatingFuelTypes());
+  EXPECT_EQ(ComponentType(ComponentType::Cooling), awhp.componentType());
+  testFuelTypeEquality({FuelType::Electricity}, awhp.coolingFuelTypes());
+  testFuelTypeEquality({}, awhp.heatingFuelTypes());
+  testAppGFuelTypeEquality({}, awhp.appGHeatingFuelTypes());
 }
 
-TEST_F(ModelFixture, HeatPumpAirToWaterHeating_Speeds) {
+TEST_F(ModelFixture, HeatPumpAirToWaterCooling_Speeds) {
 
   // create a model to use
   Model model;
 
-  HeatPumpAirToWaterHeating awhp(model);
+  HeatPumpAirToWaterCooling awhp(model);
 
-  std::vector<HeatPumpAirToWaterHeatingSpeedData> speeds;
-  EXPECT_EQ(5, HeatPumpAirToWaterHeating::maximum_number_of_speeds);
-  for (unsigned i = 1; i <= HeatPumpAirToWaterHeating::maximum_number_of_speeds; ++i) {
-    HeatPumpAirToWaterHeatingSpeedData speed(model);
+  std::vector<HeatPumpAirToWaterCoolingSpeedData> speeds;
+  EXPECT_EQ(5, HeatPumpAirToWaterCooling::maximum_number_of_speeds);
+  for (unsigned i = 1; i <= HeatPumpAirToWaterCooling::maximum_number_of_speeds; ++i) {
+    HeatPumpAirToWaterCoolingSpeedData speed(model);
     speed.setName("Speed " + std::to_string(i));
     speeds.push_back(speed);
     EXPECT_TRUE(awhp.addSpeed(speed));
@@ -165,7 +161,7 @@ TEST_F(ModelFixture, HeatPumpAirToWaterHeating_Speeds) {
   }
 
   // Can't add more than 5 Speeds
-  HeatPumpAirToWaterHeatingSpeedData anotherSpeed(model);
+  HeatPumpAirToWaterCoolingSpeedData anotherSpeed(model);
   EXPECT_FALSE(awhp.addSpeed(anotherSpeed));
   EXPECT_EQ(5, awhp.numberOfSpeeds());
   EXPECT_EQ(speeds, awhp.speeds());
@@ -177,7 +173,7 @@ TEST_F(ModelFixture, HeatPumpAirToWaterHeating_Speeds) {
 
   {
     int speedIndex = 3;
-    std::vector<HeatPumpAirToWaterHeatingSpeedData> thisSpeeds = awhp.speeds();
+    std::vector<HeatPumpAirToWaterCoolingSpeedData> thisSpeeds = awhp.speeds();
     // Explicit copy, so we can keep using it after it's been removed
     const auto speedAtIndex = thisSpeeds[speedIndex - 1];
     EXPECT_TRUE(std::find(thisSpeeds.begin(), thisSpeeds.end(), speedAtIndex) != thisSpeeds.end());
@@ -195,7 +191,7 @@ TEST_F(ModelFixture, HeatPumpAirToWaterHeating_Speeds) {
 
   {
     int speedIndex = 2;
-    std::vector<HeatPumpAirToWaterHeatingSpeedData> thisSpeeds = awhp.speeds();
+    std::vector<HeatPumpAirToWaterCoolingSpeedData> thisSpeeds = awhp.speeds();
     // Explicit copy, so we can keep using it after it's been removed
     const auto speedAtIndex = thisSpeeds[speedIndex - 1];
     EXPECT_TRUE(std::find(thisSpeeds.begin(), thisSpeeds.end(), speedAtIndex) != thisSpeeds.end());
@@ -218,7 +214,7 @@ TEST_F(ModelFixture, HeatPumpAirToWaterHeating_Speeds) {
     EXPECT_EQ(awhp.numberOfSpeeds(), optIndex.get());
 
     EXPECT_TRUE(awhp.setSpeedIndex(speedAtEnd, 2));
-    std::vector<HeatPumpAirToWaterHeatingSpeedData> thisSpeeds = awhp.speeds();
+    std::vector<HeatPumpAirToWaterCoolingSpeedData> thisSpeeds = awhp.speeds();
     optIndex = awhp.speedIndex(speedAtEnd);
     ASSERT_TRUE(optIndex);
     EXPECT_EQ(2, optIndex.get());
@@ -240,7 +236,7 @@ TEST_F(ModelFixture, HeatPumpAirToWaterHeating_Speeds) {
   EXPECT_EQ(speeds, awhp.speeds());
 
   for (unsigned i = 6; i <= 8; ++i) {
-    HeatPumpAirToWaterHeatingSpeedData speed(model);
+    HeatPumpAirToWaterCoolingSpeedData speed(model);
     awhp.setName("Speed " + std::to_string(i));
     speeds.push_back(speed);
   }
@@ -252,7 +248,7 @@ TEST_F(ModelFixture, HeatPumpAirToWaterHeating_Speeds) {
   EXPECT_FALSE(awhp.setSpeeds(speeds));
   EXPECT_EQ(5, awhp.numberOfSpeeds());
   {
-    std::vector<HeatPumpAirToWaterHeatingSpeedData> thisSpeeds = awhp.speeds();
+    std::vector<HeatPumpAirToWaterCoolingSpeedData> thisSpeeds = awhp.speeds();
     for (unsigned i = 0; i < 5; ++i) {
       EXPECT_EQ(speeds[i], thisSpeeds[i]);
     }
@@ -264,23 +260,23 @@ TEST_F(ModelFixture, HeatPumpAirToWaterHeating_Speeds) {
 
   // Test that added a speed from another model will fail but not add a blank extensible group
   Model model2;
-  HeatPumpAirToWaterHeatingSpeedData speedFromAnotherModel(model2);
+  HeatPumpAirToWaterCoolingSpeedData speedFromAnotherModel(model2);
   EXPECT_FALSE(awhp.addSpeed(speedFromAnotherModel));
   EXPECT_EQ(0, awhp.numExtensibleGroups());
   EXPECT_EQ(0, awhp.numberOfSpeeds());
   EXPECT_EQ(0, awhp.speeds().size());
 }
 
-TEST_F(ModelFixture, HeatPumpAirToWaterHeating_clone) {
+TEST_F(ModelFixture, HeatPumpAirToWaterCooling_clone) {
 
   // create a model to use
   Model model;
 
-  HeatPumpAirToWaterHeating awhp(model);
+  HeatPumpAirToWaterCooling awhp(model);
 
-  std::vector<HeatPumpAirToWaterHeatingSpeedData> speeds;
-  for (unsigned i = 1; i <= HeatPumpAirToWaterHeating::maximum_number_of_speeds; ++i) {
-    HeatPumpAirToWaterHeatingSpeedData speed(model);
+  std::vector<HeatPumpAirToWaterCoolingSpeedData> speeds;
+  for (unsigned i = 1; i <= HeatPumpAirToWaterCooling::maximum_number_of_speeds; ++i) {
+    HeatPumpAirToWaterCoolingSpeedData speed(model);
     speed.setName("Speed " + std::to_string(i));
     speeds.push_back(speed);
     EXPECT_TRUE(awhp.addSpeed(speed));
@@ -289,14 +285,14 @@ TEST_F(ModelFixture, HeatPumpAirToWaterHeating_clone) {
   EXPECT_EQ(5, awhp.numberOfSpeeds());
   EXPECT_EQ(speeds, awhp.speeds());
 
-  EXPECT_EQ(1, model.getConcreteModelObjects<HeatPumpAirToWaterHeating>().size());
+  EXPECT_EQ(1, model.getConcreteModelObjects<HeatPumpAirToWaterCooling>().size());
   EXPECT_EQ(1, model.getConcreteModelObjects<ModelObjectList>().size());
-  EXPECT_EQ(5, model.getConcreteModelObjects<HeatPumpAirToWaterHeatingSpeedData>().size());
+  EXPECT_EQ(5, model.getConcreteModelObjects<HeatPumpAirToWaterCoolingSpeedData>().size());
 
-  auto awhpClone = awhp.clone(model).cast<HeatPumpAirToWaterHeating>();
-  EXPECT_EQ(2, model.getConcreteModelObjects<HeatPumpAirToWaterHeating>().size());
+  auto awhpClone = awhp.clone(model).cast<HeatPumpAirToWaterCooling>();
+  EXPECT_EQ(2, model.getConcreteModelObjects<HeatPumpAirToWaterCooling>().size());
   EXPECT_EQ(2, model.getConcreteModelObjects<ModelObjectList>().size());
-  EXPECT_EQ(5, model.getConcreteModelObjects<HeatPumpAirToWaterHeatingSpeedData>().size());
+  EXPECT_EQ(5, model.getConcreteModelObjects<HeatPumpAirToWaterCoolingSpeedData>().size());
 
   EXPECT_EQ(5, awhp.numberOfSpeeds());
   EXPECT_EQ(speeds, awhp.speeds());
@@ -304,96 +300,24 @@ TEST_F(ModelFixture, HeatPumpAirToWaterHeating_clone) {
   EXPECT_EQ(5, awhpClone.numberOfSpeeds());
   EXPECT_EQ(speeds, awhpClone.speeds());
 
+  // This shouldn't work, it's going to put the CoilCoolingDXCurveFitPerformance in a broken state
   auto rmed = awhp.remove();
+  EXPECT_EQ(0, rmed.size());
+  HeatPumpAirToWaterCoolingSpeedData boosterModeOnSpeed(model);
+  EXPECT_TRUE(awhp.setBoosterModeOnSpeed(boosterModeOnSpeed));
+  ASSERT_TRUE(awhp.boosterModeOnSpeed());
+  EXPECT_EQ(3, model.getConcreteModelObjects<HeatPumpAirToWaterCooling>().size());
+  EXPECT_EQ(10, model.getConcreteModelObjects<HeatPumpAirToWaterCoolingSpeedData>().size());
 
-  auto getObjectNames = [](const auto& rmed) {
-    std::vector<std::string> rm_names;
-    rm_names.reserve(rmed.size());
-    std::transform(rmed.cbegin(), rmed.cend(), std::back_inserter(rm_names), [](const auto& idfObjet) { return idfObjet.nameString(); });
-    return fmt::format("Removed objects: {}", rm_names);
-  };
-
-  EXPECT_EQ(2, rmed.size()) << getObjectNames(rmed);
-  EXPECT_EQ(1, model.getConcreteModelObjects<HeatPumpAirToWaterHeating>().size());
-  EXPECT_EQ(5, model.getConcreteModelObjects<HeatPumpAirToWaterHeatingSpeedData>().size());
-  EXPECT_EQ(5, awhpClone.numberOfSpeeds());
+  rmed = awhp.remove();
+  EXPECT_EQ(1, rmed.size());
+  EXPECT_EQ(2, model.getConcreteModelObjects<HeatPumpAirToWaterCooling>().size());
+  EXPECT_EQ(10, model.getConcreteModelObjects<HeatPumpAirToWaterCoolingSpeedData>().size());
+  EXPECT_EQ(10, awhpClone.numberOfSpeeds());
   EXPECT_EQ(speeds, awhpClone.speeds());
 
   rmed = awhpClone.remove();
-  EXPECT_EQ(11, rmed.size()) << getObjectNames(rmed);
-  EXPECT_EQ(1, model.getConcreteModelObjects<HeatPumpAirToWaterHeating>().size());
-  EXPECT_EQ(0, model.getConcreteModelObjects<HeatPumpAirToWaterHeatingSpeedData>().size());
-}
-
-TEST_F(ModelFixture, HeatPumpAirToWaterHeating_addToNode) {
-  // create a model to use
-  Model m;
-
-  HeatPumpAirToWaterHeating awhp(m);
-
-  PlantLoop p(m);
-  {
-    Node n = p.demandInletNode();
-    EXPECT_FALSE(awhp.addToNode(n));
-  }
-  EXPECT_FALSE(p.addDemandBranchForComponent(awhp));
-
-  AirLoopHVAC a(m);
-  {
-    Node n = a.supplyInletNode();
-    EXPECT_FALSE(awhp.addToNode(n));
-  }
-  {
-    Node n = a.demandInletNode();
-    EXPECT_FALSE(awhp.addToNode(n));
-  }
-
-  EXPECT_FALSE(awhp.plantLoop());
-  EXPECT_FALSE(awhp.inletModelObject());
-  EXPECT_FALSE(awhp.outletModelObject());
-
-  // Plant Side connections
-  EXPECT_EQ(5, p.demandComponents().size());  // o --- Splitter --- o --- Mixer --- o
-  EXPECT_EQ(5, p.supplyComponents().size());  // o --- Splitter --- o --- Mixer --- o
-
-  EXPECT_TRUE(p.addSupplyBranchForComponent(awhp));
-  EXPECT_EQ(7, p.supplyComponents().size());  // o --- Splitter --- o --- awhp_hc --- Mixer --- o
-  EXPECT_TRUE(awhp.plantLoop());
-  EXPECT_TRUE(awhp.inletModelObject());
-  EXPECT_TRUE(awhp.outletModelObject());
-
-  auto awhpClone = awhp.clone(m).cast<HeatPumpAirToWaterHeating>();
-  EXPECT_FALSE(awhpClone.plantLoop());
-  EXPECT_FALSE(awhpClone.inletModelObject());
-  EXPECT_FALSE(awhpClone.outletModelObject());
-
-  EXPECT_EQ(2, m.getConcreteModelObjects<HeatPumpAirToWaterHeating>().size());
-
-  awhp.removeFromLoop();
-  EXPECT_FALSE(awhp.plantLoop());
-  EXPECT_FALSE(awhp.inletModelObject());
-  EXPECT_FALSE(awhp.outletModelObject());
-
-  EXPECT_EQ(2, m.getConcreteModelObjects<HeatPumpAirToWaterHeating>().size());
-  EXPECT_EQ(5, p.supplyComponents().size());  // o --- Splitter --- o --- Mixer --- o
-  EXPECT_EQ(5, p.demandComponents().size());  // o --- Splitter --- o --- Mixer --- o
-
-  auto supply_inlet_node = p.supplyInletNode();
-  EXPECT_TRUE(awhpClone.addToNode(supply_inlet_node));
-
-  EXPECT_EQ(7, p.supplyComponents().size());  // o --- awhpClone --- Splitter --- o --- Mixer --- o
-  EXPECT_EQ(5, p.demandComponents().size());  // o --- Splitter --- o --- Mixer --- o
-  EXPECT_TRUE(awhpClone.plantLoop());
-  ASSERT_TRUE(awhpClone.inletModelObject());
-  EXPECT_EQ(supply_inlet_node, awhpClone.inletModelObject().get());
-  ASSERT_TRUE(awhpClone.outletModelObject());
-  auto outlet_ = awhpClone.outletModelObject().get().optionalCast<Node>();
-  ASSERT_TRUE(outlet_);
-  ASSERT_TRUE(outlet_->outletModelObject());
-  EXPECT_EQ(p.supplySplitter(), outlet_->outletModelObject().get());
-
-  awhpClone.remove();
-  EXPECT_EQ(1, m.getConcreteModelObjects<HeatPumpAirToWaterHeating>().size());
-  EXPECT_EQ(5, p.supplyComponents().size());  // o --- Splitter --- o --- Mixer --- o
-  EXPECT_EQ(5, p.demandComponents().size());  // o --- Splitter --- o --- Mixer --- o
+  EXPECT_EQ(11, rmed.size());
+  EXPECT_EQ(1, model.getConcreteModelObjects<HeatPumpAirToWaterCooling>().size());
+  EXPECT_EQ(0, model.getConcreteModelObjects<HeatPumpAirToWaterCoolingSpeedData>().size());
 }

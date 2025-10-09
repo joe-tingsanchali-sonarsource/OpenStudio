@@ -328,6 +328,8 @@ namespace model {
       {"HeatExchangerAirToAirSensibleAndLatent", "Availability", "availabilitySchedule", false, "Availability", 0.0, 1.0},
       {"HeatExchangerDesiccantBalancedFlow", "Availability", "availabilitySchedule", false, "Availability", 0.0, 1.0},
       {"HeatExchangerFluidToFluid", "Availability", "availabilitySchedule", false, "Availability", 0.0, 1.0},
+      {"HeatPumpAirToWater", "Operating Mode Control", "operatingModeControlSchedule", false, "", 0.0, 2.0},
+      {"HeatPumpAirToWaterCooling", "Availability", "availabilitySchedule", false, "Availability", 0.0, 1.0},
       {"HeatPumpAirToWaterHeating", "Availability", "availabilitySchedule", false, "Availability", 0.0, 1.0},
       {"HumidifierSteamElectric", "Availability", "availabilitySchedule", false, "Availability", 0.0, 1.0},
       {"HumidifierSteamGas", "Availability", "availabilitySchedule", false, "Availability", 0.0, 1.0},

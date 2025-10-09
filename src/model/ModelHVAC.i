@@ -224,6 +224,7 @@ MODELOBJECT_TEMPLATES(HeatPumpWaterToWaterEquationFitCooling);
 MODELOBJECT_TEMPLATES(HeatPumpWaterToWaterEquationFitHeating);
 MODELOBJECT_TEMPLATES(HeatPumpPlantLoopEIRCooling);
 MODELOBJECT_TEMPLATES(HeatPumpPlantLoopEIRHeating);
+MODELOBJECT_TEMPLATES(HeatPumpAirToWater)
 MODELOBJECT_TEMPLATES(HeatPumpAirToWaterCoolingSpeedData);
 MODELOBJECT_TEMPLATES(HeatPumpAirToWaterHeating);
 MODELOBJECT_TEMPLATES(HeatPumpAirToWaterHeatingSpeedData);
@@ -357,6 +358,7 @@ SWIG_MODELOBJECT(HeatPumpWaterToWaterEquationFitCooling,1);
 SWIG_MODELOBJECT(HeatPumpWaterToWaterEquationFitHeating,1);
 SWIG_MODELOBJECT(HeatPumpPlantLoopEIRCooling,1);
 SWIG_MODELOBJECT(HeatPumpPlantLoopEIRHeating,1);
+SWIG_MODELOBJECT(HeatPumpAirToWater, 1);
 SWIG_MODELOBJECT(HeatPumpAirToWaterCoolingSpeedData, 1);
 SWIG_MODELOBJECT(HeatPumpAirToWaterHeating,1);
 SWIG_MODELOBJECT(HeatPumpAirToWaterHeatingSpeedData, 1);

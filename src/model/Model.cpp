@@ -4188,6 +4188,8 @@ namespace model {
     REGISTER_CONSTRUCTOR(HeatExchangerFluidToFluid);
     REGISTER_CONSTRUCTOR(HeatPumpAirToWaterFuelFiredHeating);
     REGISTER_CONSTRUCTOR(HeatPumpAirToWaterFuelFiredCooling);
+    REGISTER_CONSTRUCTOR(HeatPumpAirToWater);
+    REGISTER_CONSTRUCTOR(HeatPumpAirToWaterCooling);
     REGISTER_CONSTRUCTOR(HeatPumpAirToWaterCoolingSpeedData);
     REGISTER_CONSTRUCTOR(HeatPumpAirToWaterHeating);
     REGISTER_CONSTRUCTOR(HeatPumpAirToWaterHeatingSpeedData);
@@ -4770,6 +4772,8 @@ namespace model {
     REGISTER_COPYCONSTRUCTORS(HeatExchangerFluidToFluid);
     REGISTER_COPYCONSTRUCTORS(HeatPumpAirToWaterFuelFiredHeating);
     REGISTER_COPYCONSTRUCTORS(HeatPumpAirToWaterFuelFiredCooling);
+    REGISTER_COPYCONSTRUCTORS(HeatPumpAirToWater);
+    REGISTER_COPYCONSTRUCTORS(HeatPumpAirToWaterCooling);
     REGISTER_COPYCONSTRUCTORS(HeatPumpAirToWaterCoolingSpeedData);
     REGISTER_COPYCONSTRUCTORS(HeatPumpAirToWaterHeating);
     REGISTER_COPYCONSTRUCTORS(HeatPumpAirToWaterHeatingSpeedData);

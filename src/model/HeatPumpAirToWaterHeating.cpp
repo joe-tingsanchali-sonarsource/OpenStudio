@@ -93,7 +93,8 @@ namespace model {
     }
 
     boost::optional<HVACComponent> HeatPumpAirToWaterHeating_Impl::containingHVACComponent() const {
-      LOG_AND_THROW("TODO: implement HeatPumpAirToWaterHeating_Impl::containingHVACComponent");
+      // TODO: implement HeatPumpAirToWaterHeating_Impl::containingHVACComponent"
+      return boost::none;
     }
 
     ModelObject HeatPumpAirToWaterHeating_Impl::clone(Model model) const {
@@ -408,7 +409,7 @@ namespace model {
 
     bool HeatPumpAirToWaterHeating_Impl::addSpeed(const HeatPumpAirToWaterHeatingSpeedData& speed) {
       if (numberOfSpeeds() >= HeatPumpAirToWaterHeating::maximum_number_of_speeds) {
-        LOG(Error, "You have reached the maximum number of stages (=" << HeatPumpAirToWaterHeating::maximum_number_of_speeds << "), occurred for "
+        LOG(Error, "You have reached the maximum number of speeds (=" << HeatPumpAirToWaterHeating::maximum_number_of_speeds << "), occurred for "
                                                                       << briefDescription() << ".");
         return false;  // too many speeds
       }
@@ -465,6 +466,7 @@ namespace model {
     bool HeatPumpAirToWaterHeating_Impl::removeSpeed(const HeatPumpAirToWaterHeatingSpeedData& speed) {  // NOLINT(readability-*)
       auto speedList = speedDataList();
       if (!speedList.hasModelObject(speed)) {
+        LOG(Warn, "For " << briefDescription() << " cannot remove speed " << speed.briefDescription() << " since it is not part of it.");
         return false;
       }
       speedList.removeModelObject(speed);

@@ -238,7 +238,7 @@ class ModelObjectField
         result = "std::string"
       end
     elsif isObjectList?
-      if ["UniVariateFunctions", "BiVariateFunctions"].include?(objectListClassName)
+      if ["UnivariateFunctions", "BivariateFunctions"].include?(objectListClassName)
         result = "Curve"
       elsif objectListClassName == "Connection"
         result = "Node"
@@ -323,7 +323,7 @@ class ModelObjectField
     elsif isObjectList?
       if isSchedule?
         result = objectListClassName + "&"
-      elsif ["UniVariateFunctions", "BiVariateFunctions"].include?(objectListClassName)
+      elsif ["UnivariateFunctions", "BivariateFunctions"].include?(objectListClassName)
         result = "const Curve&"
       elsif objectListClassName == "Connection"
         result = "const Node&"
@@ -497,7 +497,7 @@ class ModelClassGenerator < SubProjectClassGenerator
 
       preamble = "// TODO: Check the following class names against object getters and setters.\n"
       @objectListClassNames.each { |className|
-        if ["UniVariateFunctions", "BiVariateFunctions"].include?(className)
+        if ["UnivariateFunctions", "BivariateFunctions"].include?(className)
           className = "Curve"
         elsif className == "Connection"
           className = "Node"
@@ -557,7 +557,7 @@ class ModelClassGenerator < SubProjectClassGenerator
     if @iddObject
       preamble = "  // TODO: Check the following class names against object getters and setters.\n"
       @objectListClassNames.each { |className|
-        if ["UniVariateFunctions", "BiVariateFunctions"].include?(className)
+        if ["UnivariateFunctions", "BivariateFunctions"].include?(className)
           className = "Curve"
         elsif className == "Connection"
           className = "Node"
@@ -1539,7 +1539,7 @@ class ModelClassGenerator < SubProjectClassGenerator
 
     # Check for ObjectList fields, to see which we need to include
     @objectListClassNames.each { |className|
-      if ["UniVariateFunctions", "BiVariateFunctions"].include?(className)
+      if ["UnivariateFunctions", "BivariateFunctions"].include?(className)
           className = "Curve"
       elsif className == "Connection"
           className = "Node"
