@@ -26,19 +26,19 @@ namespace model {
   namespace detail {
 
     HeatPumpAirToWaterHeatingSpeedData_Impl::HeatPumpAirToWaterHeatingSpeedData_Impl(const IdfObject& idfObject, Model_Impl* model, bool keepHandle)
-      : ParentObject_Impl(idfObject, model, keepHandle) {
+      : ResourceObject_Impl(idfObject, model, keepHandle) {
       OS_ASSERT(idfObject.iddObject().type() == HeatPumpAirToWaterHeatingSpeedData::iddObjectType());
     }
 
     HeatPumpAirToWaterHeatingSpeedData_Impl::HeatPumpAirToWaterHeatingSpeedData_Impl(const openstudio::detail::WorkspaceObject_Impl& other,
                                                                                      Model_Impl* model, bool keepHandle)
-      : ParentObject_Impl(other, model, keepHandle) {
+      : ResourceObject_Impl(other, model, keepHandle) {
       OS_ASSERT(other.iddObject().type() == HeatPumpAirToWaterHeatingSpeedData::iddObjectType());
     }
 
     HeatPumpAirToWaterHeatingSpeedData_Impl::HeatPumpAirToWaterHeatingSpeedData_Impl(const HeatPumpAirToWaterHeatingSpeedData_Impl& other,
                                                                                      Model_Impl* model, bool keepHandle)
-      : ParentObject_Impl(other, model, keepHandle) {}
+      : ResourceObject_Impl(other, model, keepHandle) {}
 
     const std::vector<std::string>& HeatPumpAirToWaterHeatingSpeedData_Impl::outputVariableNames() const {
       static std::vector<std::string> result;
@@ -179,7 +179,7 @@ namespace model {
   }  // namespace detail
 
   HeatPumpAirToWaterHeatingSpeedData::HeatPumpAirToWaterHeatingSpeedData(const Model& model)
-    : ParentObject(HeatPumpAirToWaterHeatingSpeedData::iddObjectType(), model) {
+    : ResourceObject(HeatPumpAirToWaterHeatingSpeedData::iddObjectType(), model) {
     OS_ASSERT(getImpl<detail::HeatPumpAirToWaterHeatingSpeedData_Impl>());
 
     autosizeRatedHeatingCapacity();
@@ -253,7 +253,7 @@ namespace model {
                                                                          const Curve& normalizedHeatingCapacityFunctionofTemperatureCurve,
                                                                          const Curve& heatingEnergyInputRatioFunctionofTemperatureCurve,
                                                                          const Curve& heatingEnergyInputRatioFunctionofPLRCurve)
-    : ParentObject(HeatPumpAirToWaterHeatingSpeedData::iddObjectType(), model) {
+    : ResourceObject(HeatPumpAirToWaterHeatingSpeedData::iddObjectType(), model) {
 
     auto impl = getImpl<detail::HeatPumpAirToWaterHeatingSpeedData_Impl>();
     OS_ASSERT(impl);
@@ -263,7 +263,7 @@ namespace model {
 
     bool ok = setNormalizedHeatingCapacityFunctionofTemperatureCurve(normalizedHeatingCapacityFunctionofTemperatureCurve);
     if (!ok) {
-      // We don't call remove() (which would do ParentObject::remove()) because that would try to remove the curves too if they aren't being used,
+      // We don't call remove() (which would do ResourceObject::remove()) because that would try to remove the curves too if they aren't being used,
       // so we call ModelObject::remove() directly
       impl->detail::ModelObject_Impl::remove();
       LOG_AND_THROW("Unable to set " << briefDescription() << "'s Capacity Curve to "
@@ -341,7 +341,7 @@ namespace model {
 
   /// @cond
   HeatPumpAirToWaterHeatingSpeedData::HeatPumpAirToWaterHeatingSpeedData(std::shared_ptr<detail::HeatPumpAirToWaterHeatingSpeedData_Impl> impl)
-    : ParentObject(std::move(impl)) {}
+    : ResourceObject(std::move(impl)) {}
   /// @endcond
 
   void HeatPumpAirToWaterHeatingSpeedData::autosize() {

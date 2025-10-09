@@ -7,7 +7,7 @@
 #define MODEL_HEATPUMPAIRTOWATERHEATINGSPEEDDATA_HPP
 
 #include "ModelAPI.hpp"
-#include "ParentObject.hpp"
+#include "ResourceObject.hpp"
 
 namespace openstudio {
 
@@ -21,8 +21,8 @@ namespace model {
 
   }  // namespace detail
 
-  /** HeatPumpAirToWaterHeatingSpeedData is a ParentObject that wraps the OpenStudio IDD object 'OS:HeatPump:AirToWater:Heating:SpeedData'. */
-  class MODEL_API HeatPumpAirToWaterHeatingSpeedData : public ParentObject
+  /** HeatPumpAirToWaterHeatingSpeedData is a ResourceObject that wraps the OpenStudio IDD object 'OS:HeatPump:AirToWater:Heating:SpeedData'. */
+  class MODEL_API HeatPumpAirToWaterHeatingSpeedData : public ResourceObject
   {
    public:
     /** @name Constructors and Destructors */

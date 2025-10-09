@@ -15,6 +15,7 @@
 #include "../Schedule.hpp"
 #include "../ScheduleConstant.hpp"
 #include "../Curve.hpp"
+#include "../Curve_Impl.hpp"
 #include "../CurveCubic.hpp"
 #include "../CurveBicubic.hpp"
 
@@ -26,6 +27,8 @@
 
 #include "../ModelObjectList.hpp"
 #include "../ModelObjectList_Impl.hpp"
+
+#include <utilities/idd/IddEnums.hxx>
 
 #include <algorithm>
 #include <fmt/format.h>
@@ -292,11 +295,13 @@ TEST_F(ModelFixture, HeatPumpAirToWaterHeating_clone) {
   EXPECT_EQ(1, model.getConcreteModelObjects<HeatPumpAirToWaterHeating>().size());
   EXPECT_EQ(1, model.getConcreteModelObjects<ModelObjectList>().size());
   EXPECT_EQ(5, model.getConcreteModelObjects<HeatPumpAirToWaterHeatingSpeedData>().size());
+  EXPECT_EQ(5 * 3, model.getModelObjects<Curve>().size());
 
   auto awhpClone = awhp.clone(model).cast<HeatPumpAirToWaterHeating>();
   EXPECT_EQ(2, model.getConcreteModelObjects<HeatPumpAirToWaterHeating>().size());
   EXPECT_EQ(2, model.getConcreteModelObjects<ModelObjectList>().size());
   EXPECT_EQ(5, model.getConcreteModelObjects<HeatPumpAirToWaterHeatingSpeedData>().size());
+  EXPECT_EQ(5 * 3, model.getModelObjects<Curve>().size());
 
   EXPECT_EQ(5, awhp.numberOfSpeeds());
   EXPECT_EQ(speeds, awhp.speeds());
@@ -314,15 +319,23 @@ TEST_F(ModelFixture, HeatPumpAirToWaterHeating_clone) {
   };
 
   EXPECT_EQ(2, rmed.size()) << getObjectNames(rmed);
+  EXPECT_EQ(IddObjectType::OS_HeatPump_AirToWater_Heating, rmed[0].iddObject().type().value());
+  EXPECT_EQ(IddObjectType::OS_ModelObjectList, rmed[1].iddObject().type().value());
   EXPECT_EQ(1, model.getConcreteModelObjects<HeatPumpAirToWaterHeating>().size());
+  EXPECT_EQ(1, model.getConcreteModelObjects<ModelObjectList>().size());
   EXPECT_EQ(5, model.getConcreteModelObjects<HeatPumpAirToWaterHeatingSpeedData>().size());
+  EXPECT_EQ(5 * 3, model.getModelObjects<Curve>().size());
   EXPECT_EQ(5, awhpClone.numberOfSpeeds());
   EXPECT_EQ(speeds, awhpClone.speeds());
 
   rmed = awhpClone.remove();
-  EXPECT_EQ(11, rmed.size()) << getObjectNames(rmed);
-  EXPECT_EQ(1, model.getConcreteModelObjects<HeatPumpAirToWaterHeating>().size());
+
+  const unsigned expectedRemoved = 1 /* HeatPumpAirToWaterHeating */ + 1 /* ModelObjectList */ + 5 * (1 /* SpeedData */ + 3 /* Curves */);
+  EXPECT_EQ(expectedRemoved, rmed.size()) << getObjectNames(rmed);
+  EXPECT_EQ(0, model.getConcreteModelObjects<HeatPumpAirToWaterHeating>().size());
+  EXPECT_EQ(0, model.getConcreteModelObjects<ModelObjectList>().size());
   EXPECT_EQ(0, model.getConcreteModelObjects<HeatPumpAirToWaterHeatingSpeedData>().size());
+  EXPECT_EQ(0, model.getModelObjects<Curve>().size());
 }
 
 TEST_F(ModelFixture, HeatPumpAirToWaterHeating_addToNode) {

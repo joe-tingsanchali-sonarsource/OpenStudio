@@ -139,10 +139,13 @@ namespace model {
     // std::vector<IddObjectType> allowableChildTypes() const override;
 
     std::vector<IdfObject> HeatPumpAirToWaterHeating_Impl::remove() {
-      auto speedList = speedDataList();
+      // ModelObjectList is kinda dumb, it removes all the modelObjects it has, which we don't want
+      // We listed the SpeedData (ResourceObjects) in children, so it should be handled by ParentObject::remove
+      auto speedList_ = optionalSpeedDataList();
       std::vector<IdfObject> result = StraightComponent_Impl::remove();
-      if (!result.empty()) {
-        openstudio::detail::concat_helper(result, speedList.remove());
+      if (!result.empty() && speedList_) {
+        speedList_->clearExtensibleGroups();  // Clearer than removeAllModelObjects (which does the same thing, but could mean delete all objects)
+        openstudio::detail::concat_helper(result, speedList_->remove());
       }
 
       return result;

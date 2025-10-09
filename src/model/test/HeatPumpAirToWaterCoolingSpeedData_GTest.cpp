@@ -8,6 +8,8 @@
 #include "../HeatPumpAirToWaterCoolingSpeedData.hpp"
 #include "../HeatPumpAirToWaterCoolingSpeedData_Impl.hpp"
 
+#include "../HeatPumpAirToWaterCooling.hpp"
+
 #include "../Model.hpp"
 #include "../Curve.hpp"
 #include "../Curve_Impl.hpp"
@@ -182,6 +184,29 @@ TEST_F(ModelFixture, HeatPumpAirToWaterCoolingSpeedData_clone_remove) {
 }
 
 TEST_F(ModelFixture, HeatPumpAirToWaterCoolingSpeedData_RemoveParentModelObjectList) {
-  GTEST_SKIP() << "Need to implement ModelObjectList support in HeatPumpAirToWater and check that removing a speed data is either prevented or "
-                  "cleans up the ModelObjectList properly.";
+  Model m;
+
+  HeatPumpAirToWaterCooling awhp(m);
+  HeatPumpAirToWaterCooling awhp2(m);
+
+  HeatPumpAirToWaterCoolingSpeedData speed1(m);
+  HeatPumpAirToWaterCoolingSpeedData speed2(m);
+
+  EXPECT_TRUE(awhp.addSpeed(speed1));
+  EXPECT_TRUE(awhp2.addSpeed(speed1));
+  EXPECT_TRUE(awhp.addSpeed(speed2));
+  EXPECT_TRUE(awhp2.addSpeed(speed2));
+
+  {
+    const std::vector<HeatPumpAirToWaterCoolingSpeedData> speeds{speed1, speed2};
+    EXPECT_EQ(speeds, awhp.speeds());
+    EXPECT_EQ(speeds, awhp2.speeds());
+  }
+
+  speed1.remove();
+  {
+    const std::vector<HeatPumpAirToWaterCoolingSpeedData> speeds{speed2};
+    EXPECT_EQ(speeds, awhp.speeds());
+    EXPECT_EQ(speeds, awhp2.speeds());
+  }
 }

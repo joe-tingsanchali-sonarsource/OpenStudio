@@ -23,10 +23,16 @@
 #include "../PlantLoop.hpp"
 #include "../Node.hpp"
 #include "../Node_Impl.hpp"
+#include "../Splitter.hpp"
 
 #include "../ModelObjectList.hpp"
 #include "../ModelObjectList_Impl.hpp"
 
+#include <utilities/idd/IddEnums.hxx>
+
+#include <algorithm>
+#include <fmt/format.h>
+#include <fmt/ranges.h>
 using namespace openstudio;
 using namespace openstudio::model;
 
@@ -288,11 +294,13 @@ TEST_F(ModelFixture, HeatPumpAirToWaterCooling_clone) {
   EXPECT_EQ(1, model.getConcreteModelObjects<HeatPumpAirToWaterCooling>().size());
   EXPECT_EQ(1, model.getConcreteModelObjects<ModelObjectList>().size());
   EXPECT_EQ(5, model.getConcreteModelObjects<HeatPumpAirToWaterCoolingSpeedData>().size());
+  EXPECT_EQ(5 * 3, model.getModelObjects<Curve>().size());
 
   auto awhpClone = awhp.clone(model).cast<HeatPumpAirToWaterCooling>();
   EXPECT_EQ(2, model.getConcreteModelObjects<HeatPumpAirToWaterCooling>().size());
   EXPECT_EQ(2, model.getConcreteModelObjects<ModelObjectList>().size());
   EXPECT_EQ(5, model.getConcreteModelObjects<HeatPumpAirToWaterCoolingSpeedData>().size());
+  EXPECT_EQ(5 * 3, model.getModelObjects<Curve>().size());
 
   EXPECT_EQ(5, awhp.numberOfSpeeds());
   EXPECT_EQ(speeds, awhp.speeds());
@@ -300,24 +308,104 @@ TEST_F(ModelFixture, HeatPumpAirToWaterCooling_clone) {
   EXPECT_EQ(5, awhpClone.numberOfSpeeds());
   EXPECT_EQ(speeds, awhpClone.speeds());
 
-  // This shouldn't work, it's going to put the CoilCoolingDXCurveFitPerformance in a broken state
   auto rmed = awhp.remove();
-  EXPECT_EQ(0, rmed.size());
-  HeatPumpAirToWaterCoolingSpeedData boosterModeOnSpeed(model);
-  EXPECT_TRUE(awhp.setBoosterModeOnSpeed(boosterModeOnSpeed));
-  ASSERT_TRUE(awhp.boosterModeOnSpeed());
-  EXPECT_EQ(3, model.getConcreteModelObjects<HeatPumpAirToWaterCooling>().size());
-  EXPECT_EQ(10, model.getConcreteModelObjects<HeatPumpAirToWaterCoolingSpeedData>().size());
 
-  rmed = awhp.remove();
-  EXPECT_EQ(1, rmed.size());
-  EXPECT_EQ(2, model.getConcreteModelObjects<HeatPumpAirToWaterCooling>().size());
-  EXPECT_EQ(10, model.getConcreteModelObjects<HeatPumpAirToWaterCoolingSpeedData>().size());
-  EXPECT_EQ(10, awhpClone.numberOfSpeeds());
+  auto getObjectNames = [](const auto& rmed) {
+    std::vector<std::string> rm_names;
+    rm_names.reserve(rmed.size());
+    std::transform(rmed.cbegin(), rmed.cend(), std::back_inserter(rm_names), [](const auto& idfObjet) { return idfObjet.nameString(); });
+    return fmt::format("Removed objects: {}", rm_names);
+  };
+
+  EXPECT_EQ(2, rmed.size()) << getObjectNames(rmed);
+  EXPECT_EQ(IddObjectType::OS_HeatPump_AirToWater_Cooling, rmed[0].iddObject().type().value());
+  EXPECT_EQ(IddObjectType::OS_ModelObjectList, rmed[1].iddObject().type().value());
+  EXPECT_EQ(1, model.getConcreteModelObjects<HeatPumpAirToWaterCooling>().size());
+  EXPECT_EQ(1, model.getConcreteModelObjects<ModelObjectList>().size());
+  EXPECT_EQ(5, model.getConcreteModelObjects<HeatPumpAirToWaterCoolingSpeedData>().size());
+  EXPECT_EQ(5 * 3, model.getModelObjects<Curve>().size());
+  EXPECT_EQ(5, awhpClone.numberOfSpeeds());
   EXPECT_EQ(speeds, awhpClone.speeds());
 
   rmed = awhpClone.remove();
-  EXPECT_EQ(11, rmed.size());
-  EXPECT_EQ(1, model.getConcreteModelObjects<HeatPumpAirToWaterCooling>().size());
+
+  const unsigned expectedRemoved = 1 /* HeatPumpAirToWaterCooling */ + 1 /* ModelObjectList */ + 5 * (1 /* SpeedData */ + 3 /* Curves */);
+  EXPECT_EQ(expectedRemoved, rmed.size()) << getObjectNames(rmed);
+  EXPECT_EQ(0, model.getConcreteModelObjects<HeatPumpAirToWaterCooling>().size());
+  EXPECT_EQ(0, model.getConcreteModelObjects<ModelObjectList>().size());
   EXPECT_EQ(0, model.getConcreteModelObjects<HeatPumpAirToWaterCoolingSpeedData>().size());
+  EXPECT_EQ(0, model.getModelObjects<Curve>().size());
+}
+
+TEST_F(ModelFixture, HeatPumpAirToWaterCooling_addToNode) {
+  // create a model to use
+  Model m;
+
+  HeatPumpAirToWaterCooling awhp(m);
+
+  PlantLoop p(m);
+  {
+    Node n = p.demandInletNode();
+    EXPECT_FALSE(awhp.addToNode(n));
+  }
+  EXPECT_FALSE(p.addDemandBranchForComponent(awhp));
+
+  AirLoopHVAC a(m);
+  {
+    Node n = a.supplyInletNode();
+    EXPECT_FALSE(awhp.addToNode(n));
+  }
+  {
+    Node n = a.demandInletNode();
+    EXPECT_FALSE(awhp.addToNode(n));
+  }
+
+  EXPECT_FALSE(awhp.plantLoop());
+  EXPECT_FALSE(awhp.inletModelObject());
+  EXPECT_FALSE(awhp.outletModelObject());
+
+  // Plant Side connections
+  EXPECT_EQ(5, p.demandComponents().size());  // o --- Splitter --- o --- Mixer --- o
+  EXPECT_EQ(5, p.supplyComponents().size());  // o --- Splitter --- o --- Mixer --- o
+
+  EXPECT_TRUE(p.addSupplyBranchForComponent(awhp));
+  EXPECT_EQ(7, p.supplyComponents().size());  // o --- Splitter --- o --- awhp_cc --- Mixer --- o
+  EXPECT_TRUE(awhp.plantLoop());
+  EXPECT_TRUE(awhp.inletModelObject());
+  EXPECT_TRUE(awhp.outletModelObject());
+
+  auto awhpClone = awhp.clone(m).cast<HeatPumpAirToWaterCooling>();
+  EXPECT_FALSE(awhpClone.plantLoop());
+  EXPECT_FALSE(awhpClone.inletModelObject());
+  EXPECT_FALSE(awhpClone.outletModelObject());
+
+  EXPECT_EQ(2, m.getConcreteModelObjects<HeatPumpAirToWaterCooling>().size());
+
+  awhp.removeFromLoop();
+  EXPECT_FALSE(awhp.plantLoop());
+  EXPECT_FALSE(awhp.inletModelObject());
+  EXPECT_FALSE(awhp.outletModelObject());
+
+  EXPECT_EQ(2, m.getConcreteModelObjects<HeatPumpAirToWaterCooling>().size());
+  EXPECT_EQ(5, p.supplyComponents().size());  // o --- Splitter --- o --- Mixer --- o
+  EXPECT_EQ(5, p.demandComponents().size());  // o --- Splitter --- o --- Mixer --- o
+
+  auto supply_inlet_node = p.supplyInletNode();
+  EXPECT_TRUE(awhpClone.addToNode(supply_inlet_node));
+
+  EXPECT_EQ(7, p.supplyComponents().size());  // o --- awhpClone --- Splitter --- o --- Mixer --- o
+  EXPECT_EQ(5, p.demandComponents().size());  // o --- Splitter --- o --- Mixer --- o
+  EXPECT_TRUE(awhpClone.plantLoop());
+  ASSERT_TRUE(awhpClone.inletModelObject());
+  EXPECT_EQ(supply_inlet_node, awhpClone.inletModelObject().get());
+  ASSERT_TRUE(awhpClone.outletModelObject());
+  auto outlet_ = awhpClone.outletModelObject().get().optionalCast<Node>();
+  ASSERT_TRUE(outlet_);
+  ASSERT_TRUE(outlet_->outletModelObject());
+  EXPECT_EQ(p.supplySplitter(), outlet_->outletModelObject().get());
+
+  awhpClone.remove();
+  EXPECT_EQ(1, m.getConcreteModelObjects<HeatPumpAirToWaterCooling>().size());
+  EXPECT_EQ(5, p.supplyComponents().size());  // o --- Splitter --- o --- Mixer --- o
+  EXPECT_EQ(5, p.demandComponents().size());  // o --- Splitter --- o --- Mixer --- o
 }
