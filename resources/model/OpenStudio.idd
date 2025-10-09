@@ -14939,12 +14939,12 @@ OS:HeatPump:AirToWater:Heating,
         \note Heating is disabled above this temperature
    A4,  \field Minimum Leaving Water Temperature Curve Name
         \type object-list
-        \object-list UniVariateFunctions
+        \object-list UnivariateFunctions
         \note quadratic curve = a + b*OAT is typical, other univariate curves may be used
         \note OAT = Outdoor Dry-Bulb Temperature
    A5,  \field Maximum Leaving Water Temperature Curve Name
         \type object-list
-        \object-list UniVariateFunctions
+        \object-list UnivariateFunctions
         \note quadratic curve = a + b*OAT is typical, other univariate curves may be used
         \note OAT = Outdoor Dry-Bulb Temperature
    N7,  \field Sizing Factor
@@ -15035,12 +15035,12 @@ OS:HeatPump:AirToWater:Cooling,
         \note Cooling is disabled above this temperature
    A4,  \field Minimum Leaving Water Temperature Curve Name
         \type object-list
-        \object-list UniVariateFunctions
+        \object-list UnivariateFunctions
         \note quadratic curve = a + b*OAT is typical, other univariate curves may be used
         \note OAT = Outdoor Dry-Bulb Temperature
    A5,  \field Maximum Leaving Water Temperature Curve Name
         \type object-list
-        \object-list UniVariateFunctions
+        \object-list UnivariateFunctions
         \note quadratic curve = a + b*OAT is typical, other univariate curves may be used
         \note OAT = Outdoor Dry-Bulb Temperature
    N7,  \field Sizing Factor for Cooling
@@ -15172,12 +15172,12 @@ OS:HeatPump:AirToWater,
         \note Heating is disabled above this temperature
    A8,  \field Minimum Leaving Water Temperature Curve Name in Heating Mode
         \type object-list
-        \object-list UniVariateFunctions
+        \object-list UnivariateFunctions
         \note quadratic curve = a + b*OAT is typical, other univariate curves may be used
         \note OAT = Outdoor Dry-Bulb Temperature
    A9,  \field Maximum Leaving Water Temperature Curve Name in Heating Mode
         \type object-list
-        \object-list UniVariateFunctions
+        \object-list UnivariateFunctions
         \note quadratic curve = a + b*OAT is typical, other univariate curves may be used
         \note OAT = Outdoor Dry-Bulb Temperature
    N9,  \field Sizing Factor for Heating
@@ -15228,12 +15228,12 @@ OS:HeatPump:AirToWater,
         \note Cooling is disabled above this temperature
    A10, \field Minimum Leaving Water Temperature Curve Name in Cooling Mode
         \type object-list
-        \object-list UniVariateFunctions
+        \object-list UnivariateFunctions
         \note quadratic curve = a + b*OAT is typical, other univariate curves may be used
         \note OAT = Outdoor Dry-Bulb Temperature
    A11, \field Maximum Leaving Water Temperature Curve Name in Cooling Mode
         \type object-list
-        \object-list UniVariateFunctions
+        \object-list UnivariateFunctions
         \note quadratic curve = a + b*OAT is typical, other univariate curves may be used
         \note OAT = Outdoor Dry-Bulb Temperature
    N16, \field Sizing Factor for Cooling
