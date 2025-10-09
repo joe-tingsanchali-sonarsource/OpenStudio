@@ -409,6 +409,16 @@ namespace energyplus {
         }
         break;
       }
+      case openstudio::IddObjectType::OS_HeatPump_AirToWater_Cooling: {
+        auto awhp = component.cast<HeatPumpAirToWaterCooling>();
+        result = awhp.containingHVACComponent();
+        break;
+      }
+      case openstudio::IddObjectType::OS_HeatPump_AirToWater_Heating: {
+        auto awhp = component.cast<HeatPumpAirToWaterHeating>();
+        result = awhp.containingHVACComponent();
+        break;
+      }
       default: {
         break;
       }
