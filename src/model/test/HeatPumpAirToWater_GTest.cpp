@@ -42,11 +42,12 @@ TEST_F(ModelFixture, HeatPumpAirToWater_GettersSetters) {
   // Operating Mode Control Method: Required String
   // Ctor default
   EXPECT_EQ("Load", heatPumpAirToWater.operatingModeControlMethod());
-  EXPECT_TRUE(heatPumpAirToWater.setOperatingModeControlMethod("ScheduledModes"));
-  EXPECT_EQ("ScheduledModes", heatPumpAirToWater.operatingModeControlMethod());
+  EXPECT_FALSE(heatPumpAirToWater.setOperatingModeControlMethod("ScheduledModes"));
+  EXPECT_TRUE(heatPumpAirToWater.setOperatingModeControlMethod("EMSControlled"));
+  EXPECT_EQ("EMSControlled", heatPumpAirToWater.operatingModeControlMethod());
   // Bad Value
   EXPECT_FALSE(heatPumpAirToWater.setOperatingModeControlMethod("BADENUM"));
-  EXPECT_EQ("ScheduledModes", heatPumpAirToWater.operatingModeControlMethod());
+  EXPECT_EQ("EMSControlled", heatPumpAirToWater.operatingModeControlMethod());
 
   // Operating Mode Control Option for Multiple Unit: Required String
   // Ctor default
@@ -59,10 +60,16 @@ TEST_F(ModelFixture, HeatPumpAirToWater_GettersSetters) {
 
   // Operating Mode Control Schedule Name: Optional Object
   EXPECT_FALSE(heatPumpAirToWater.operatingModeControlSchedule());
+  EXPECT_EQ("EMSControlled", heatPumpAirToWater.operatingModeControlMethod());
   ScheduleConstant operatingModeControlSchedule(m);
   EXPECT_TRUE(heatPumpAirToWater.setOperatingModeControlSchedule(operatingModeControlSchedule));
   ASSERT_TRUE(heatPumpAirToWater.operatingModeControlSchedule());
   EXPECT_EQ(operatingModeControlSchedule, heatPumpAirToWater.operatingModeControlSchedule().get());
+  EXPECT_EQ("ScheduledModes", heatPumpAirToWater.operatingModeControlMethod());
+  // Reset
+  heatPumpAirToWater.resetOperatingModeControlSchedule();
+  EXPECT_FALSE(heatPumpAirToWater.operatingModeControlSchedule());
+  EXPECT_EQ("Load", heatPumpAirToWater.operatingModeControlMethod());  // Back to default
 
   // Minimum Part Load Ratio: Required Double
   // Ctor default

@@ -318,6 +318,10 @@ namespace model {
     }
 
     bool HeatPumpAirToWater_Impl::setOperatingModeControlMethod(const std::string& operatingModeControlMethod) {
+      if (operatingModeControlMethod == "ScheduledModes" && !operatingModeControlSchedule()) {
+        LOG(Warn, "For " << briefDescription() << ", to use 'ScheduledModes' use setOperatingModeControlSchedule");
+        return false;
+      }
       const bool result = setString(OS_HeatPump_AirToWaterFields::OperatingModeControlMethod, operatingModeControlMethod);
       return result;
     }
@@ -329,14 +333,16 @@ namespace model {
     }
 
     bool HeatPumpAirToWater_Impl::setOperatingModeControlSchedule(Schedule& operatingModeControlSchedule) {
-      const bool result = setSchedule(OS_HeatPump_AirToWaterFields::OperatingModeControlScheduleName, "HeatPumpAirToWater", "Operating Mode Control",
-                                      operatingModeControlSchedule);
+      bool result = setSchedule(OS_HeatPump_AirToWaterFields::OperatingModeControlScheduleName, "HeatPumpAirToWater", "Operating Mode Control",
+                                operatingModeControlSchedule);
+      result &= setString(OS_HeatPump_AirToWaterFields::OperatingModeControlMethod, "ScheduledModes");
       return result;
     }
 
     void HeatPumpAirToWater_Impl::resetOperatingModeControlSchedule() {
       const bool result = setString(OS_HeatPump_AirToWaterFields::OperatingModeControlScheduleName, "");
       OS_ASSERT(result);
+      setString(OS_HeatPump_AirToWaterFields::OperatingModeControlMethod, "Load");  // Reset to default
     }
 
     bool HeatPumpAirToWater_Impl::setMinimumPartLoadRatio(double minimumPartLoadRatio) {
