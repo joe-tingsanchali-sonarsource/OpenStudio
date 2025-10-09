@@ -4776,9 +4776,12 @@ TEST_F(OSVersionFixture, update_3_10_0_to_3_10_1_ControllerMechanicalVentilation
   openstudio::path outPath = resourcesPath() / toPath("osversion/3_10_1/test_vt_ControllerMechanicalVentilation_updated.osm");
   model->save(outPath, true);
 
-  std::vector<WorkspaceObject> cs = model->getObjectsByType("OS:ControllerMechanicalVentilation");
-  ASSERT_EQ(1u, cs.size());
-  const auto& c = cs.front();
+  std::vector<WorkspaceObject> cntrls = model->getObjectsByType("OS:ControllerMechanicalVentilation");
+  ASSERT_EQ(1u, cntrls.size());
+  const auto& cntrl = cntrls.front();
 
-  EXPECT_EQ("ProportionalControlBasedonOccupancySchedule", c.getString(4).get());  // System Outdoor Air Method
+  ASSERT_TRUE(cntrl.getTarget(2));
+  EXPECT_EQ("Always On Discrete", cntrl.getTarget(2)->nameString());                   // Availability Schedule
+  EXPECT_TRUE(cntrl.isEmpty(3));                                                       // Demand Controlled Ventilation
+  EXPECT_EQ("ProportionalControlBasedonOccupancySchedule", cntrl.getString(4).get());  // System Outdoor Air Method
 }
