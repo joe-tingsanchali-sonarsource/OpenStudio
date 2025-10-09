@@ -33539,7 +33539,7 @@ OS:ThermalStorage:ChilledWater:Stratified,
        \required-field
        \type real
        \units deltaC
-       \minimum 0.0
+       \minimum 0.0001
   N5,  \field Temperature Sensor Height
        \units m
        \minimum 0.0
@@ -33549,6 +33549,8 @@ OS:ThermalStorage:ChilledWater:Stratified,
   N7 , \field Nominal Cooling Capacity
        \type real
        \units W
+       \autosizable
+       \required-field
   A5 , \field Ambient Temperature Indicator
        \required-field
        \type choice
