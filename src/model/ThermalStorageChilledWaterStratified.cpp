@@ -697,6 +697,10 @@ namespace model {
       return result;
     }
 
+    boost::optional<double> ThermalStorageChilledWaterStratified_Impl::autosizedNominalCoolingCapacity() const {
+      return getAutosizedValue("Nominal Cooling Capacity", "W");
+    }
+
     boost::optional<double> ThermalStorageChilledWaterStratified_Impl::autosizedUseSideDesignFlowRate() const {
       return getAutosizedValue("Use Side Design Flow Rate", "m3/s");
     }
@@ -706,12 +710,18 @@ namespace model {
     }
 
     void ThermalStorageChilledWaterStratified_Impl::autosize() {
+      autosizeNominalCoolingCapacity();
       autosizeUseSideDesignFlowRate();
       autosizeSourceSideDesignFlowRate();
     }
 
     void ThermalStorageChilledWaterStratified_Impl::applySizingValues() {
       boost::optional<double> val;
+      val = autosizedNominalCoolingCapacity();
+      if (val) {
+        setNominalCoolingCapacity(val.get());
+      }
+
       val = autosizedUseSideDesignFlowRate();
       if (val) {
         setUseSideDesignFlowRate(val.get());
@@ -1206,6 +1216,10 @@ namespace model {
   ThermalStorageChilledWaterStratified::ThermalStorageChilledWaterStratified(std::shared_ptr<detail::ThermalStorageChilledWaterStratified_Impl> impl)
     : WaterToWaterComponent(std::move(impl)) {}
   /// @endcond
+
+  boost::optional<double> ThermalStorageChilledWaterStratified::autosizedNominalCoolingCapacity() const {
+    return getImpl<detail::ThermalStorageChilledWaterStratified_Impl>()->autosizedNominalCoolingCapacity();
+  }
 
   boost::optional<double> ThermalStorageChilledWaterStratified::autosizedUseSideDesignFlowRate() const {
     return getImpl<detail::ThermalStorageChilledWaterStratified_Impl>()->autosizedUseSideDesignFlowRate();
