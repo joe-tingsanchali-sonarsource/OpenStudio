@@ -12,6 +12,7 @@
 #include "../HeatPumpAirToWater_Impl.hpp"
 #include "../HeatPumpAirToWaterHeatingSpeedData.hpp"
 #include "../HeatPumpAirToWaterHeatingSpeedData_Impl.hpp"
+#include "../HeatPumpAirToWaterCooling.hpp"
 
 #include "../Model.hpp"
 #include "../Schedule.hpp"
@@ -38,6 +39,13 @@
 
 using namespace openstudio;
 using namespace openstudio::model;
+
+std::string getObjectNames(const auto& rmed) {
+  std::vector<std::string> rm_names;
+  rm_names.reserve(rmed.size());
+  std::transform(rmed.cbegin(), rmed.cend(), std::back_inserter(rm_names), [](const auto& idfObjet) { return idfObjet.nameString(); });
+  return fmt::format("Removed objects: {}", rm_names);
+};
 
 TEST_F(ModelFixture, HeatPumpAirToWaterHeating_GettersSetters) {
   Model m;
@@ -313,13 +321,6 @@ TEST_F(ModelFixture, HeatPumpAirToWaterHeating_clone) {
 
   auto rmed = awhp.remove();
 
-  auto getObjectNames = [](const auto& rmed) {
-    std::vector<std::string> rm_names;
-    rm_names.reserve(rmed.size());
-    std::transform(rmed.cbegin(), rmed.cend(), std::back_inserter(rm_names), [](const auto& idfObjet) { return idfObjet.nameString(); });
-    return fmt::format("Removed objects: {}", rm_names);
-  };
-
   EXPECT_EQ(2, rmed.size()) << getObjectNames(rmed);
   EXPECT_EQ(IddObjectType::OS_HeatPump_AirToWater_Heating, rmed[0].iddObject().type().value());
   EXPECT_EQ(IddObjectType::OS_ModelObjectList, rmed[1].iddObject().type().value());
@@ -421,6 +422,11 @@ TEST_F(ModelFixture, HeatPumpAirToWaterHeating_containingHVACComponent) {
   HeatPumpAirToWater awhp2(m);
 
   HeatPumpAirToWaterHeating awhp_hc(m);
+  for (unsigned i = 1; i <= HeatPumpAirToWaterHeating::maximum_number_of_speeds; ++i) {
+    HeatPumpAirToWaterHeatingSpeedData speed(m);
+    speed.setName("Heating Speed " + std::to_string(i));
+    EXPECT_TRUE(awhp_hc.addSpeed(speed));
+  }
   EXPECT_FALSE(awhp_hc.containingHVACComponent());
   EXPECT_EQ(0, awhp_hc.heatPumpAirToWaters().size());
 
@@ -428,10 +434,18 @@ TEST_F(ModelFixture, HeatPumpAirToWaterHeating_containingHVACComponent) {
   ASSERT_TRUE(awhp_hc.containingHVACComponent());
   EXPECT_EQ(awhp, awhp_hc.containingHVACComponent().get());
   EXPECT_EQ(1, awhp_hc.heatPumpAirToWaters().size());
+  EXPECT_EQ(5, m.getConcreteModelObjects<HeatPumpAirToWaterHeatingSpeedData>().size());
+  // Each speed has 3 curves
+  EXPECT_EQ(5 * 3, m.getModelObjects<Curve>().size());
 
   EXPECT_TRUE(awhp2.setHeatingOperationMode(awhp_hc));
   ASSERT_TRUE(awhp_hc.containingHVACComponent());
   EXPECT_EQ(2, awhp_hc.heatPumpAirToWaters().size());
+
+  EXPECT_TRUE(awhp.heatingOperationMode());
+  EXPECT_TRUE(awhp2.heatingOperationMode());
+  EXPECT_FALSE(awhp.coolingOperationMode());
+  EXPECT_FALSE(awhp2.coolingOperationMode());
 
   // Is contained so not removable
   EXPECT_FALSE(awhp_hc.isRemovable());
@@ -439,39 +453,46 @@ TEST_F(ModelFixture, HeatPumpAirToWaterHeating_containingHVACComponent) {
   EXPECT_EQ(2, m.getConcreteModelObjects<HeatPumpAirToWater>().size());
   EXPECT_EQ(1, m.getConcreteModelObjects<HeatPumpAirToWaterHeating>().size());
   EXPECT_EQ(1, m.getConcreteModelObjects<ModelObjectList>().size());
+  EXPECT_EQ(5, m.getConcreteModelObjects<HeatPumpAirToWaterHeatingSpeedData>().size());
+  EXPECT_EQ(5 * 3, m.getModelObjects<Curve>().size());
 
   EXPECT_EQ(0, awhp_hc.remove().size());
   EXPECT_EQ(2, m.getConcreteModelObjects<HeatPumpAirToWater>().size());
   EXPECT_EQ(1, m.getConcreteModelObjects<HeatPumpAirToWaterHeating>().size());
   EXPECT_EQ(1, m.getConcreteModelObjects<ModelObjectList>().size());
+  EXPECT_EQ(5, m.getConcreteModelObjects<HeatPumpAirToWaterHeatingSpeedData>().size());
+  EXPECT_EQ(5 * 3, m.getModelObjects<Curve>().size());
 
   // Remove the first awhp
-  EXPECT_EQ(1, awhp.remove().size());
+  auto rmed = awhp.remove();
+  EXPECT_EQ(1, rmed.size()) << getObjectNames(rmed);
   EXPECT_EQ(1, awhp_hc.heatPumpAirToWaters().size());
   ASSERT_TRUE(awhp_hc.containingHVACComponent());
   EXPECT_EQ(awhp2, awhp_hc.containingHVACComponent().get());
   EXPECT_EQ(1, m.getConcreteModelObjects<HeatPumpAirToWater>().size());
   EXPECT_EQ(1, m.getConcreteModelObjects<HeatPumpAirToWaterHeating>().size());
   EXPECT_EQ(1, m.getConcreteModelObjects<ModelObjectList>().size());
+  EXPECT_EQ(5, m.getConcreteModelObjects<HeatPumpAirToWaterHeatingSpeedData>().size());
+  EXPECT_EQ(5 * 3, m.getModelObjects<Curve>().size());
 
   // Still not removable
   EXPECT_FALSE(awhp_hc.isRemovable());
-  EXPECT_EQ(0, awhp_hc.remove().size());
+  rmed = awhp_hc.remove();
+  EXPECT_EQ(0, rmed.size()) << getObjectNames(rmed);
   EXPECT_EQ(1, m.getConcreteModelObjects<HeatPumpAirToWater>().size());
   EXPECT_EQ(1, m.getConcreteModelObjects<HeatPumpAirToWaterHeating>().size());
   EXPECT_EQ(1, m.getConcreteModelObjects<ModelObjectList>().size());
+  EXPECT_EQ(5, m.getConcreteModelObjects<HeatPumpAirToWaterHeatingSpeedData>().size());
+  EXPECT_EQ(5 * 3, m.getModelObjects<Curve>().size());
 
-  // Remove the second awhp
-  EXPECT_EQ(1, awhp2.remove().size());
-  EXPECT_EQ(0, m.getConcreteModelObjects<HeatPumpAirToWater>().size());
-  EXPECT_EQ(1, m.getConcreteModelObjects<HeatPumpAirToWaterHeating>().size());
-  EXPECT_EQ(1, m.getConcreteModelObjects<ModelObjectList>().size());
-
-  EXPECT_EQ(0, awhp_hc.heatPumpAirToWaters().size());
-  EXPECT_FALSE(awhp_hc.containingHVACComponent());
-  EXPECT_TRUE(awhp_hc.isRemovable());
-  EXPECT_EQ(2, awhp_hc.remove().size());
+  // Remove the second awhp: this time it's not shared by any other object so it should remove everything
+  rmed = awhp2.remove();
+  const unsigned expectedRemoved =
+    1 /* HeatPumpAirToWater */ + 1 /* HeatPumpAirToWaterHeating */ + 1 /* ModelObjectList */ + 5 * (1 /* SpeedData */ + 3 /* Curves */);
+  EXPECT_EQ(expectedRemoved, rmed.size()) << getObjectNames(rmed);
   EXPECT_EQ(0, m.getConcreteModelObjects<HeatPumpAirToWater>().size());
   EXPECT_EQ(0, m.getConcreteModelObjects<HeatPumpAirToWaterHeating>().size());
   EXPECT_EQ(0, m.getConcreteModelObjects<ModelObjectList>().size());
+  EXPECT_EQ(0, m.getConcreteModelObjects<HeatPumpAirToWaterHeatingSpeedData>().size());
+  EXPECT_EQ(0, m.getModelObjects<Curve>().size());
 }

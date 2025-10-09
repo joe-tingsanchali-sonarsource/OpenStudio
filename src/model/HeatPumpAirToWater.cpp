@@ -6,6 +6,7 @@
 #include "HeatPumpAirToWater.hpp"
 #include "HeatPumpAirToWater_Impl.hpp"
 
+#include "Model.hpp"
 #include "Curve.hpp"
 #include "Curve_Impl.hpp"
 #include "HeatPumpAirToWaterHeating.hpp"
@@ -19,6 +20,7 @@
 #include "ScheduleTypeRegistry.hpp"
 
 #include "../utilities/core/Assert.hpp"
+#include "../utilities/core/ContainersMove.hpp"
 #include "../utilities/data/DataEnums.hpp"
 
 #include <utilities/idd/IddFactory.hxx>
@@ -130,6 +132,66 @@ namespace model {
     bool HeatPumpAirToWater_Impl::addToNode(Node& /*node*/) {
       LOG(Info, "Use the underlying HeatPumpAirToWaterCooling / HeatPumpAirToWaterHeating objects to add to a plant loop.");
       return false;
+    }
+
+    std::vector<ModelObject> HeatPumpAirToWater_Impl::children() const {
+      std::vector<ModelObject> children;
+      if (auto c_ = defrostEnergyInputRatioFunctionofTemperatureCurve()) {
+        children.emplace_back(std::move(*c_));
+      }
+      if (auto c_ = crankcaseHeaterCapacityFunctionofTemperatureCurve()) {
+        children.emplace_back(std::move(*c_));
+      }
+      if (auto c_ = coolingOperationMode()) {
+        children.emplace_back(std::move(*c_));
+      }
+      if (auto c_ = heatingOperationMode()) {
+        children.emplace_back(std::move(*c_));
+      }
+      return children;
+    }
+
+    ModelObject HeatPumpAirToWater_Impl::clone(Model model) const {
+      auto t_clone = StraightComponent_Impl::clone(model).cast<HeatPumpAirToWater>();
+      // We clone the operation modes, because the autosizing is reported at the wrapper level
+      if (auto coolingOpMode_ = coolingOperationMode()) {
+        auto coolingOpModeClone = coolingOpMode_->clone(model).cast<HeatPumpAirToWaterCooling>();
+        bool ok = t_clone.setCoolingOperationMode(coolingOpModeClone);
+        OS_ASSERT(ok);
+      }
+      if (auto heatingOpMode_ = heatingOperationMode()) {
+        auto heatingOpModeClone = heatingOpMode_->clone(model).cast<HeatPumpAirToWaterHeating>();
+        bool ok = t_clone.setHeatingOperationMode(heatingOpModeClone);
+        OS_ASSERT(ok);
+      }
+
+      return std::move(t_clone);
+    }
+
+    std::vector<IdfObject> HeatPumpAirToWater_Impl::remove() {
+      std::vector<IdfObject> result;
+
+      // Don't delete the underlying HeatPumpAirToWaterCooling / Heating objects if used by several HeatPumpAirToWater
+      if (auto coolingOpMode_ = coolingOperationMode()) {
+        if (coolingOpMode_->heatPumpAirToWaters().size() > 1) {
+          resetCoolingOperationMode();
+        } else {
+          // If we are the only one using this cooling operation mode, remove it (it will remove the children too)
+          resetCoolingOperationMode();  // Need to reset so it's marked as removable first
+          result = coolingOpMode_->remove();
+        }
+      }
+      if (auto heatingOpMode_ = heatingOperationMode()) {
+        if (heatingOpMode_->heatPumpAirToWaters().size() > 1) {
+          resetHeatingOperationMode();
+        } else {
+          // If we are the only one using this heating operation mode, remove it (it will remove the children too)
+          resetHeatingOperationMode();
+          openstudio::detail::concat_helper(result, heatingOpMode_->remove());
+        }
+      }
+      openstudio::detail::concat_helper(result, StraightComponent_Impl::remove());
+      return result;
     }
 
     ComponentType HeatPumpAirToWater_Impl::componentType() const {

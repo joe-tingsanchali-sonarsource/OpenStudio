@@ -12,6 +12,7 @@
 #include "../ScheduleConstant.hpp"
 
 #include "../Curve.hpp"
+#include "../Curve_Impl.hpp"
 #include "../CurveCubic.hpp"
 #include "../CurveBicubic.hpp"
 
@@ -20,10 +21,14 @@
 #include "../PlantLoop.hpp"
 
 #include "../HeatPumpAirToWaterHeating.hpp"
+#include "../HeatPumpAirToWaterHeating_Impl.hpp"
 #include "../HeatPumpAirToWaterHeatingSpeedData.hpp"
+#include "../HeatPumpAirToWaterHeatingSpeedData_Impl.hpp"
 
 #include "../HeatPumpAirToWaterCooling.hpp"
+#include "../HeatPumpAirToWaterCooling_Impl.hpp"
 #include "../HeatPumpAirToWaterCoolingSpeedData.hpp"
+#include "../HeatPumpAirToWaterCoolingSpeedData_Impl.hpp"
 
 using namespace openstudio;
 using namespace openstudio::model;
@@ -268,4 +273,51 @@ TEST_F(ModelFixture, HeatPumpAirToWater_Loop) {
   EXPECT_EQ(chwLoop, awhp.coolingLoop().get());
   ASSERT_TRUE(awhp.heatingLoop());
   EXPECT_EQ(hwLoop, awhp.heatingLoop().get());
+}
+
+TEST_F(ModelFixture, HeatPumpAirToWater_Clone) {
+  Model m;
+  HeatPumpAirToWater awhp(m);
+  HeatPumpAirToWaterCooling awhp_cc(m);
+  EXPECT_TRUE(awhp.setCoolingOperationMode(awhp_cc));
+  HeatPumpAirToWaterHeating awhp_hc(m);
+  EXPECT_TRUE(awhp.setHeatingOperationMode(awhp_hc));
+
+  for (unsigned i = 1; i <= HeatPumpAirToWaterCooling::maximum_number_of_speeds; ++i) {
+    HeatPumpAirToWaterCoolingSpeedData speed(m);
+    speed.setName("Cooling Speed " + std::to_string(i));
+    EXPECT_TRUE(awhp_cc.addSpeed(speed));
+  }
+  for (unsigned i = 1; i <= HeatPumpAirToWaterHeating::maximum_number_of_speeds; ++i) {
+    HeatPumpAirToWaterHeatingSpeedData speed(m);
+    speed.setName("Heating Speed " + std::to_string(i));
+    EXPECT_TRUE(awhp_hc.addSpeed(speed));
+  }
+
+  EXPECT_EQ(1, m.getConcreteModelObjects<HeatPumpAirToWater>().size());
+  EXPECT_EQ(1, m.getConcreteModelObjects<HeatPumpAirToWaterCooling>().size());
+  EXPECT_EQ(5, m.getConcreteModelObjects<HeatPumpAirToWaterCoolingSpeedData>().size());
+  EXPECT_EQ(1, m.getConcreteModelObjects<HeatPumpAirToWaterHeating>().size());
+  EXPECT_EQ(5, m.getConcreteModelObjects<HeatPumpAirToWaterHeatingSpeedData>().size());
+  // Each speed has 3 curves
+  EXPECT_EQ((5 + 5) * 3, m.getModelObjects<Curve>().size());
+
+  auto awhpClone = awhp.clone(m).cast<HeatPumpAirToWater>();
+  EXPECT_EQ(2, m.getConcreteModelObjects<HeatPumpAirToWater>().size());
+  EXPECT_EQ(2, m.getConcreteModelObjects<HeatPumpAirToWaterCooling>().size());
+  EXPECT_EQ(5, m.getConcreteModelObjects<HeatPumpAirToWaterCoolingSpeedData>().size());
+  EXPECT_EQ(2, m.getConcreteModelObjects<HeatPumpAirToWaterHeating>().size());
+  EXPECT_EQ(5, m.getConcreteModelObjects<HeatPumpAirToWaterHeatingSpeedData>().size());
+  EXPECT_EQ((5 + 5) * 3, m.getModelObjects<Curve>().size());
+
+  {
+    Model m2;
+    auto awhpClone2 = awhp.clone(m2).cast<HeatPumpAirToWater>();
+    EXPECT_EQ(1, m2.getConcreteModelObjects<HeatPumpAirToWater>().size());
+    EXPECT_EQ(2, m2.getConcreteModelObjects<HeatPumpAirToWaterCooling>().size());
+    EXPECT_EQ(5, m2.getConcreteModelObjects<HeatPumpAirToWaterCoolingSpeedData>().size());
+    EXPECT_EQ(2, m2.getConcreteModelObjects<HeatPumpAirToWaterHeating>().size());
+    EXPECT_EQ(5, m2.getConcreteModelObjects<HeatPumpAirToWaterHeatingSpeedData>().size());
+    EXPECT_EQ((5 + 5) * 3, m.getModelObjects<Curve>().size());
+  }
 }

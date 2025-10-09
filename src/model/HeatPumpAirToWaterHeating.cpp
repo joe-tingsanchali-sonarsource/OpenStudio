@@ -114,11 +114,6 @@ namespace model {
       // This handles resetting the ports, and bypassing ParentObject::clone so it doesn't clone children
       auto t_clone = StraightComponent_Impl::clone(model).cast<HeatPumpAirToWaterHeating>();
 
-      // TODO: Cloning a ModelObjectList clones the underlying objects too, I don't know if want that
-      // TODO: if we do not want that, we need to make the Speed Data a ResourceObject instead and not just a ParentObject
-      // auto speedDataListClone = speedDataList().clone(model).cast<ModelObjectList>();
-      // t_clone.getImpl<detail::HeatPumpAirToWaterHeating_Impl>()->setSpeedDataList(speedDataListClone);
-
       // Make a clean list and repopulate it, without cloning the SpeedData objects
       auto newSpeedList = ModelObjectList(model);
       newSpeedList.setName(t_clone.nameString() + " Speed Data List");

@@ -45,13 +45,13 @@ namespace model {
 
       virtual std::vector<ScheduleTypeKey> getScheduleTypeKeys(const Schedule& schedule) const override;
 
-      // TODO: You may need to override these since base is StraightComponent
-      // virtual ModelObject clone(Model model) const override;
+      // base is StraightComponent
+      virtual ModelObject clone(Model model) const override;
 
-      // virtual std::vector<ModelObject> children() const override;
+      virtual std::vector<ModelObject> children() const override;
       // virtual std::vector<IddObjectType> allowableChildTypes() const override;
 
-      // virtual std::vector<IdfObject> remove() override;
+      virtual std::vector<IdfObject> remove() override;
 
       // Overrides from StraightComponent
       virtual unsigned inletPort() const override;
@@ -59,10 +59,6 @@ namespace model {
 
       virtual bool addToNode(Node& node) override;
 
-      // TODO: If your component can be contained, override these
-      // virtual boost::optional<HVACComponent> containingHVACComponent() const override;
-      // virtual boost::optional<Mixer> containingZoneHVACComponent() const override;
-      // virtual boost::optional<SetpointManager> containingStraightComponent() const override;
       virtual void autosize() override;
 
       virtual void applySizingValues() override;
