@@ -10,13 +10,19 @@
 #include "../ReverseTranslator.hpp"
 
 #include "../../model/HeatPumpAirToWater.hpp"
+#include "../../model/HeatPumpAirToWater_Impl.hpp"
 #include "../../model/HeatPumpAirToWaterCooling.hpp"
+#include "../../model/HeatPumpAirToWaterCooling_Impl.hpp"
 #include "../../model/HeatPumpAirToWaterCoolingSpeedData.hpp"
+#include "../../model/HeatPumpAirToWaterCoolingSpeedData_Impl.hpp"
 #include "../../model/HeatPumpAirToWaterHeating.hpp"
+#include "../../model/HeatPumpAirToWaterHeating_Impl.hpp"
 #include "../../model/HeatPumpAirToWaterHeatingSpeedData.hpp"
+#include "../../model/HeatPumpAirToWaterHeatingSpeedData_Impl.hpp"
 
 #include "../../model/Model.hpp"
 #include "../../model/Curve.hpp"
+#include "../../model/Curve_Impl.hpp"
 #include "../../model/CurveBiquadratic.hpp"
 #include "../../model/CurveQuadratic.hpp"
 #include "../../model/PlantLoop.hpp"
@@ -55,9 +61,6 @@ HeatPumpAirToWater makeAWHP(const Model& m) {
   HeatPumpAirToWater awhp(m);
   awhp.setName("AWHP");
 
-  // Operating Mode Control Method: Required String
-  EXPECT_TRUE(awhp.setOperatingModeControlMethod("ScheduledModes"));
-
   // Operating Mode Control Option for Multiple Unit: Required String
   EXPECT_TRUE(awhp.setOperatingModeControlOptionforMultipleUnit("CoolingPriority"));
 
@@ -65,6 +68,8 @@ HeatPumpAirToWater makeAWHP(const Model& m) {
   ScheduleConstant operatingModeControlSchedule(m);
   operatingModeControlSchedule.setName(awhp.nameString() + " Operating Mode Control Schedule");
   EXPECT_TRUE(awhp.setOperatingModeControlSchedule(operatingModeControlSchedule));
+  // Operating Mode Control Method: Required String
+  EXPECT_EQ("ScheduledModes", awhp.operatingModeControlMethod());
 
   // Minimum Part Load Ratio: Required Double
   EXPECT_TRUE(awhp.setMinimumPartLoadRatio(0.6));
@@ -757,5 +762,48 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_HeatPumpAirToWater) {
       ASSERT_EQ("HeatPump:AirToWater", peqs.front().getString(PlantEquipmentListExtensibleFields::EquipmentObjectType).get());
       ASSERT_EQ(awhp.nameString(), peqs.front().getString(PlantEquipmentListExtensibleFields::EquipmentName).get());
     }
+  }
+}
+
+TEST_F(EnergyPlusFixture, ReverseTranslator_HeatPumpAirToWater) {
+
+  ForwardTranslator ft;
+  ft.setExcludeLCCObjects(true);
+
+  Model m;
+
+  HeatPumpAirToWater awhp = makeAWHP(m);
+  HeatPumpAirToWaterHeating awhp_hc = makeAWHP_Heating(m);
+  EXPECT_TRUE(awhp.setHeatingOperationMode(awhp_hc));
+
+  HeatPumpAirToWaterCooling awhp_cc = makeAWHP_Cooling(m);
+  EXPECT_TRUE(awhp.setCoolingOperationMode(awhp_cc));
+
+  PlantLoop hwLoop = createLoop(m, "HW Loop");
+  EXPECT_TRUE(hwLoop.addSupplyBranchForComponent(awhp_hc));
+
+  PlantLoop chwLoop = createLoop(m, "ChW Loop");
+  EXPECT_TRUE(chwLoop.addSupplyBranchForComponent(awhp_cc));
+
+  {
+    Workspace w = ft.translateModel(m);
+    ReverseTranslator rt;
+    Model m2 = rt.translateWorkspace(w);
+    EXPECT_EQ(1, m.getConcreteModelObjects<HeatPumpAirToWater>().size());
+    EXPECT_EQ(1, m.getConcreteModelObjects<HeatPumpAirToWaterHeating>().size());
+    EXPECT_EQ(5, m.getConcreteModelObjects<HeatPumpAirToWaterHeating>().front().numberOfSpeeds());
+    EXPECT_TRUE(m.getConcreteModelObjects<HeatPumpAirToWaterHeating>().front().boosterModeOnSpeed());
+    EXPECT_EQ(6, m.getConcreteModelObjects<HeatPumpAirToWaterHeatingSpeedData>().size());
+    EXPECT_EQ(1, m.getConcreteModelObjects<HeatPumpAirToWaterCooling>().size());
+    EXPECT_EQ(5, m.getConcreteModelObjects<HeatPumpAirToWaterCooling>().front().numberOfSpeeds());
+    EXPECT_TRUE(m.getConcreteModelObjects<HeatPumpAirToWaterCooling>().front().boosterModeOnSpeed());
+    EXPECT_EQ(6, m.getConcreteModelObjects<HeatPumpAirToWaterCoolingSpeedData>().size());
+    const size_t expectedNumCurves = 1                   // defrostEnergyInputRatioFunctionofTemperatureCurve
+                                     + 1                 // crankcaseHeaterCapacityFunctionofTemperatureCurve
+                                     + 2 * 2             // awhp_hc/cc min/max LWT curves
+                                     + 2 * (5 + 1) * 3;  // awhp_hc/cc: 5 speeds + one booster mode, each with 3 curves
+    EXPECT_EQ(expectedNumCurves, m.getModelObjects<Curve>().size());
+    // m.save("HeatPumpAirToWater_original.osm");
+    // m2.save("HeatPumpAirToWater_roundtrip.osm");
   }
 }

@@ -547,6 +547,7 @@ set(${target_name}_src
   ReverseTranslator/ReverseTranslateGeneratorMicroTurbine.cpp
   ReverseTranslator/ReverseTranslateGeneratorWindTurbine.cpp
   ReverseTranslator/ReverseTranslateHeatBalanceAlgorithm.cpp
+  ReverseTranslator/ReverseTranslateHeatPumpAirToWater.cpp
   ReverseTranslator/ReverseTranslateHotWaterEquipment.cpp
   ReverseTranslator/ReverseTranslateInternalMass.cpp
   ReverseTranslator/ReverseTranslateLights.cpp
