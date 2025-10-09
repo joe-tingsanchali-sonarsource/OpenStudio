@@ -14,6 +14,7 @@ namespace openstudio {
 namespace model {
 
   class Curve;
+  class HeatPumpAirToWaterHeating;
 
   namespace detail {
 
@@ -80,8 +81,8 @@ namespace model {
     /** @name Other */
     //@{
 
-    // returns a vector of HeatPumpAirToWater that use this as their Speed Data
-    // TODO: std::vector<HeatPumpAirToWater> heatPumpsAirToWater() const;
+    // convenience function that returns a vector of HeatPumpAirToWaterHeating that use this as their Speed Data (either regular speed or Booster)
+    std::vector<HeatPumpAirToWaterHeating> heatPumpAirToWaterHeatings() const;
 
     boost::optional<double> autosizedRatedHeatingCapacity();
 

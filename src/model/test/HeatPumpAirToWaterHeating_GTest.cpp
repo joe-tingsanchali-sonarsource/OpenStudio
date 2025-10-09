@@ -8,6 +8,8 @@
 #include "../HeatPumpAirToWaterHeating.hpp"
 #include "../HeatPumpAirToWaterHeating_Impl.hpp"
 
+#include "../HeatPumpAirToWater.hpp"
+#include "../HeatPumpAirToWater_Impl.hpp"
 #include "../HeatPumpAirToWaterHeatingSpeedData.hpp"
 #include "../HeatPumpAirToWaterHeatingSpeedData_Impl.hpp"
 
@@ -409,4 +411,67 @@ TEST_F(ModelFixture, HeatPumpAirToWaterHeating_addToNode) {
   EXPECT_EQ(1, m.getConcreteModelObjects<HeatPumpAirToWaterHeating>().size());
   EXPECT_EQ(5, p.supplyComponents().size());  // o --- Splitter --- o --- Mixer --- o
   EXPECT_EQ(5, p.demandComponents().size());  // o --- Splitter --- o --- Mixer --- o
+}
+
+TEST_F(ModelFixture, HeatPumpAirToWaterHeating_containingHVACComponent) {
+
+  Model m;
+
+  HeatPumpAirToWater awhp(m);
+  HeatPumpAirToWater awhp2(m);
+
+  HeatPumpAirToWaterHeating awhp_hc(m);
+  EXPECT_FALSE(awhp_hc.containingHVACComponent());
+  EXPECT_EQ(0, awhp_hc.heatPumpAirToWaters().size());
+
+  EXPECT_TRUE(awhp.setHeatingOperationMode(awhp_hc));
+  ASSERT_TRUE(awhp_hc.containingHVACComponent());
+  EXPECT_EQ(awhp, awhp_hc.containingHVACComponent().get());
+  EXPECT_EQ(1, awhp_hc.heatPumpAirToWaters().size());
+
+  EXPECT_TRUE(awhp2.setHeatingOperationMode(awhp_hc));
+  ASSERT_TRUE(awhp_hc.containingHVACComponent());
+  EXPECT_EQ(2, awhp_hc.heatPumpAirToWaters().size());
+
+  // Is contained so not removable
+  EXPECT_FALSE(awhp_hc.isRemovable());
+
+  EXPECT_EQ(2, m.getConcreteModelObjects<HeatPumpAirToWater>().size());
+  EXPECT_EQ(1, m.getConcreteModelObjects<HeatPumpAirToWaterHeating>().size());
+  EXPECT_EQ(1, m.getConcreteModelObjects<ModelObjectList>().size());
+
+  EXPECT_EQ(0, awhp_hc.remove().size());
+  EXPECT_EQ(2, m.getConcreteModelObjects<HeatPumpAirToWater>().size());
+  EXPECT_EQ(1, m.getConcreteModelObjects<HeatPumpAirToWaterHeating>().size());
+  EXPECT_EQ(1, m.getConcreteModelObjects<ModelObjectList>().size());
+
+  // Remove the first awhp
+  EXPECT_EQ(1, awhp.remove().size());
+  EXPECT_EQ(1, awhp_hc.heatPumpAirToWaters().size());
+  ASSERT_TRUE(awhp_hc.containingHVACComponent());
+  EXPECT_EQ(awhp2, awhp_hc.containingHVACComponent().get());
+  EXPECT_EQ(1, m.getConcreteModelObjects<HeatPumpAirToWater>().size());
+  EXPECT_EQ(1, m.getConcreteModelObjects<HeatPumpAirToWaterHeating>().size());
+  EXPECT_EQ(1, m.getConcreteModelObjects<ModelObjectList>().size());
+
+  // Still not removable
+  EXPECT_FALSE(awhp_hc.isRemovable());
+  EXPECT_EQ(0, awhp_hc.remove().size());
+  EXPECT_EQ(1, m.getConcreteModelObjects<HeatPumpAirToWater>().size());
+  EXPECT_EQ(1, m.getConcreteModelObjects<HeatPumpAirToWaterHeating>().size());
+  EXPECT_EQ(1, m.getConcreteModelObjects<ModelObjectList>().size());
+
+  // Remove the second awhp
+  EXPECT_EQ(1, awhp2.remove().size());
+  EXPECT_EQ(0, m.getConcreteModelObjects<HeatPumpAirToWater>().size());
+  EXPECT_EQ(1, m.getConcreteModelObjects<HeatPumpAirToWaterHeating>().size());
+  EXPECT_EQ(1, m.getConcreteModelObjects<ModelObjectList>().size());
+
+  EXPECT_EQ(0, awhp_hc.heatPumpAirToWaters().size());
+  EXPECT_FALSE(awhp_hc.containingHVACComponent());
+  EXPECT_TRUE(awhp_hc.isRemovable());
+  EXPECT_EQ(2, awhp_hc.remove().size());
+  EXPECT_EQ(0, m.getConcreteModelObjects<HeatPumpAirToWater>().size());
+  EXPECT_EQ(0, m.getConcreteModelObjects<HeatPumpAirToWaterHeating>().size());
+  EXPECT_EQ(0, m.getConcreteModelObjects<ModelObjectList>().size());
 }

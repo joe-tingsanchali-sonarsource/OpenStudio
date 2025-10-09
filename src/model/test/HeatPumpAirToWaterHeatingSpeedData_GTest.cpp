@@ -192,10 +192,25 @@ TEST_F(ModelFixture, HeatPumpAirToWaterHeatingSpeedData_RemoveParentModelObjectL
   HeatPumpAirToWaterHeatingSpeedData speed1(m);
   HeatPumpAirToWaterHeatingSpeedData speed2(m);
 
+  // Test convenience method
+  EXPECT_EQ(0, speed1.heatPumpAirToWaterHeatings().size());
+  EXPECT_EQ(0, speed2.heatPumpAirToWaterHeatings().size());
+
   EXPECT_TRUE(awhp.addSpeed(speed1));
+  EXPECT_EQ(1, speed1.heatPumpAirToWaterHeatings().size());
+  EXPECT_EQ(0, speed2.heatPumpAirToWaterHeatings().size());
+
   EXPECT_TRUE(awhp2.addSpeed(speed1));
+  EXPECT_EQ(2, speed1.heatPumpAirToWaterHeatings().size());
+  EXPECT_EQ(0, speed2.heatPumpAirToWaterHeatings().size());
+
   EXPECT_TRUE(awhp.addSpeed(speed2));
+  EXPECT_EQ(2, speed1.heatPumpAirToWaterHeatings().size());
+  EXPECT_EQ(1, speed2.heatPumpAirToWaterHeatings().size());
+
   EXPECT_TRUE(awhp2.addSpeed(speed2));
+  EXPECT_EQ(2, speed1.heatPumpAirToWaterHeatings().size());
+  EXPECT_EQ(2, speed2.heatPumpAirToWaterHeatings().size());
 
   {
     const std::vector<HeatPumpAirToWaterHeatingSpeedData> speeds{speed1, speed2};
@@ -209,4 +224,7 @@ TEST_F(ModelFixture, HeatPumpAirToWaterHeatingSpeedData_RemoveParentModelObjectL
     EXPECT_EQ(speeds, awhp.speeds());
     EXPECT_EQ(speeds, awhp2.speeds());
   }
+
+  awhp.remove();
+  EXPECT_EQ(1, speed2.heatPumpAirToWaterHeatings().size());
 }

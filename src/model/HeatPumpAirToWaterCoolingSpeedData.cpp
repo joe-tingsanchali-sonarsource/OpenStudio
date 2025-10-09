@@ -6,6 +6,9 @@
 #include "HeatPumpAirToWaterCoolingSpeedData.hpp"
 #include "HeatPumpAirToWaterCoolingSpeedData_Impl.hpp"
 
+#include "HeatPumpAirToWaterCooling.hpp"
+#include "HeatPumpAirToWaterCooling_Impl.hpp"
+
 #include "Model.hpp"
 #include "Model_Impl.hpp"
 #include "Curve.hpp"
@@ -174,6 +177,26 @@ namespace model {
     boost::optional<Curve> HeatPumpAirToWaterCoolingSpeedData_Impl::optionalCoolingEnergyInputRatioFunctionofPLRCurve() const {
       return getObject<ModelObject>().getModelObjectTarget<Curve>(
         OS_HeatPump_AirToWater_Cooling_SpeedDataFields::CoolingEnergyInputRatioFunctionofPLRCurveName);
+    }
+
+    std::vector<HeatPumpAirToWaterCooling> HeatPumpAirToWaterCoolingSpeedData_Impl::heatPumpAirToWaterCoolings() const {
+      std::vector<HeatPumpAirToWaterCooling> result;
+
+      const auto handle = this->handle();
+
+      for (const auto& awhp : model().getConcreteModelObjects<HeatPumpAirToWaterCooling>()) {
+        if (awhp.boosterModeOnSpeed() && awhp.boosterModeOnSpeed()->handle() == handle) {
+          result.push_back(awhp);
+        } else {
+          const auto speeds = awhp.speeds();
+          if (std::find_if(speeds.cbegin(), speeds.cend(),
+                           [handle](const HeatPumpAirToWaterCoolingSpeedData& speed) { return speed.handle() == handle; })
+              != speeds.end()) {
+            result.push_back(awhp);
+          }
+        }
+      }
+      return result;
     }
 
   }  // namespace detail
@@ -345,13 +368,17 @@ namespace model {
   /// @endcond
 
   void HeatPumpAirToWaterCoolingSpeedData::autosize() {
-    getImpl<detail::HeatPumpAirToWaterCoolingSpeedData_Impl>()->autosizeRatedCoolingCapacity();
+    getImpl<detail::HeatPumpAirToWaterCoolingSpeedData_Impl>()->autosize();
   }
 
   // TODO: needed?
   // void HeatPumpAirToWaterCoolingSpeedData::applySizingValues() {
   //   getImpl<detail::HeatPumpAirToWaterCoolingSpeedData_Impl>()->applySizingValues();
   // }
+
+  std::vector<HeatPumpAirToWaterCooling> HeatPumpAirToWaterCoolingSpeedData::heatPumpAirToWaterCoolings() const {
+    return getImpl<detail::HeatPumpAirToWaterCoolingSpeedData_Impl>()->heatPumpAirToWaterCoolings();
+  }
 
 }  // namespace model
 }  // namespace openstudio

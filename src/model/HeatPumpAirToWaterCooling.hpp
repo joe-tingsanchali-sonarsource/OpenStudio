@@ -13,9 +13,10 @@ namespace openstudio {
 
 namespace model {
 
-  class Schedule;
   class Curve;
+  class HeatPumpAirToWater;
   class HeatPumpAirToWaterCoolingSpeedData;
+  class Schedule;
 
   namespace detail {
 
@@ -120,50 +121,53 @@ namespace model {
     unsigned numberOfSpeeds() const;
 
     /*
-   * Get the index of a given HeatPumpAirToWaterCoolingSpeedData (1-indexed)
-   */
+     * Get the index of a given HeatPumpAirToWaterCoolingSpeedData (1-indexed)
+     */
     boost::optional<unsigned> speedIndex(const HeatPumpAirToWaterCoolingSpeedData& speed) const;
 
     /*
-   * Add a new speed after all of the existing speeds.
-   */
+     * Add a new speed after all of the existing speeds.
+     */
     bool addSpeed(const HeatPumpAirToWaterCoolingSpeedData& speed);
 
     /*
-   * Add a new HeatPumpAirToWaterCoolingSpeedData to the list which a given index (1 to x).
-   * Internally calls addSpeed then setSpeedIndex, see remarks there
-   */
+     * Add a new HeatPumpAirToWaterCoolingSpeedData to the list which a given index (1 to x).
+     * Internally calls addSpeed then setSpeedIndex, see remarks there
+     */
     bool addSpeed(const HeatPumpAirToWaterCoolingSpeedData& speed, unsigned index);
 
     /*
-   * You can shuffle the priority of a given HeatPumpAirToWaterCoolingSpeedData after having added it
-   * If index is below 1, it's reset to 1.
-   * If index is greater than the number of speeds, will reset to last
-   */
+     * You can shuffle the priority of a given HeatPumpAirToWaterCoolingSpeedData after having added it
+     * If index is below 1, it's reset to 1.
+     * If index is greater than the number of speeds, will reset to last
+     */
     bool setSpeedIndex(const HeatPumpAirToWaterCoolingSpeedData& speed, unsigned index);
 
     /*
-   * Set all speeds using a list of HeatPumpAirToWaterCoolingSpeedDatas
-   * Internally calls addSpeed, and will return the global status, but will continue trying if there are problems
-   * (eg: if you make a vector larger than the number of accepted speeds, or a vector that has a speed from another model, the valid speeds will be
-   * added indeed, but it'll eventually return false)
-   */
+     * Set all speeds using a list of HeatPumpAirToWaterCoolingSpeedDatas
+     * Internally calls addSpeed, and will return the global status, but will continue trying if there are problems
+     * (eg: if you make a vector larger than the number of accepted speeds, or a vector that has a speed from another model, the valid speeds will be
+     * added indeed, but it'll eventually return false)
+     */
     bool setSpeeds(const std::vector<HeatPumpAirToWaterCoolingSpeedData>& speeds);
 
     /*
-   * Removes all HeatPumpAirToWaterCoolingSpeedDatas in this object
-   */
+     * Removes all HeatPumpAirToWaterCoolingSpeedDatas in this object
+     */
     void removeAllSpeeds();
 
     /*
-   * Remove the given HeatPumpAirToWaterCoolingSpeedData from this object's speeds
-   */
+     * Remove the given HeatPumpAirToWaterCoolingSpeedData from this object's speeds
+     */
     bool removeSpeed(const HeatPumpAirToWaterCoolingSpeedData& speed);
 
     /*
-   * Remove the HeatPumpAirToWaterCoolingSpeedData at the given index (1-indexed)
-   */
+     * Remove the HeatPumpAirToWaterCoolingSpeedData at the given index (1-indexed)
+     */
     bool removeSpeed(unsigned index);
+
+    // Convenience function to return all HeatPumpAirToWater objects that reference this cooling coil
+    std::vector<HeatPumpAirToWater> heatPumpAirToWaters() const;
 
     // Autosize methods
     boost::optional<double> autosizedRatedAirFlowRate() const;

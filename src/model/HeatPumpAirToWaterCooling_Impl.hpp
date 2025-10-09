@@ -12,11 +12,12 @@
 namespace openstudio {
 namespace model {
 
-  class Schedule;
   class Curve;
-  class Node;
-  class ModelObjectList;
+  class HeatPumpAirToWater;
   class HeatPumpAirToWaterCoolingSpeedData;
+  class ModelObjectList;
+  class Node;
+  class Schedule;
 
   namespace detail {
 
@@ -156,6 +157,9 @@ namespace model {
       bool removeSpeed(const HeatPumpAirToWaterCoolingSpeedData& speed);
       bool removeSpeed(unsigned index);
       void removeAllSpeeds();
+
+      // Convenience function to return all HeatPumpAirToWater objects that reference this cooling coil
+      std::vector<HeatPumpAirToWater> heatPumpAirToWaters() const;
 
       // Autosize methods
 

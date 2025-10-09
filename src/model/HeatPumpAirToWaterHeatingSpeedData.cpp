@@ -6,6 +6,9 @@
 #include "HeatPumpAirToWaterHeatingSpeedData.hpp"
 #include "HeatPumpAirToWaterHeatingSpeedData_Impl.hpp"
 
+#include "HeatPumpAirToWaterHeating.hpp"
+#include "HeatPumpAirToWaterHeating_Impl.hpp"
+
 #include "Model.hpp"
 #include "Model_Impl.hpp"
 #include "Curve.hpp"
@@ -174,6 +177,26 @@ namespace model {
     boost::optional<Curve> HeatPumpAirToWaterHeatingSpeedData_Impl::optionalHeatingEnergyInputRatioFunctionofPLRCurve() const {
       return getObject<ModelObject>().getModelObjectTarget<Curve>(
         OS_HeatPump_AirToWater_Heating_SpeedDataFields::HeatingEnergyInputRatioFunctionofPLRCurveName);
+    }
+
+    std::vector<HeatPumpAirToWaterHeating> HeatPumpAirToWaterHeatingSpeedData_Impl::heatPumpAirToWaterHeatings() const {
+      std::vector<HeatPumpAirToWaterHeating> result;
+
+      const auto handle = this->handle();
+
+      for (const auto& awhp : model().getConcreteModelObjects<HeatPumpAirToWaterHeating>()) {
+        if (awhp.boosterModeOnSpeed() && awhp.boosterModeOnSpeed()->handle() == handle) {
+          result.push_back(awhp);
+        } else {
+          const auto speeds = awhp.speeds();
+          if (std::find_if(speeds.cbegin(), speeds.cend(),
+                           [handle](const HeatPumpAirToWaterHeatingSpeedData& speed) { return speed.handle() == handle; })
+              != speeds.end()) {
+            result.push_back(awhp);
+          }
+        }
+      }
+      return result;
     }
 
   }  // namespace detail
@@ -352,6 +375,10 @@ namespace model {
   // void HeatPumpAirToWaterHeatingSpeedData::applySizingValues() {
   //   getImpl<detail::HeatPumpAirToWaterHeatingSpeedData_Impl>()->applySizingValues();
   // }
+
+  std::vector<HeatPumpAirToWaterHeating> HeatPumpAirToWaterHeatingSpeedData::heatPumpAirToWaterHeatings() const {
+    return getImpl<detail::HeatPumpAirToWaterHeatingSpeedData_Impl>()->heatPumpAirToWaterHeatings();
+  }
 
 }  // namespace model
 }  // namespace openstudio

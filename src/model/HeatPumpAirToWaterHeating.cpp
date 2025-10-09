@@ -6,6 +6,8 @@
 #include "HeatPumpAirToWaterHeating.hpp"
 #include "HeatPumpAirToWaterHeating_Impl.hpp"
 
+#include "HeatPumpAirToWater.hpp"
+#include "HeatPumpAirToWater_Impl.hpp"
 #include "HeatPumpAirToWaterHeatingSpeedData.hpp"
 #include "HeatPumpAirToWaterHeatingSpeedData_Impl.hpp"
 
@@ -93,8 +95,19 @@ namespace model {
     }
 
     boost::optional<HVACComponent> HeatPumpAirToWaterHeating_Impl::containingHVACComponent() const {
-      // TODO: implement HeatPumpAirToWaterHeating_Impl::containingHVACComponent"
+      auto awhps = getObject<ModelObject>().getModelObjectSources<HVACComponent>(HeatPumpAirToWater::iddObjectType());
+      auto count = awhps.size();
+      if (count == 1) {
+        return awhps[0];
+      } else if (count > 1) {
+        LOG(Warn, briefDescription() << " is referenced by more than one CoilHeatingElectricMultiStage, returning the first");
+        return awhps[0];
+      }
       return boost::none;
+    }
+
+    std::vector<HeatPumpAirToWater> HeatPumpAirToWaterHeating_Impl::heatPumpAirToWaters() const {
+      return getObject<ModelObject>().getModelObjectSources<HeatPumpAirToWater>(HeatPumpAirToWater::iddObjectType());
     }
 
     ModelObject HeatPumpAirToWaterHeating_Impl::clone(Model model) const {
@@ -686,6 +699,10 @@ namespace model {
 
   bool HeatPumpAirToWaterHeating::removeSpeed(unsigned index) {
     return getImpl<detail::HeatPumpAirToWaterHeating_Impl>()->removeSpeed(index);
+  }
+
+  std::vector<HeatPumpAirToWater> HeatPumpAirToWaterHeating::heatPumpAirToWaters() const {
+    return getImpl<detail::HeatPumpAirToWaterHeating_Impl>()->heatPumpAirToWaters();
   }
 
   /// @cond

@@ -13,9 +13,10 @@ namespace openstudio {
 
 namespace model {
 
-  class Schedule;
   class Curve;
+  class HeatPumpAirToWater;
   class HeatPumpAirToWaterHeatingSpeedData;
+  class Schedule;
 
   namespace detail {
 
@@ -164,6 +165,9 @@ namespace model {
    * Remove the HeatPumpAirToWaterHeatingSpeedData at the given index (1-indexed)
    */
     bool removeSpeed(unsigned index);
+
+    // Convenience function to return all HeatPumpAirToWater objects that reference this heating coil
+    std::vector<HeatPumpAirToWater> heatPumpAirToWaters() const;
 
     // Autosize methods
     boost::optional<double> autosizedRatedAirFlowRate() const;
