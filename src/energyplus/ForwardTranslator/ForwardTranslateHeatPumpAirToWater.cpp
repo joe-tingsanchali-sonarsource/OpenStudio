@@ -28,7 +28,7 @@ namespace energyplus {
 
   void ForwardTranslator::translateHeatPumpAirToWaterCooling(model::HeatPumpAirToWaterCooling& modelObject, IdfObject& idfObject) {
     // Number of Speeds for Cooling: Optional Integer
-    const int numberofSpeedsforCooling = modelObject.numberOfSpeeds();
+    const int numberofSpeedsforCooling = modelObject.plantLoop() ? modelObject.numberOfSpeeds() : 0;
     idfObject.setInt(HeatPump_AirToWaterFields::NumberofSpeedsforCooling, numberofSpeedsforCooling);
     if (numberofSpeedsforCooling == 0) {
       return;
@@ -208,7 +208,7 @@ namespace energyplus {
 
   void ForwardTranslator::translateHeatPumpAirToWaterHeating(model::HeatPumpAirToWaterHeating& modelObject, IdfObject& idfObject) {
 
-    const int numberofSpeedsforHeating = modelObject.numberOfSpeeds();
+    const int numberofSpeedsforHeating = modelObject.plantLoop() ? modelObject.numberOfSpeeds() : 0;
     idfObject.setInt(HeatPump_AirToWaterFields::NumberofSpeedsforHeating, numberofSpeedsforHeating);
     if (numberofSpeedsforHeating == 0) {
       return;
@@ -294,7 +294,7 @@ namespace energyplus {
     const unsigned number_fields =
       static_cast<unsigned>(HeatPump_AirToWaterFields::HeatingEnergyInputRatioFunctionofPLRCurveNameatSpeed1) - startIndex + 1;
 
-    auto getFieldIndex = [startIndex](HeatPump_AirToWaterFields::domain field) -> unsigned {
+    auto getFieldIndex = [&startIndex](HeatPump_AirToWaterFields::domain field) -> unsigned {
       return startIndex + (static_cast<unsigned>(field) - static_cast<unsigned>(HeatPump_AirToWaterFields::RatedHeatingCapacityatSpeed1));
     };
 
@@ -423,7 +423,7 @@ namespace energyplus {
       {
         const std::string airOutletNodeName = modelObject.airOutletNodeName().value_or(modelObject.nameString() + " Air Outlet Node");
         idfObject.setString(HeatPump_AirToWaterFields::AirOutletNodeName, airOutletNodeName);
-        oaNodeListIdf.setString(0, airOutletNodeName);
+        oaNodeListIdf.setString(1, airOutletNodeName);
       }
       m_idfObjects.emplace_back(std::move(oaNodeListIdf));
     }
@@ -441,14 +441,8 @@ namespace energyplus {
     const double heatPumpDefrostTimePeriodFraction = modelObject.heatPumpDefrostTimePeriodFraction();
     idfObject.setDouble(HeatPump_AirToWaterFields::HeatPumpDefrostTimePeriodFraction, heatPumpDefrostTimePeriodFraction);
 
-    if (modelObject.isResistiveDefrostHeaterCapacityAutosized()) {
-      idfObject.setString(HeatPump_AirToWaterFields::ResistiveDefrostHeaterCapacity, "Autosize");
-    } else {
-      // Resistive Defrost Heater Capacity: boost::optional<double>
-      if (boost::optional<double> resistiveDefrostHeaterCapacity_ = modelObject.resistiveDefrostHeaterCapacity()) {
-        idfObject.setDouble(HeatPump_AirToWaterFields::ResistiveDefrostHeaterCapacity, resistiveDefrostHeaterCapacity_.get());
-      }
-    }
+    const double resistiveDefrostHeaterCapacity = modelObject.resistiveDefrostHeaterCapacity();
+    idfObject.setDouble(HeatPump_AirToWaterFields::ResistiveDefrostHeaterCapacity, resistiveDefrostHeaterCapacity);
 
     // Defrost Energy Input Ratio Function of Temperature Curve Name: Optional Object
     if (boost::optional<Curve> defrostEnergyInputRatioFunctionofTemperatureCurve_ = modelObject.defrostEnergyInputRatioFunctionofTemperatureCurve()) {

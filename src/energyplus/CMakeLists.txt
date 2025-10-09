@@ -770,6 +770,7 @@ set(${target_name}_test_src
   Test/GroundHeatExchangerVertical_GTest.cpp
   Test/HeatExchangerDesiccantBalancedFlow_GTest.cpp
   Test/HeatExchangerDesiccantBalancedFlowPerformanceDataType1_GTest.cpp
+  Test/HeatPumpAirToWater_GTest.cpp
   Test/HeatPumpAirToWaterFuelFired_GTest.cpp
   Test/HeatPumpWaterToWaterEquationFit_GTest.cpp
   Test/HeatPumpPlantLoopEIR_GTest.cpp
