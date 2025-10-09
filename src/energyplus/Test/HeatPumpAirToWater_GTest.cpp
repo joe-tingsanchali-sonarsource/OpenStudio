@@ -267,6 +267,7 @@ PlantLoop createLoop(Model& m, const std::string& prefix) {
 TEST_F(EnergyPlusFixture, ForwardTranslator_HeatPumpAirToWater) {
 
   ForwardTranslator ft;
+  ft.setExcludeLCCObjects(true);
 
   Model m;
 
@@ -511,8 +512,6 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_HeatPumpAirToWater) {
   {
     Workspace w = ft.translateModel(m);
 
-    m.save("awhp.osm");
-    w.save("awhp.idf", true);
     const auto idfObjs = w.getObjectsByType(IddObjectType::HeatPump_AirToWater);
     ASSERT_EQ(1u, idfObjs.size());
 
