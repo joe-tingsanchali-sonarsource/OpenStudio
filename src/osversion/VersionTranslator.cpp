@@ -9810,15 +9810,14 @@ namespace osversion {
         for (size_t i = 0; i < object.numFields(); ++i) {
           if ((value = object.getString(i))) {
             newObject.setString(i, value.get());
-          }
-        }
-        else {
-          if (i == 24) {
-            newObject.setString(i, "Autosize");
-          } else if (i == 25) {
-            newObject.setDouble(i, 35.0);
-          } else if (i == 26) {
-            newObject.setDouble(i, 25.6);
+          } else {
+            if (i == 24) {
+              newObject.setString(i, "Autosize");
+            } else if (i == 25) {
+              newObject.setDouble(i, 35.0);
+            } else if (i == 26) {
+              newObject.setDouble(i, 25.6);
+            }
           }
         }
       }
