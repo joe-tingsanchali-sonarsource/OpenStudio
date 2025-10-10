@@ -79,6 +79,11 @@ You can also refer to the [OpenStudio SDK Python Binding Version Compatibility M
     * API-breaking change for `ExternalInterface:FunctionalMockupUnitExport:To:Schedule` and `ExternalInterface:FunctionalMockupUnitExport:To:Actuator`:
         * `initialValue` (`double` to `boost::optional<double>`)
 
+* [#5495](https://github.com/NREL/OpenStudio/pull/5495) - New ThermalStorageChilledWaterStratified default
+    * Field `Nominal Cooling Capacity` is made required (also made autosizable) for `ThermalStorage:ChilledWater:Stratified`
+    * API-breaking change for `ThermalStorage:ChilledWater:Stratified`:
+        * `resetNominalCoolingCapacity` is removed
+
 ## Minor changes and bug fixes
 
 
