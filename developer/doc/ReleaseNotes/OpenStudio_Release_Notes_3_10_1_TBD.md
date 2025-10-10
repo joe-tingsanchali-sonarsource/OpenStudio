@@ -84,6 +84,12 @@ You can also refer to the [OpenStudio SDK Python Binding Version Compatibility M
     * API-breaking change for `ThermalStorage:ChilledWater:Stratified`:
         * `resetNominalCoolingCapacity` is removed
 
+* [#5492](https://github.com/NREL/OpenStudio/pull/5492) - New DX Heating Coil Sizing Ratio fields
+    * Replaces `Minimum Outdoor Dry-Bulb Temperature for Compressor Operation` with `DX Heating Coil Sizing Ratio` for `AirLoopHVAC:UnitaryHeatPump:AirToAir:MultiSpeed`
+    * Deprecated methods for `AirLoopHVAC:UnitaryHeatPump:AirToAir:MultiSpeed`:
+        * `minimumOutdoorDryBulbTemperatureforCompressorOperation`
+        * `setMinimumOutdoorDryBulbTemperatureforCompressorOperation`
+        
 ## Minor changes and bug fixes
 
 
