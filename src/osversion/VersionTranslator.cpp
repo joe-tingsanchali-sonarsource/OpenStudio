@@ -9780,18 +9780,22 @@ namespace osversion {
             } else {
               newObject.setString(i + 1, value.get());
             }
-          } else {
-            if (i == 13) {
-              newObject.setString(i + 1, "Autosize");
-            } else if (i == 14) {
-              newObject.setDouble(i + 1, 35.0);
-            } else if (i == 15) {
-              newObject.setDouble(i + 1, 25.6);
-            }
           }
         }
 
         newObject.setDouble(9, 1.25);
+
+        if (!object.getDouble(13)) {
+          newObject.setString(14, "Autosize");
+        }
+
+        if (!object.getDouble(14)) {
+          newObject.setDouble(15, 35.0);
+        }
+
+        if (!object.getDouble(15)) {
+          newObject.setDouble(16, 25.6);
+        }
 
         m_refactored.push_back(RefactoredObjectData(object, newObject));
         ss << newObject;
@@ -9810,33 +9814,33 @@ namespace osversion {
         for (size_t i = 0; i < object.numFields(); ++i) {
           if ((value = object.getString(i))) {
             newObject.setString(i, value.get());
-          } else {
-            if (i == 24) {
-              newObject.setString(i, "Autosize");
-            } else if (i == 25) {
-              newObject.setDouble(i, 35.0);
-            } else if (i == 26) {
-              newObject.setDouble(i, 25.6);
-            }
           }
         }
+
+        if (!object.getDouble(24)) {
+          newObject.setString(24, "Autosize");
+        }
+
+        if (!object.getDouble(25)) {
+          newObject.setDouble(25, 35.0);
+        }
+
+        if (!object.getDouble(26)) {
+          newObject.setDouble(26, 25.6);
+        }
+
+        m_refactored.push_back(RefactoredObjectData(object, newObject));
+        ss << newObject;
+
+        // No-op
+      } else {
+        ss << object;
       }
-
-      newObject.setDouble(9, 1.25);
-
-      m_refactored.push_back(RefactoredObjectData(object, newObject));
-      ss << newObject;
-
-      // No-op
     }
-    else {
-      ss << object;
-    }
-  }
 
-  return ss.str();
+    return ss.str();
 
-}  // end update_3_10_0_to_3_10_1
+  }  // end update_3_10_0_to_3_10_1
 
 }  // namespace osversion
 }  // namespace openstudio
