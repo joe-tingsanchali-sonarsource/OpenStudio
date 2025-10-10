@@ -49,6 +49,8 @@ namespace model {
     /** @name Getters */
     //@{
 
+    Schedule availabilitySchedule() const;
+
     boost::optional<double> ratedAirFlowRate() const;
 
     bool isRatedAirFlowRateDefaulted() const;
@@ -98,6 +100,8 @@ namespace model {
     //@}
     /** @name Setters */
     //@{
+
+    bool setAvailabilitySchedule(Schedule& schedule);
 
     bool setRatedAirFlowRate(boost::optional<double> ratedAirFlowRate);
 

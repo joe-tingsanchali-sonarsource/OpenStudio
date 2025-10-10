@@ -45,6 +45,8 @@ namespace model {
 
     /** @name Getters */
 
+    Schedule availabilitySchedule() const;
+
     boost::optional<double> ratedAirFlowRate() const;
 
     bool isRatedAirFlowRateDefaulted() const;
@@ -121,6 +123,8 @@ namespace model {
     double fanDelayTime() const;
 
     /** @name Setters */
+
+    bool setAvailabilitySchedule(Schedule& schedule);
 
     bool setRatedAirFlowRate(double ratedAirFlowRate);
 

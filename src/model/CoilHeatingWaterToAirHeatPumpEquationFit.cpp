@@ -19,6 +19,7 @@
 #include "CurveLinear.hpp"
 #include "Curve.hpp"
 #include "Curve_Impl.hpp"
+#include "ScheduleTypeRegistry.hpp"
 
 #include <utilities/idd/OS_Coil_Heating_WaterToAirHeatPump_EquationFit_FieldEnums.hxx>
 #include <utilities/idd/IddEnums.hxx>
@@ -75,6 +76,17 @@ namespace model {
       return CoilHeatingWaterToAirHeatPumpEquationFit::iddObjectType();
     }
 
+    std::vector<ScheduleTypeKey> CoilHeatingWaterToAirHeatPumpEquationFit_Impl::getScheduleTypeKeys(const Schedule& schedule) const {
+      std::vector<ScheduleTypeKey> result;
+      UnsignedVector fieldIndices = getSourceIndices(schedule.handle());
+      UnsignedVector::const_iterator b(fieldIndices.begin());
+      UnsignedVector::const_iterator e(fieldIndices.end());
+      if (std::find(b, e, OS_Coil_Heating_WaterToAirHeatPump_EquationFitFields::AvailabilityScheduleName) != e) {
+        result.push_back(ScheduleTypeKey("CoilHeatingWaterToAirHeatPumpEquationFit", "Availability Schedule"));
+      }
+      return result;
+    }
+
     unsigned CoilHeatingWaterToAirHeatPumpEquationFit_Impl::airInletPort() const {
       return OS_Coil_Heating_WaterToAirHeatPump_EquationFitFields::AirInletNodeName;
     }
@@ -89,6 +101,25 @@ namespace model {
 
     unsigned CoilHeatingWaterToAirHeatPumpEquationFit_Impl::waterOutletPort() const {
       return OS_Coil_Heating_WaterToAirHeatPump_EquationFitFields::WaterOutletNodeName;
+    }
+
+    boost::optional<Schedule> CoilHeatingWaterToAirHeatPumpEquationFit_Impl::optionalAvailabilitySchedule() const {
+      return getObject<ModelObject>().getModelObjectTarget<Schedule>(OS_Coil_Heating_WaterToAirHeatPump_EquationFitFields::AvailabilityScheduleName);
+    }
+
+    Schedule CoilHeatingWaterToAirHeatPumpEquationFit_Impl::availabilitySchedule() const {
+      boost::optional<Schedule> value = optionalAvailabilitySchedule();
+      if (!value) {
+        // it is an error if we get here, however we don't want to crash
+        // so we hook up to global always on schedule
+        LOG(Error, "Required availability schedule not set, using 'Always On' schedule");
+        value = this->model().alwaysOnDiscreteSchedule();
+        OS_ASSERT(value);
+        const_cast<CoilHeatingWaterToAirHeatPumpEquationFit_Impl*>(this)->setAvailabilitySchedule(*value);
+        value = optionalAvailabilitySchedule();
+      }
+      OS_ASSERT(value);
+      return value.get();
     }
 
     boost::optional<double> CoilHeatingWaterToAirHeatPumpEquationFit_Impl::ratedAirFlowRate() const {
@@ -169,6 +200,11 @@ namespace model {
         getDouble(OS_Coil_Heating_WaterToAirHeatPump_EquationFitFields::RatioofRatedHeatingCapacitytoRatedCoolingCapacity, true);
       OS_ASSERT(value);
       return value.get();
+    }
+
+    bool CoilHeatingWaterToAirHeatPumpEquationFit_Impl::setAvailabilitySchedule(Schedule& schedule) {
+      bool result = setSchedule(OS_Coil_Heating_WaterToAirHeatPump_EquationFitFields::AvailabilityScheduleName, "CoilHeatingWaterToAirHeatPumpEquationFit", "Availability Schedule", schedule);
+      return result;
     }
 
     bool CoilHeatingWaterToAirHeatPumpEquationFit_Impl::setRatedAirFlowRate(boost::optional<double> ratedAirFlowRate) {
@@ -439,7 +475,11 @@ namespace model {
     : WaterToAirComponent(CoilHeatingWaterToAirHeatPumpEquationFit::iddObjectType(), model) {
     OS_ASSERT(getImpl<detail::CoilHeatingWaterToAirHeatPumpEquationFit_Impl>());
 
-    bool ok = setRatedEnteringWaterTemperature(20);
+    auto always_on = model.alwaysOnDiscreteSchedule();
+    bool ok = setAvailabilitySchedule(always_on);
+    OS_ASSERT(ok);
+
+    ok = setRatedEnteringWaterTemperature(20);
     OS_ASSERT(ok);
 
     ok = setRatedEnteringAirDryBulbTemperature(20);
@@ -468,7 +508,11 @@ namespace model {
     : WaterToAirComponent(CoilHeatingWaterToAirHeatPumpEquationFit::iddObjectType(), model) {
     OS_ASSERT(getImpl<detail::CoilHeatingWaterToAirHeatPumpEquationFit_Impl>());
 
-    bool ok = setRatedEnteringWaterTemperature(20);
+    auto always_on = model.alwaysOnDiscreteSchedule();
+    bool ok = setAvailabilitySchedule(always_on);
+    OS_ASSERT(ok);
+
+    ok = setRatedEnteringWaterTemperature(20);
     OS_ASSERT(ok);
 
     ok = setRatedEnteringAirDryBulbTemperature(20);
@@ -507,6 +551,10 @@ namespace model {
 
   IddObjectType CoilHeatingWaterToAirHeatPumpEquationFit::iddObjectType() {
     return {IddObjectType::OS_Coil_Heating_WaterToAirHeatPump_EquationFit};
+  }
+
+  Schedule CoilHeatingWaterToAirHeatPumpEquationFit::availabilitySchedule() const {
+    return getImpl<detail::CoilHeatingWaterToAirHeatPumpEquationFit_Impl>()->availabilitySchedule();
   }
 
   boost::optional<double> CoilHeatingWaterToAirHeatPumpEquationFit::ratedAirFlowRate() const {
@@ -563,6 +611,10 @@ namespace model {
 
   double CoilHeatingWaterToAirHeatPumpEquationFit::ratioofRatedHeatingCapacitytoRatedCoolingCapacity() const {
     return getImpl<detail::CoilHeatingWaterToAirHeatPumpEquationFit_Impl>()->ratioofRatedHeatingCapacitytoRatedCoolingCapacity();
+  }
+
+  bool CoilHeatingWaterToAirHeatPumpEquationFit::setAvailabilitySchedule(Schedule& schedule) {
+    return getImpl<detail::CoilHeatingWaterToAirHeatPumpEquationFit_Impl>()->setAvailabilitySchedule(schedule);
   }
 
   bool CoilHeatingWaterToAirHeatPumpEquationFit::setRatedAirFlowRate(OptionalDouble ratedAirFlowRate) {
