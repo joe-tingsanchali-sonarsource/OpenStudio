@@ -4665,7 +4665,7 @@ TEST_F(OSVersionFixture, update_3_10_0_to_3_10_1_EvaporativeFluidCooler) {
   ASSERT_EQ(1u, efctss.size());
   const auto& efcts = efctss.front();
 
-  EXPECT_EQ("Evaporative Fluid Cooler Single Speed 1", efcts.getString(1).get());  // Name
+  EXPECT_EQ("Evaporative Fluid Cooler Two Speed 1", efcts.getString(1).get());  // Name
 
   // Fields made required
   EXPECT_EQ(150.0, efcts.getDouble(24).get());  // Design Entering Water Temperature
