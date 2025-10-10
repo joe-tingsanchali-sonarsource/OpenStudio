@@ -4672,6 +4672,5 @@ TEST_F(OSVersionFixture, update_3_10_0_to_3_10_1_ThermalStorageChilledWaterStrat
   EXPECT_EQ("Autosize", ts.getString(10).get());
 
   // After insertion and also last field: Ambient Temperature Indicator
-  ASSERT_TRUE(ts.getTarget(11));
-  EXPECT_EQ("Schedule Ruleset 1", ts.getTarget(11)->nameString());
+  EXPECT_EQ("Outdoors", ts.getString(11).get());
 }

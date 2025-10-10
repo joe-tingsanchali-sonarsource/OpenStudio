@@ -9793,11 +9793,12 @@ namespace osversion {
         for (size_t i = 0; i < object.numFields(); ++i) {
           if ((value = object.getString(i))) {
             newObject.setString(i, value.get());
-          } else if (i == 10) {
-            newObject.setString(i, "Autosize");
           }
         }
 
+        if (!object.getDouble(10)) {
+          newObject.setString(10, "Autosize");
+        }
         ss << newObject;
         m_refactored.emplace_back(std::move(object), std::move(newObject));
 
