@@ -265,7 +265,8 @@ namespace model {
     }
 
     bool CoilWaterHeatingAirToWaterHeatPump_Impl::setAvailabilitySchedule(Schedule& schedule) {
-      bool result = setSchedule(OS_Coil_WaterHeating_AirToWaterHeatPumpFields::AvailabilityScheduleName, "CoilWaterHeatingAirToWaterHeatPump", "Availability Schedule", schedule);
+      bool result = setSchedule(OS_Coil_WaterHeating_AirToWaterHeatPumpFields::AvailabilityScheduleName, "CoilWaterHeatingAirToWaterHeatPump",
+                                "Availability Schedule", schedule);
       return result;
     }
 

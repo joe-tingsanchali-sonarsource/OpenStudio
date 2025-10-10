@@ -233,7 +233,7 @@ namespace model {
       {"CoilSystemCoolingWater", "Availability", "availabilitySchedule", false, "Availability", 0.0, 1.0},
       {"CoilWaterHeatingAirToWaterHeatPump", "Availability Schedule", "availabilitySchedule", false, "Availability", 0.0, 1.0},
       {"CoilWaterHeatingAirToWaterHeatPumpVariableSpeed", "Availability Schedule", "availabilitySchedule", false, "Availability", 0.0, 1.0},
-      {"CoilWaterHeatingAirToWaterHeatPumpWrapped", "Availability Schedule", "availabilitySchedule", false, "Availability", 0.0, 1.0},      
+      {"CoilWaterHeatingAirToWaterHeatPumpWrapped", "Availability Schedule", "availabilitySchedule", false, "Availability", 0.0, 1.0},
       {"CoilWaterHeatingDesuperheater", "Availability", "availabilitySchedule", false, "Availability", 0.0, 1.0},
       {"CoilWaterHeatingDesuperheater", "Setpoint Temperature", "setpointTemperatureSchedule", true, "Temperature", OptionalDouble(),
        OptionalDouble()},

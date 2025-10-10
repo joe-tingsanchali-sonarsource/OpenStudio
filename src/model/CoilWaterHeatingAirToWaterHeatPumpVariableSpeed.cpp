@@ -190,7 +190,8 @@ namespace model {
     }
 
     boost::optional<Schedule> CoilWaterHeatingAirToWaterHeatPumpVariableSpeed_Impl::optionalAvailabilitySchedule() const {
-      return getObject<ModelObject>().getModelObjectTarget<Schedule>(OS_Coil_WaterHeating_AirToWaterHeatPump_VariableSpeedFields::AvailabilityScheduleName);
+      return getObject<ModelObject>().getModelObjectTarget<Schedule>(
+        OS_Coil_WaterHeating_AirToWaterHeatPump_VariableSpeedFields::AvailabilityScheduleName);
     }
 
     Schedule CoilWaterHeatingAirToWaterHeatPumpVariableSpeed_Impl::availabilitySchedule() const {
@@ -329,7 +330,8 @@ namespace model {
     }
 
     bool CoilWaterHeatingAirToWaterHeatPumpVariableSpeed_Impl::setAvailabilitySchedule(Schedule& schedule) {
-      bool result = setSchedule(OS_Coil_WaterHeating_AirToWaterHeatPump_VariableSpeedFields::AvailabilityScheduleName, "CoilWaterHeatingAirToWaterHeatPumpVariableSpeed", "Availability Schedule", schedule);
+      bool result = setSchedule(OS_Coil_WaterHeating_AirToWaterHeatPump_VariableSpeedFields::AvailabilityScheduleName,
+                                "CoilWaterHeatingAirToWaterHeatPumpVariableSpeed", "Availability Schedule", schedule);
       return result;
     }
 

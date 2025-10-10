@@ -232,7 +232,8 @@ namespace model {
     }
 
     bool CoilCoolingWaterToAirHeatPumpEquationFit_Impl::setAvailabilitySchedule(Schedule& schedule) {
-      bool result = setSchedule(OS_Coil_Cooling_WaterToAirHeatPump_EquationFitFields::AvailabilityScheduleName, "CoilCoolingWaterToAirHeatPumpEquationFit", "Availability Schedule", schedule);
+      bool result = setSchedule(OS_Coil_Cooling_WaterToAirHeatPump_EquationFitFields::AvailabilityScheduleName,
+                                "CoilCoolingWaterToAirHeatPumpEquationFit", "Availability Schedule", schedule);
       return result;
     }
 

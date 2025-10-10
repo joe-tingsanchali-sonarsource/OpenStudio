@@ -260,7 +260,8 @@ namespace model {
     }
 
     bool CoilCoolingDXVariableSpeed_Impl::setAvailabilitySchedule(Schedule& schedule) {
-      bool result = setSchedule(OS_Coil_Cooling_DX_VariableSpeedFields::AvailabilityScheduleName, "CoilCoolingDXVariableSpeed", "Availability Schedule", schedule);
+      bool result = setSchedule(OS_Coil_Cooling_DX_VariableSpeedFields::AvailabilityScheduleName, "CoilCoolingDXVariableSpeed",
+                                "Availability Schedule", schedule);
       return result;
     }
 

@@ -9804,15 +9804,11 @@ namespace osversion {
     for (const IdfObject& object : idf_3_10_0.objects()) {
       auto iddname = object.iddObject().name();
 
-      if ((iddname == "OS:Coil:Cooling:DX:VariableSpeed") ||
-          (iddname == "OS:Coil:Heating:DX:VariableSpeed") ||
-          (iddname == "OS:Coil:Cooling:WaterToAirHeatPump:EquationFit") ||
-          (iddname == "OS:Coil:Heating:WaterToAirHeatPump:EquationFit") ||
-          (iddname == "OS:Coil:Cooling:WaterToAirHeatPump:VariableSpeedEquationFit") ||
-          (iddname == "OS:Coil:Heating:WaterToAirHeatPump:VariableSpeedEquationFit") ||
-          (iddname == "OS:Coil:WaterHeating:AirToWaterHeatPump") ||
-          (iddname == "OS:Coil:WaterHeating:AirToWaterHeatPump:Wrapped") ||
-          (iddname == "OS:Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed")) {
+      if ((iddname == "OS:Coil:Cooling:DX:VariableSpeed") || (iddname == "OS:Coil:Heating:DX:VariableSpeed")
+          || (iddname == "OS:Coil:Cooling:WaterToAirHeatPump:EquationFit") || (iddname == "OS:Coil:Heating:WaterToAirHeatPump:EquationFit")
+          || (iddname == "OS:Coil:Cooling:WaterToAirHeatPump:VariableSpeedEquationFit")
+          || (iddname == "OS:Coil:Heating:WaterToAirHeatPump:VariableSpeedEquationFit") || (iddname == "OS:Coil:WaterHeating:AirToWaterHeatPump")
+          || (iddname == "OS:Coil:WaterHeating:AirToWaterHeatPump:Wrapped") || (iddname == "OS:Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed")) {
 
         // 1 Field has been inserted from 3.10.0 to 3.10.1:
         // ------------------------------------------------
