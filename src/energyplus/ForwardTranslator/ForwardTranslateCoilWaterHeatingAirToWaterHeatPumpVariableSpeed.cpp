@@ -8,6 +8,9 @@
 #include "../../model/CoilWaterHeatingAirToWaterHeatPumpVariableSpeed.hpp"
 #include "../../model/CoilWaterHeatingAirToWaterHeatPumpVariableSpeedSpeedData.hpp"
 #include "../../model/Curve.hpp"
+#include "../../model/Schedule.hpp"
+#include "../../model/Schedule_Impl.hpp"
+
 #include <utilities/idd/Coil_WaterHeating_AirToWaterHeatPump_VariableSpeed_FieldEnums.hxx>
 #include "../../utilities/idd/IddEnums.hpp"
 #include <utilities/idd/IddEnums.hxx>
@@ -36,6 +39,14 @@ namespace energyplus {
 
     // Name and register
     IdfObject idfObject = createRegisterAndNameIdfObject(openstudio::IddObjectType::Coil_WaterHeating_AirToWaterHeatPump_VariableSpeed, modelObject);
+
+    // AvailabilityScheduleName
+    {
+      auto schedule = modelObject.availabilitySchedule();
+      if (boost::optional<IdfObject> _schedule = translateAndMapModelObject(schedule)) {
+        idfObject.setString(Coil_WaterHeating_AirToWaterHeatPump_VariableSpeedFields::AvailabilityScheduleName, _schedule->name().get());
+      }
+    }
 
     // Nominal Speed Level
     if (auto speedLevel = modelObject.nominalSpeedLevel()) {
