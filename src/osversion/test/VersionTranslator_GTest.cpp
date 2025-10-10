@@ -4785,3 +4785,157 @@ TEST_F(OSVersionFixture, update_3_10_0_to_3_10_1_ControllerMechanicalVentilation
   EXPECT_TRUE(cntrl.isEmpty(3));                                                       // Demand Controlled Ventilation
   EXPECT_EQ("ProportionalControlBasedonOccupancySchedule", cntrl.getString(4).get());  // System Outdoor Air Method
 }
+
+TEST_F(OSVersionFixture, update_3_10_0_to_3_10_1_CoilAvailabilitySchedules) {
+  openstudio::path path = resourcesPath() / toPath("osversion/3_10_1/test_vt_CoilAvailabilitySchedules.osm");
+  osversion::VersionTranslator vt;
+  boost::optional<model::Model> model = vt.loadModel(path);
+  ASSERT_TRUE(model) << "Failed to load " << path;
+
+  openstudio::path outPath = resourcesPath() / toPath("osversion/3_10_1/test_vt_CoilAvailabilitySchedules_updated.osm");
+  model->save(outPath, true);
+
+  {
+    std::vector<WorkspaceObject> coils = model->getObjectsByType("OS:Coil:Cooling:DX:VariableSpeed");
+    ASSERT_EQ(1u, coils.size());
+    const auto& coil = coils.front();
+
+    // Before insertion: Name
+    EXPECT_EQ("Coil Cooling DX Variable Speed 1", coil.getString(1).get());  // Name
+
+    // New Field: Availability Schedule Name
+    ASSERT_TRUE(coil.getTarget(2));
+    EXPECT_EQ("Always On Discrete", coil.getTarget(2)->nameString());
+
+    // After insertion: Indoor Air Inlet Node Name
+    EXPECT_TRUE(coil.isEmpty(3));
+  }
+
+  {
+    std::vector<WorkspaceObject> coils = model->getObjectsByType("OS:Coil:Heating:DX:VariableSpeed");
+    ASSERT_EQ(1u, coils.size());
+    const auto& coil = coils.front();
+
+    // Before insertion: Name
+    EXPECT_EQ("Coil Heating DX Variable Speed 1", coil.getString(1).get());  // Name
+
+    // New Field: Availability Schedule Name
+    ASSERT_TRUE(coil.getTarget(2));
+    EXPECT_EQ("Always On Discrete", coil.getTarget(2)->nameString());
+
+    // After insertion: Indoor Air Inlet Node Name
+    EXPECT_TRUE(coil.isEmpty(3));
+  }
+
+  {
+    std::vector<WorkspaceObject> coils = model->getObjectsByType("OS:Coil:Cooling:WaterToAirHeatPump:EquationFit");
+    ASSERT_EQ(1u, coils.size());
+    const auto& coil = coils.front();
+
+    // Before insertion: Name
+    EXPECT_EQ("Coil Cooling Water To Air Heat Pump Equation Fit 1", coil.getString(1).get());  // Name
+
+    // New Field: Availability Schedule Name
+    ASSERT_TRUE(coil.getTarget(2));
+    EXPECT_EQ("Always On Discrete", coil.getTarget(2)->nameString());
+
+    // After insertion: Water Inlet Node Name
+    EXPECT_TRUE(coil.isEmpty(3));
+  }
+
+  {
+    std::vector<WorkspaceObject> coils = model->getObjectsByType("OS:Coil:Heating:WaterToAirHeatPump:EquationFit");
+    ASSERT_EQ(1u, coils.size());
+    const auto& coil = coils.front();
+
+    // Before insertion: Name
+    EXPECT_EQ("Coil Heating Water To Air Heat Pump Equation Fit 1", coil.getString(1).get());  // Name
+
+    // New Field: Availability Schedule Name
+    ASSERT_TRUE(coil.getTarget(2));
+    EXPECT_EQ("Always On Discrete", coil.getTarget(2)->nameString());
+
+    // After insertion: Water Inlet Node Name
+    EXPECT_TRUE(coil.isEmpty(3));
+  }
+
+  {
+    std::vector<WorkspaceObject> coils = model->getObjectsByType("OS:Coil:Cooling:WaterToAirHeatPump:VariableSpeedEquationFit");
+    ASSERT_EQ(1u, coils.size());
+    const auto& coil = coils.front();
+
+    // Before insertion: Name
+    EXPECT_EQ("Coil Cooling Water To Air Heat Pump Variable Speed Equation Fit 1", coil.getString(1).get());  // Name
+
+    // New Field: Availability Schedule Name
+    ASSERT_TRUE(coil.getTarget(2));
+    EXPECT_EQ("Always On Discrete", coil.getTarget(2)->nameString());
+
+    // After insertion: Water-to-Refrigerant HX Water Inlet Node Name
+    EXPECT_TRUE(coil.isEmpty(3));
+  }
+
+  {
+    std::vector<WorkspaceObject> coils = model->getObjectsByType("OS:Coil:Heating:WaterToAirHeatPump:VariableSpeedEquationFit");
+    ASSERT_EQ(1u, coils.size());
+    const auto& coil = coils.front();
+
+    // Before insertion: Name
+    EXPECT_EQ("Coil Heating Water To Air Heat Pump Variable Speed Equation Fit 1", coil.getString(1).get());  // Name
+
+    // New Field: Availability Schedule Name
+    ASSERT_TRUE(coil.getTarget(2));
+    EXPECT_EQ("Always On Discrete", coil.getTarget(2)->nameString());
+
+    // After insertion: Water-to-Refrigerant HX Water Inlet Node Name
+    EXPECT_TRUE(coil.isEmpty(3));
+  }
+
+  {
+    std::vector<WorkspaceObject> coils = model->getObjectsByType("OS:Coil:WaterHeating:AirToWaterHeatPump");
+    ASSERT_EQ(1u, coils.size());
+    const auto& coil = coils.front();
+
+    // Before insertion: Name
+    EXPECT_EQ("Coil Water Heating Air To Water Heat Pump 1", coil.getString(1).get());  // Name
+
+    // New Field: Availability Schedule Name
+    ASSERT_TRUE(coil.getTarget(2));
+    EXPECT_EQ("Always On Discrete", coil.getTarget(2)->nameString());
+
+    // After insertion: Rated Heating Capacity
+    EXPECT_EQ(4000.0, coil.getDouble(3).get());
+  }
+
+  {
+    std::vector<WorkspaceObject> coils = model->getObjectsByType("OS:Coil:WaterHeating:AirToWaterHeatPump:Wrapped");
+    ASSERT_EQ(1u, coils.size());
+    const auto& coil = coils.front();
+
+    // Before insertion: Name
+    EXPECT_EQ("Coil Water Heating Air To Water Heat Pump Wrapped 1", coil.getString(1).get());  // Name
+
+    // New Field: Availability Schedule Name
+    ASSERT_TRUE(coil.getTarget(2));
+    EXPECT_EQ("Always On Discrete", coil.getTarget(2)->nameString());
+
+    // After insertion: Rated Heating Capacity
+    EXPECT_EQ(2349.6, coil.getDouble(3).get());
+  }
+
+  {
+    std::vector<WorkspaceObject> coils = model->getObjectsByType("OS:Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed");
+    ASSERT_EQ(1u, coils.size());
+    const auto& coil = coils.front();
+
+    // Before insertion: Name
+    EXPECT_EQ("Coil Water Heating Air To Water Heat Pump Variable Speed 1", coil.getString(1).get());  // Name
+
+    // New Field: Availability Schedule Name
+    ASSERT_TRUE(coil.getTarget(2));
+    EXPECT_EQ("Always On Discrete", coil.getTarget(2)->nameString());
+
+    // After insertion: Nominal Speed Level
+    EXPECT_EQ(1, coil.getInt(3).get());
+  }
+}

@@ -9757,10 +9757,87 @@ namespace osversion {
     IdfFile targetIdf(idd_3_10_1.iddFile());
     ss << targetIdf.versionObject().get();
 
+    boost::optional<IdfObject> alwaysOnDiscreteSchedule;
+
+    // Add an alwaysOnDiscreteSchedule if one does not already exist
+    if (!m_isComponent) {
+      for (const IdfObject& object : idf_3_10_0.objects()) {
+        if (object.iddObject().name() == "OS:Schedule:Constant") {
+          if (boost::optional<std::string> name = object.getString(1)) {
+            if (istringEqual(name.get(), "Always On Discrete")) {
+              if (boost::optional<double> value = object.getDouble(3)) {
+                if (equal<double>(value.get(), 1.0)) {
+                  alwaysOnDiscreteSchedule = object;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      if (!alwaysOnDiscreteSchedule) {
+        alwaysOnDiscreteSchedule = IdfObject(idd_3_10_1.getObject("OS:Schedule:Constant").get());
+
+        alwaysOnDiscreteSchedule->setString(0, toString(createUUID()));
+        alwaysOnDiscreteSchedule->setString(1, "Always On Discrete");
+        alwaysOnDiscreteSchedule->setDouble(3, 1.0);
+
+        IdfObject typeLimits(idd_3_10_1.getObject("OS:ScheduleTypeLimits").get());
+        typeLimits.setString(0, toString(createUUID()));
+        typeLimits.setString(1, "Always On Discrete Limits");
+        typeLimits.setDouble(2, 0.0);
+        typeLimits.setDouble(3, 1.0);
+        typeLimits.setString(4, "Discrete");
+        typeLimits.setString(5, "Availability");
+
+        alwaysOnDiscreteSchedule->setString(2, typeLimits.getString(0).get());
+
+        ss << alwaysOnDiscreteSchedule.get();
+        ss << typeLimits;
+
+        // Register new objects
+        m_new.push_back(alwaysOnDiscreteSchedule.get());
+        m_new.push_back(typeLimits);
+      }
+    }  // End locating or creating alwaysOnDiscreteSchedule
+
     for (const IdfObject& object : idf_3_10_0.objects()) {
       auto iddname = object.iddObject().name();
 
-      if (iddname == "OS:Site:WaterMainsTemperature") {
+      if ((iddname == "OS:Coil:Cooling:DX:VariableSpeed") ||
+          (iddname == "OS:Coil:Heating:DX:VariableSpeed") ||
+          (iddname == "OS:Coil:Cooling:WaterToAirHeatPump:EquationFit") ||
+          (iddname == "OS:Coil:Heating:WaterToAirHeatPump:EquationFit") ||
+          (iddname == "OS:Coil:Cooling:WaterToAirHeatPump:VariableSpeedEquationFit") ||
+          (iddname == "OS:Coil:Heating:WaterToAirHeatPump:VariableSpeedEquationFit") ||
+          (iddname == "OS:Coil:WaterHeating:AirToWaterHeatPump") ||
+          (iddname == "OS:Coil:WaterHeating:AirToWaterHeatPump:Wrapped") ||
+          (iddname == "OS:Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed")) {
+
+        // 1 Field has been inserted from 3.10.0 to 3.10.1:
+        // ------------------------------------------------
+        // * Availability Schedule Name * 2
+
+        auto iddObject = idd_3_10_1.getObject(iddname);
+        IdfObject newObject(iddObject.get());
+
+        for (size_t i = 0; i < object.numFields(); ++i) {
+          if ((value = object.getString(i))) {
+            if (i < 2) {
+              newObject.setString(i, value.get());
+            } else {
+              newObject.setString(i + 1, value.get());
+            }
+          }
+        }
+
+        // Applicability Schedule
+        newObject.setString(2, alwaysOnDiscreteSchedule->getString(0).get());
+
+        ss << newObject;
+        m_refactored.emplace_back(std::move(object), std::move(newObject));
+
+      } else if (iddname == "OS:Site:WaterMainsTemperature") {
 
         // 2 Fields have been inserted from 3.10.0 to 3.10.1:
         // ------------------------------------------------
