@@ -17,6 +17,8 @@
 #include "../Schedule_Impl.hpp"
 #include "../ScheduleConstant.hpp"
 #include "../ScheduleConstant_Impl.hpp"
+#include "../ScheduleTypeLimits.hpp"
+#include "../ScheduleTypeLimits_Impl.hpp"
 
 using namespace openstudio;
 using namespace openstudio::model;
@@ -192,8 +194,10 @@ TEST_F(ModelFixture, CoilHeatingDXVariableSpeed_Remove) {
   coil.remove();
 
   auto curves = m.getModelObjects<model::Curve>();
+  auto schedules = m.getConcreteModelObjects<model::ScheduleConstant>();
+  auto limits = m.getConcreteModelObjects<model::ScheduleTypeLimits>();
 
-  EXPECT_EQ(count, m.modelObjects().size() - curves.size());
+  EXPECT_EQ(count + schedules.size() + limits.size(), m.modelObjects().size() - curves.size());
 }
 
 TEST_F(ModelFixture, CoilHeatingDXVariableSpeed_HeatCoolFuelTypes) {
