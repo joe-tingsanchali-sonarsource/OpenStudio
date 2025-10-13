@@ -13,6 +13,8 @@
 #include "CurveBiquadratic_Impl.hpp"
 #include "CurveQuadratic.hpp"
 #include "CurveQuadratic_Impl.hpp"
+#include "Schedule.hpp"
+#include "Schedule_Impl.hpp"
 #include "ScheduleTypeRegistry.hpp"
 
 #include <utilities/idd/IddFactory.hxx>

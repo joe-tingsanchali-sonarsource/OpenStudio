@@ -15,6 +15,10 @@
 #include "../CoilSystemIntegratedHeatPumpAirSource.hpp"
 #include "../ModelObjectList.hpp"
 #include "../ModelObjectList_Impl.hpp"
+#include "../Schedule.hpp"
+#include "../Schedule_Impl.hpp"
+#include "../ScheduleConstant.hpp"
+#include "../ScheduleConstant_Impl.hpp"
 
 using namespace openstudio;
 using namespace openstudio::model;
@@ -35,6 +39,8 @@ TEST_F(ModelFixture, CoilWaterHeatingAirToWaterHeatPumpVariableSpeed_CoilWaterHe
 
   CoilWaterHeatingAirToWaterHeatPumpVariableSpeed coil(m);
 
+  auto alwaysOn = m.alwaysOnDiscreteSchedule();
+  EXPECT_EQ(alwaysOn, coil.availabilitySchedule());
   EXPECT_EQ(1, coil.nominalSpeedLevel());
   EXPECT_EQ(4000.0, coil.ratedWaterHeatingCapacity());
   EXPECT_EQ(29.44, coil.ratedEvaporatorInletAirDryBulbTemperature());
@@ -59,6 +65,8 @@ TEST_F(ModelFixture, CoilWaterHeatingAirToWaterHeatPumpVariableSpeed_SetGetField
 
   CoilWaterHeatingAirToWaterHeatPumpVariableSpeed coil(m);
 
+  ScheduleConstant scheduleConstant(m);
+  EXPECT_TRUE(coil.setAvailabilitySchedule(scheduleConstant));
   EXPECT_TRUE(coil.setNominalSpeedLevel(2));
   EXPECT_TRUE(coil.setRatedWaterHeatingCapacity(1800.0));
   EXPECT_TRUE(coil.setRatedEvaporatorInletAirDryBulbTemperature(20.0));
@@ -76,6 +84,7 @@ TEST_F(ModelFixture, CoilWaterHeatingAirToWaterHeatPumpVariableSpeed_SetGetField
   auto curve = CurveQuadratic(m);
   EXPECT_TRUE(coil.setPartLoadFractionCorrelationCurve(curve));
 
+  EXPECT_EQ(scheduleConstant, coil.availabilitySchedule());
   EXPECT_EQ(2, coil.nominalSpeedLevel());
   EXPECT_EQ(1800.0, coil.ratedWaterHeatingCapacity());
   EXPECT_EQ(20.0, coil.ratedEvaporatorInletAirDryBulbTemperature());

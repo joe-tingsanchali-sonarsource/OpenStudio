@@ -13,6 +13,10 @@
 #include "../CurveBiquadratic.hpp"
 #include "../CoilHeatingDXVariableSpeedSpeedData.hpp"
 #include "../CoilHeatingDXVariableSpeedSpeedData_Impl.hpp"
+#include "../Schedule.hpp"
+#include "../Schedule_Impl.hpp"
+#include "../ScheduleConstant.hpp"
+#include "../ScheduleConstant_Impl.hpp"
 
 using namespace openstudio;
 using namespace openstudio::model;
@@ -21,6 +25,13 @@ TEST_F(ModelFixture, CoilHeatingDXVariableSpeed) {
 
   Model m;
   CoilHeatingDXVariableSpeed coil(m);
+
+  // Availability Schedule Name: Required Object
+  auto alwaysOn = m.alwaysOnDiscreteSchedule();
+  EXPECT_EQ(alwaysOn, coil.availabilitySchedule());
+  ScheduleConstant scheduleConstant(m);
+  EXPECT_TRUE(coil.setAvailabilitySchedule(scheduleConstant));
+  EXPECT_EQ(scheduleConstant, coil.availabilitySchedule());
 
   // Indoor Air Inlet Node Name: Required Object
   // Indoor Air Outlet Node Name: Required Object

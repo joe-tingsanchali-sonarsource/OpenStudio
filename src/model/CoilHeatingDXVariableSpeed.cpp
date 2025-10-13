@@ -29,6 +29,8 @@
 #include "Model_Impl.hpp"
 #include "Node.hpp"
 #include "AirLoopHVAC.hpp"
+#include "Schedule.hpp"
+#include "Schedule_Impl.hpp"
 #include "ScheduleTypeRegistry.hpp"
 
 #include <utilities/idd/IddFactory.hxx>

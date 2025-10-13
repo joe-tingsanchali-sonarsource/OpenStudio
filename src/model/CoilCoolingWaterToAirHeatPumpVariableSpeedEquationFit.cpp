@@ -23,6 +23,8 @@
 #include "Model_Impl.hpp"
 #include "Node.hpp"
 #include "Node_Impl.hpp"
+#include "Schedule.hpp"
+#include "Schedule_Impl.hpp"
 #include "ScheduleTypeRegistry.hpp"
 
 #include <utilities/idd/OS_Coil_Cooling_WaterToAirHeatPump_VariableSpeedEquationFit_FieldEnums.hxx>

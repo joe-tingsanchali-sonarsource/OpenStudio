@@ -11,6 +11,10 @@
 #include "../Curve_Impl.hpp"
 #include "../CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFitSpeedData.hpp"
 #include "../CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFitSpeedData_Impl.hpp"
+#include "../Schedule.hpp"
+#include "../Schedule_Impl.hpp"
+#include "../ScheduleConstant.hpp"
+#include "../ScheduleConstant_Impl.hpp"
 
 using namespace openstudio;
 using namespace openstudio::model;
@@ -26,6 +30,15 @@ TEST_F(ModelFixture, CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFit) {
       exit(0);
     },
     ::testing::ExitedWithCode(0), "");
+
+  Model m;
+  CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFit coil(m);
+
+  auto alwaysOn = m.alwaysOnDiscreteSchedule();
+  EXPECT_EQ(alwaysOn, coil.availabilitySchedule());
+  ScheduleConstant scheduleConstant(m);
+  EXPECT_TRUE(coil.setAvailabilitySchedule(scheduleConstant));
+  EXPECT_EQ(scheduleConstant, coil.availabilitySchedule());
 }
 
 TEST_F(ModelFixture, CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFit_Remove) {

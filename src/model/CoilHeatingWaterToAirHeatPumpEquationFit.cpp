@@ -19,6 +19,8 @@
 #include "CurveLinear.hpp"
 #include "Curve.hpp"
 #include "Curve_Impl.hpp"
+#include "Schedule.hpp"
+#include "Schedule_Impl.hpp"
 #include "ScheduleTypeRegistry.hpp"
 
 #include <utilities/idd/OS_Coil_Heating_WaterToAirHeatPump_EquationFit_FieldEnums.hxx>
