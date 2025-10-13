@@ -5,6 +5,8 @@
 
 #include "CoilWaterHeatingAirToWaterHeatPumpWrapped.hpp"
 #include "CoilWaterHeatingAirToWaterHeatPumpWrapped_Impl.hpp"
+#include "Model.hpp"
+#include "Model_Impl.hpp"
 #include "Curve.hpp"
 #include "Curve_Impl.hpp"
 #include "CurveBiquadratic.hpp"

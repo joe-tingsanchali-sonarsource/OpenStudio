@@ -92,7 +92,7 @@ namespace model {
       UnsignedVector fieldIndices = getSourceIndices(schedule.handle());
       UnsignedVector::const_iterator b(fieldIndices.begin());
       UnsignedVector::const_iterator e(fieldIndices.end());
-      if (std::find(b, e, CoilWaterHeatingAirToWaterHeatPumpVariableSpeed_Impl::AvailabilityScheduleName) != e) {
+      if (std::find(b, e, OS_Coil_WaterHeating_AirToWaterHeatPump_VariableSpeedFields::AvailabilityScheduleName) != e) {
         result.push_back(ScheduleTypeKey("CoilWaterHeatingAirToWaterHeatPumpVariableSpeed", "Availability Schedule"));
       }
       return result;
