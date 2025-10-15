@@ -1274,6 +1274,7 @@ SizingPeriod:WeatherFileDays,
        \memo Use a weather file period for design sizing calculations.
   A1 , \field Name
        \reference RunPeriodsAndDesignDays
+       \reference SizingPeriodWeatherFileDays
        \required-field
        \note user supplied name for reporting
   N1 , \field Begin Month
@@ -48902,13 +48903,96 @@ GroundHeatExchanger:System,
         \key UHFcalc
         \key UBHWTcalc
         \default UHFcalc
-  A8,   \field GHE:Vertical:Array Object Name
+  A8,   \field GHE:Vertical:Sizing Object Type
+        \type choice
+        \key GroundHeatExchanger:Vertical:Sizing:Rectangle
+  A9,   \field GHE:Vertical:Sizing Object Name
+        \type object-list
+        \object-list GroundHeatExchangerVerticalSizingNames
+        \note Only needed when g-function calculation method is FullDesign
+  A10,  \field GHE:Vertical:Array Object Name
         \type object-list
         \object-list GroundHeatExchangerVerticalArrayNames
-  A9;   \field GHE:Vertical:Single Object Name 1
+  A11;  \field GHE:Vertical:Single Object Name 1
         \begin-extensible
         \type object-list
         \object-list GroundHeatExchangerVerticalSingleNames
+
+GroundHeatExchanger:Vertical:Sizing:Rectangle,
+        \memo Specifies parameters to be used for Ground Heat Exchanger borehole
+        \memo field design and sizing.
+        \min-fields 6
+  A1,   \field Name
+        \required-field
+        \type alpha
+        \reference GroundHeatExchangerVerticalSizingNames
+  A2,   \field SizingPeriod:WeatherFileDays Name
+        \required-field
+        \type object-list
+        \object-list SizingPeriodWeatherFileDays
+        \note Specifies the SizingPeriod:WeatherFileDays required to perform GHE sizing
+  N1,   \field Design Flow Rate Per Borehole
+        \type real
+        \minimum> 0.0
+        \default 0.0005
+        \units m3/s
+        \required-field
+        \note Design flow rate per borehole used to size borehole field
+  N2,   \field Available Borehole Field Length
+        \type real
+        \minimum> 0.0
+        \units m
+        \required-field
+        \note Available length of the area available for designing the borehole field
+  N3,   \field Available Borehole Field Width
+        \type real
+        \minimum> 0.0
+        \units m
+        \required-field
+        \note Available width of the area available for designing the borehole field
+  N4,   \field Maximum Number of Boreholes
+        \type real
+        \minimum> 0.0
+        \required-field
+        \note User specified maximum number of boreholes
+  N5,   \field Minimum Borehole Spacing
+        \type real
+        \minimum> 0.0
+        \default 4.0
+        \units m
+        \note Minimum borehole-to-borehole spacing
+  N6,   \field Maximum Borehole Spacing
+        \type real
+        \minimum> 0.0
+        \default 6.0
+        \units m
+        \note Maximum borehole-to-borehole spacing
+  N7,   \field Minimum Borehole Vertical Length
+        \type real
+        \minimum> 0.0
+        \default 60.0
+        \units m
+        \note Minimum drilled depth of the vertical borehole
+  N8,   \field Maximum Borehole Vertical Length
+        \type real
+        \minimum> 0.0
+        \default 135.0
+        \units m
+        \note Maximum drilled depth fo the vertical borehole
+  N9,   \field Minimum Exiting Fluid Temperature for Sizing
+        \type real
+        \minimum> 0.0
+        \default 5.0
+        \units C
+        \note Minimum ground heat exchanger exiting fluid temperature used
+        \note when designing the borehole field
+  N10;  \field Maximum Exiting Fluid Temperature for Sizing
+        \type real
+        \minimum> 0.0
+        \default 35.0
+        \units C
+        \note Maximum ground heat exchanger exiting fluid temperature used
+        \note when designing the borehole field
 
 GroundHeatExchanger:Vertical:Properties,
         \memo Properties for vertical ground heat exchanger systems
