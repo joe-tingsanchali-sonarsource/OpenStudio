@@ -13748,7 +13748,7 @@ OS:Boiler:HotWater,
        \type real
        \units W
        \autosizable
-       \minimum 0.0
+       \minimum> 0.0
        \default autosize
   N2, \field Nominal Thermal Efficiency
        \type real
