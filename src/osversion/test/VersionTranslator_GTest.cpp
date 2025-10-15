@@ -3159,7 +3159,7 @@ TEST_F(OSVersionFixture, update_3_6_1_to_3_7_0_Coils_Latent_solo) {
     }
 
     {
-      const size_t insertionIndex = 17;
+      const size_t insertionIndex = 18;
       EXPECT_EQ(100.0, coil.getDouble(insertionIndex - 1).get());
 
       // Crankcase Heater Capacity Function of Temperature Curve Name
@@ -3169,8 +3169,8 @@ TEST_F(OSVersionFixture, update_3_6_1_to_3_7_0_Coils_Latent_solo) {
     }
 
     // Last field: Part Load Fraction Correlation Curve Name
-    ASSERT_TRUE(coil.getTarget(25));
-    EXPECT_EQ("CC DXVsd Solo Speed Data List", coil.getTarget(25)->nameString());
+    ASSERT_TRUE(coil.getTarget(26));
+    EXPECT_EQ("CC DXVsd Solo Speed Data List", coil.getTarget(26)->nameString());
   }
 }
 
