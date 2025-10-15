@@ -1274,7 +1274,6 @@ SizingPeriod:WeatherFileDays,
        \memo Use a weather file period for design sizing calculations.
   A1 , \field Name
        \reference RunPeriodsAndDesignDays
-       \reference SizingPeriodWeatherFileDays
        \required-field
        \note user supplied name for reporting
   N1 , \field Begin Month
@@ -48902,6 +48901,7 @@ GroundHeatExchanger:System,
         \type choice
         \key UHFcalc
         \key UBHWTcalc
+        \key FullDesign
         \default UHFcalc
   A8,   \field GHE:Vertical:Sizing Object Type
         \type choice
@@ -48936,7 +48936,6 @@ GroundHeatExchanger:Vertical:Sizing:Rectangle,
         \minimum> 0.0
         \default 0.0005
         \units m3/s
-        \required-field
         \note Design flow rate per borehole used to size borehole field
   N2,   \field Available Borehole Field Length
         \type real
