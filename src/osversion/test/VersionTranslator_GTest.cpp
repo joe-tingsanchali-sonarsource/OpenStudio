@@ -2969,7 +2969,7 @@ TEST_F(OSVersionFixture, update_3_6_1_to_3_7_0_Coils_CrankcaseCurve) {
 
     // Last field: Speed Data List
     ASSERT_TRUE(coil.getTarget(20));
-    EXPECT_EQ("CoilHeatingDXVariableSpeed Speed Data List", coil.getTarget(21)->nameString());
+    EXPECT_EQ("CoilHeatingDXVariableSpeed Speed Data List", coil.getTarget(20)->nameString());
   }
 
   {
@@ -2977,9 +2977,9 @@ TEST_F(OSVersionFixture, update_3_6_1_to_3_7_0_Coils_CrankcaseCurve) {
     ASSERT_EQ(1u, coils.size());
     WorkspaceObject coil = coils[0];
 
-    EXPECT_EQ(30, coil.numFields());
+    EXPECT_EQ(31, coil.numFields());
 
-    const size_t insertionIndex = 20;
+    const size_t insertionIndex = 21;
     EXPECT_EQ(100.0, coil.getDouble(insertionIndex - 1).get());
 
     // Crankcase Heater Capacity Function of Temperature Curve Name
@@ -2988,8 +2988,8 @@ TEST_F(OSVersionFixture, update_3_6_1_to_3_7_0_Coils_CrankcaseCurve) {
     EXPECT_EQ(11.0, coil.getDouble(insertionIndex + 1).get());
 
     // Last field: Part Load Fraction Correlation Curve
-    ASSERT_TRUE(coil.getTarget(29));
-    EXPECT_EQ("CoilWaterHeatingAirToWaterHeatPump PLFCorrelationCurve", coil.getTarget(29)->nameString());
+    ASSERT_TRUE(coil.getTarget(30));
+    EXPECT_EQ("CoilWaterHeatingAirToWaterHeatPump PLFCorrelationCurve", coil.getTarget(30)->nameString());
   }
 
   {
@@ -2997,9 +2997,9 @@ TEST_F(OSVersionFixture, update_3_6_1_to_3_7_0_Coils_CrankcaseCurve) {
     ASSERT_EQ(1u, coils.size());
     WorkspaceObject coil = coils[0];
 
-    EXPECT_EQ(23, coil.numFields());
+    EXPECT_EQ(24, coil.numFields());
 
-    const size_t insertionIndex = 18;
+    const size_t insertionIndex = 19;
     EXPECT_EQ(100.0, coil.getDouble(insertionIndex - 1).get());
 
     // Crankcase Heater Capacity Function of Temperature Curve Name
@@ -3008,8 +3008,8 @@ TEST_F(OSVersionFixture, update_3_6_1_to_3_7_0_Coils_CrankcaseCurve) {
     EXPECT_EQ(11.0, coil.getDouble(insertionIndex + 1).get());
 
     // Last field: Speed Data List
-    ASSERT_TRUE(coil.getTarget(22));
-    EXPECT_EQ("CoilWaterHeatingAirToWaterHeatPumpVariableSpeed Speed Data List", coil.getTarget(22)->nameString());
+    ASSERT_TRUE(coil.getTarget(23));
+    EXPECT_EQ("CoilWaterHeatingAirToWaterHeatPumpVariableSpeed Speed Data List", coil.getTarget(23)->nameString());
   }
 
   {
@@ -3017,9 +3017,9 @@ TEST_F(OSVersionFixture, update_3_6_1_to_3_7_0_Coils_CrankcaseCurve) {
     ASSERT_EQ(1u, coils.size());
     WorkspaceObject coil = coils[0];
 
-    EXPECT_EQ(21, coil.numFields());
+    EXPECT_EQ(22, coil.numFields());
 
-    const size_t insertionIndex = 13;
+    const size_t insertionIndex = 14;
     EXPECT_EQ(100.0, coil.getDouble(insertionIndex - 1).get());
 
     // Crankcase Heater Capacity Function of Temperature Curve Name
@@ -3028,8 +3028,8 @@ TEST_F(OSVersionFixture, update_3_6_1_to_3_7_0_Coils_CrankcaseCurve) {
     EXPECT_EQ(11.0, coil.getDouble(insertionIndex + 1).get());
 
     // Last field: Part Load Fraction Correlation Curve Name
-    ASSERT_TRUE(coil.getTarget(20));
-    EXPECT_EQ("CoilWaterHeatingAirToWaterHeatPumpWrapped PLFCorrelationCurve", coil.getTarget(20)->nameString());
+    ASSERT_TRUE(coil.getTarget(21));
+    EXPECT_EQ("CoilWaterHeatingAirToWaterHeatPumpWrapped PLFCorrelationCurve", coil.getTarget(21)->nameString());
   }
 }
 
@@ -3057,16 +3057,16 @@ TEST_F(OSVersionFixture, update_3_6_1_to_3_7_0_Coils_Latent_solo) {
     ASSERT_EQ(1u, coils.size());
     WorkspaceObject coil = coils[0];
 
-    EXPECT_EQ(16, coil.numFields());
+    EXPECT_EQ(17, coil.numFields());
 
     // Previous last field: Heating Power Consumption Curve Name
-    ASSERT_TRUE(coil.getTarget(14));
-    EXPECT_EQ("HC Eq Solo heatingPowerConsumptionCurve", coil.getTarget(14)->nameString());
-
     ASSERT_TRUE(coil.getTarget(15));
-    EXPECT_EQ("HC Eq Solo-PLFCorrelationCurve", coil.getTarget(15)->nameString());
-    EXPECT_DOUBLE_EQ(defaultC1, coil.getTarget(15)->getDouble(2).get());
-    EXPECT_DOUBLE_EQ(defaultC2, coil.getTarget(15)->getDouble(3).get());
+    EXPECT_EQ("HC Eq Solo heatingPowerConsumptionCurve", coil.getTarget(15)->nameString());
+
+    ASSERT_TRUE(coil.getTarget(16));
+    EXPECT_EQ("HC Eq Solo-PLFCorrelationCurve", coil.getTarget(16)->nameString());
+    EXPECT_DOUBLE_EQ(defaultC1, coil.getTarget(16)->getDouble(2).get());
+    EXPECT_DOUBLE_EQ(defaultC2, coil.getTarget(16)->getDouble(3).get());
   }
 
   {
@@ -3074,10 +3074,10 @@ TEST_F(OSVersionFixture, update_3_6_1_to_3_7_0_Coils_Latent_solo) {
     ASSERT_EQ(1u, coils.size());
     WorkspaceObject coil = coils[0];
 
-    EXPECT_EQ(12, coil.numFields());
+    EXPECT_EQ(13, coil.numFields());
 
-    ASSERT_TRUE(coil.getTarget(11));
-    EXPECT_EQ("HC VsdEq Solo Speed Data List", coil.getTarget(11)->nameString());
+    ASSERT_TRUE(coil.getTarget(12));
+    EXPECT_EQ("HC VsdEq Solo Speed Data List", coil.getTarget(12)->nameString());
   }
 
   {
@@ -3085,10 +3085,10 @@ TEST_F(OSVersionFixture, update_3_6_1_to_3_7_0_Coils_Latent_solo) {
     ASSERT_EQ(1u, coils.size());
     WorkspaceObject coil = coils[0];
 
-    EXPECT_EQ(23, coil.numFields());
+    EXPECT_EQ(24, coil.numFields());
 
     {
-      const size_t insertionIndex = 17;
+      const size_t insertionIndex = 18;
       ASSERT_TRUE(coil.getTarget(insertionIndex - 1));
       EXPECT_EQ("CC Eq Solo coolingPowerConsumptionCurve", coil.getTarget(insertionIndex - 1)->nameString());
 
@@ -3102,10 +3102,10 @@ TEST_F(OSVersionFixture, update_3_6_1_to_3_7_0_Coils_Latent_solo) {
     }
 
     // Previous last field: Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity
-    EXPECT_EQ(0.02, coil.getDouble(19).get());
+    EXPECT_EQ(0.02, coil.getDouble(20).get());
 
     {
-      const size_t insertionIndex = 20;
+      const size_t insertionIndex = 21;
       // No Unitary -> IDD DEFAULTS
       // E+ 23.2.0 defaults Maximum Cycling Rate and Latent Capacity Time Constant to 0.0, we don't, cf #4999
       EXPECT_EQ(2.5, coil.getDouble(insertionIndex).get());       // Maximum Cycling Rate
@@ -3119,10 +3119,10 @@ TEST_F(OSVersionFixture, update_3_6_1_to_3_7_0_Coils_Latent_solo) {
     ASSERT_EQ(1u, coils.size());
     WorkspaceObject coil = coils[0];
 
-    EXPECT_EQ(18, coil.numFields());
+    EXPECT_EQ(19, coil.numFields());
 
     {
-      const size_t insertionIndex = 12;
+      const size_t insertionIndex = 13;
       EXPECT_EQ(0.02, coil.getDouble(insertionIndex - 1).get());
 
       // No Unitary -> IDD DEFAULTS
@@ -3134,8 +3134,8 @@ TEST_F(OSVersionFixture, update_3_6_1_to_3_7_0_Coils_Latent_solo) {
       EXPECT_EQ("Yes", coil.getString(insertionIndex + 3).get());
     }
 
-    ASSERT_TRUE(coil.getTarget(17));
-    EXPECT_EQ("CC VsdEq Solo Speed Data List", coil.getTarget(17)->nameString());
+    ASSERT_TRUE(coil.getTarget(18));
+    EXPECT_EQ("CC VsdEq Solo Speed Data List", coil.getTarget(18)->nameString());
   }
 
   {
@@ -3143,10 +3143,10 @@ TEST_F(OSVersionFixture, update_3_6_1_to_3_7_0_Coils_Latent_solo) {
     ASSERT_EQ(1u, coils.size());
     WorkspaceObject coil = coils[0];
 
-    EXPECT_EQ(26, coil.numFields());
+    EXPECT_EQ(27, coil.numFields());
 
     {
-      const size_t insertionIndex = 9;
+      const size_t insertionIndex = 10;
       EXPECT_EQ(0.02, coil.getDouble(insertionIndex - 1).get());
 
       // No Unitary -> IDD DEFAULTS (NOTE: Yes, They ARE NOT the same as the WaterToAir ones...)
