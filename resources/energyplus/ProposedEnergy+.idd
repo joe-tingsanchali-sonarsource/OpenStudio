@@ -1274,6 +1274,7 @@ SizingPeriod:WeatherFileDays,
        \memo Use a weather file period for design sizing calculations.
   A1 , \field Name
        \reference RunPeriodsAndDesignDays
+       \reference SizingPeriodWeatherFileDays
        \required-field
        \note user supplied name for reporting
   N1 , \field Begin Month
@@ -2912,6 +2913,7 @@ Schedule:File,
        \type integer
        \minimum 1
        \maximum 60
+       \default 60
   A6 ; \field Adjust Schedule for Daylight Savings
        \note "No" means do not include Daylight Savings Time in the schedule, instead, use the schedule directly from the Schedule:File csv (default)
        \note "Yes" means include Daylight Savings Time to the schedule
@@ -9848,6 +9850,7 @@ SurfaceProperty:SurroundingSurfaces,
    N1, \field Sky View Factor
        \minimum 0.0
        \maximum 1.0
+       \default 0.5
        \note optional
    A2, \field Sky Temperature Schedule Name
        \type object-list
@@ -9857,6 +9860,7 @@ SurfaceProperty:SurroundingSurfaces,
    N2, \field Ground View Factor
        \minimum 0.0
        \maximum 1.0
+       \default 0.5
        \note optional
    A3, \field Ground Temperature Schedule Name
        \type object-list
@@ -13694,7 +13698,7 @@ ZoneCrossMixing,
        \units m3/s
        \type real
        \minimum 0
-  N2 , \field Flow Rate per Floor
+  N2 , \field Flow Rate per Floor Area
        \type real
        \minimum 0
        \units m3/s-m2
@@ -15144,6 +15148,10 @@ AirflowNetwork:Distribution:Component:Coil,
       \key Coil:Heating:Desuperheater
       \key Coil:Heating:Electric:MultiStage
       \key Coil:Heating:Gas:MultiStage
+      \key Coil:Cooling:WaterToAirHeatPump:EquationFit
+      \key Coil:Heating:WaterToAirHeatPump:EquationFit
+      \key Coil:Cooling:WaterToAirHeatPump:VariableSpeedEquationFit
+      \key Coil:Heating:WaterToAirHeatPump:VariableSpeedEquationFit
       \note Select the type of coil corresponding to the name entered in the field above.
  N1 , \field Air Path Length
       \required-field
@@ -15642,6 +15650,7 @@ Exterior:FuelEquipment,
        \required-field
        \type choice
        \key Electricity
+       \key Water
        \key NaturalGas
        \key Propane
        \key FuelOilNo1
@@ -24938,11 +24947,11 @@ ZoneHVAC:WaterToAirHeatPump,
         \object-list HeatingCoilName
         \note  Needs to match in the supplemental heating coil object
    N7 , \field Maximum Supply Air Temperature from Supplemental Heater
-        \required-field
+        \note required-field disabled as it has a default
         \type real
         \units C
         \autosizable
-        \note default autosize disabled since it is required
+        \default autosize
         \note Supply air temperature from the supplemental heater will not exceed this value.
    N8 , \field Maximum Outdoor Dry-Bulb Temperature for Supplemental Heater Operation
         \type real
@@ -45634,7 +45643,7 @@ HeatPump:PlantLoop:EIR:Cooling,
 
 HeatPump:PlantLoop:EIR:Heating,
         \memo An EIR formulated water to water heat pump model, heating operation
-        \min-fields 15
+        \min-fields 18
    A1,  \field Name
         \type alpha
         \reference PLHPHeatingNames
@@ -51550,12 +51559,17 @@ ThermalStorage:Ice:Simple,
       \type real
       \units GJ
       \ip-units ton-hrs
+      \autosizable
   A3, \field Inlet Node Name
       \type node
       \required-field
-  A4; \field Outlet Node Name
+  A4, \field Outlet Node Name
       \type node
       \required-field
+  A5; \field Thermal Storage Sizing Object Name
+      \type object-list
+      \object-list ThermalStorageSizing
+      \note used only when tank capacity is autosized
 
 ThermalStorage:Ice:Detailed,
     \min-fields 14
@@ -51578,6 +51592,7 @@ ThermalStorage:Ice:Detailed,
   N1 , \field Capacity
        \note This includes only the latent storage capacity
        \units GJ
+       \autosizable
        \required-field
   A3 , \field Inlet Node Name
        \required-field
@@ -51623,13 +51638,17 @@ ThermalStorage:Ice:Detailed,
        \note parameters input above is inappropriate and not advised.
        \units C
        \default 0.0
-  A9 ; \field Thaw Process Indicator
+  A9 , \field Thaw Process Indicator
        \note This field determines whether the system uses internal or external melt
        \note during discharging. This will then have an impact on charging performance.
        \type choice
        \key InsideMelt
        \key OutsideMelt
        \default OutsideMelt
+  A10; \field Thermal Storage Sizing Object Name
+       \type object-list
+       \object-list ThermalStorageSizing
+       \note used only when tank capacity is autosized
 
 ThermalStorage:ChilledWater:Mixed,
        \memo Chilled water storage with a well-mixed, single-node tank. The chilled water is
@@ -51775,8 +51794,8 @@ ThermalStorage:ChilledWater:Stratified,
   N4 , \field Deadband Temperature Difference
        \type real
        \units deltaC
-       \minimum 0.0
-       \default 0.0
+       \minimum 0.0001
+       \default 0.0001
   N5,  \field Temperature Sensor Height
        \units m
        \minimum 0.0
@@ -51786,6 +51805,8 @@ ThermalStorage:ChilledWater:Stratified,
   N7 , \field Nominal Cooling Capacity
        \type real
        \units W
+       \autosizable
+       \default autosize
   A4 , \field Ambient Temperature Indicator
        \required-field
        \type choice
@@ -52366,13 +52387,19 @@ PlantLoop,
         \key LoopFlowCorrection
         \key None
         \default None
-   N6;  \field Loop Circulation Time
+   N6,  \field Loop Circulation Time
         \note This field is only used to autocalculate the Plant Loop Volume.
         \note Loop Volume = Loop Circulation Time * Maximum Loop Flow Rate
         \type real
         \units minutes
         \minimum 0.0
         \default 2.0
+  A19;  \field Water Loop Type
+        \type choice
+        \key HotWater
+        \key ChilledWater
+        \key None
+        \default None
 
 CondenserLoop,
        \memo Defines a central plant condenser loop. CondenserLoop and PlantLoop are nearly
@@ -52872,6 +52899,7 @@ PlantEquipmentOperation:ThermalEnergyStorage,
         \key Chiller:Electric:EIR
         \key Chiller:Electric:ReformulatedEIR
         \key Chiller:Electric
+        \key Chiller:Electric:ASHRAE205
         \key Chiller:Absorption:Indirect
         \key Chiller:Absorption
         \key Chiller:ConstantCOP
@@ -52901,6 +52929,7 @@ PlantEquipmentOperation:ThermalEnergyStorage,
         \key Chiller:Electric:EIR
         \key Chiller:Electric:ReformulatedEIR
         \key Chiller:Electric
+        \key Chiller:Electric:ASHRAE205
         \key Chiller:Absorption:Indirect
         \key Chiller:Absorption
         \key Chiller:ConstantCOP
@@ -52930,6 +52959,7 @@ PlantEquipmentOperation:ThermalEnergyStorage,
         \key Chiller:Electric:EIR
         \key Chiller:Electric:ReformulatedEIR
         \key Chiller:Electric
+        \key Chiller:Electric:ASHRAE205
         \key Chiller:Absorption:Indirect
         \key Chiller:Absorption
         \key Chiller:ConstantCOP
@@ -52959,6 +52989,7 @@ PlantEquipmentOperation:ThermalEnergyStorage,
         \key Chiller:Electric:EIR
         \key Chiller:Electric:ReformulatedEIR
         \key Chiller:Electric
+        \key Chiller:Electric:ASHRAE205
         \key Chiller:Absorption:Indirect
         \key Chiller:Absorption
         \key Chiller:ConstantCOP
@@ -52988,6 +53019,7 @@ PlantEquipmentOperation:ThermalEnergyStorage,
         \key Chiller:Electric:EIR
         \key Chiller:Electric:ReformulatedEIR
         \key Chiller:Electric
+        \key Chiller:Electric:ASHRAE205
         \key Chiller:Absorption:Indirect
         \key Chiller:Absorption
         \key Chiller:ConstantCOP
@@ -53017,6 +53049,7 @@ PlantEquipmentOperation:ThermalEnergyStorage,
         \key Chiller:Electric:EIR
         \key Chiller:Electric:ReformulatedEIR
         \key Chiller:Electric
+        \key Chiller:Electric:ASHRAE205
         \key Chiller:Absorption:Indirect
         \key Chiller:Absorption
         \key Chiller:ConstantCOP
@@ -53046,6 +53079,7 @@ PlantEquipmentOperation:ThermalEnergyStorage,
         \key Chiller:Electric:EIR
         \key Chiller:Electric:ReformulatedEIR
         \key Chiller:Electric
+        \key Chiller:Electric:ASHRAE205
         \key Chiller:Absorption:Indirect
         \key Chiller:Absorption
         \key Chiller:ConstantCOP
