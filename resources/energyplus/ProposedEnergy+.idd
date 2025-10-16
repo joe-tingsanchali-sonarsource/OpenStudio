@@ -774,7 +774,7 @@ ZoneAirHeatBalanceAlgorithm,
        \format singleLine
        \min-fields 2
   A1 , \field Algorithm
-       \note Determines which algorithm will be used to solve the air heat balance
+       \note Determines which algorithm will be used to solve the air heat balance.
        \type choice
        \key ThirdOrderBackwardDifference
        \key AnalyticalSolution
@@ -5011,11 +5011,11 @@ MaterialProperty:PhaseChange,
        \type real
        \default 0.0
   N2 , \field Temperature 1
+       \begin-extensible
        \required-field
        \note for Temperature-enthalpy function
        \units C
        \type real
-       \begin-extensible
   N3;  \field Enthalpy 1
        \required-field
        \note for Temperature-enthalpy function corresponding to temperature 1
@@ -5127,11 +5127,11 @@ MaterialProperty:VariableThermalConductivity,
        \note Regular Material Name to which the additional properties will be added.
        \note this the material name for the basic material properties.
   N1 , \field Temperature 1
+       \begin-extensible
        \required-field
        \note for Temperature-Thermal Conductivity function
        \units C
        \type real
-       \begin-extensible
   N2;  \field Thermal Conductivity 1
        \required-field
        \note for Temperature-Thermal Conductivity function corresponding to temperature 1
@@ -12050,8 +12050,8 @@ OtherEquipment,
        \key Coal
        \key OtherFuel1
        \key OtherFuel2
-       \key DistrictHeatingSteam
        \key DistrictHeatingWater
+       \key DistrictHeatingSteam
        \key DistrictCooling
        \default None
   A3 , \field Zone or ZoneList or Space or SpaceList Name
@@ -13193,7 +13193,7 @@ ZoneInfiltration:FlowCoefficient,
        \required-field
        \type alpha
   A2 , \field Zone or Space Name
-       \note ZoneList and SpaceList names are not allowed
+       \note ZoneList and SpaceList names are not allowed.
        \required-field
        \type object-list
        \object-list ZoneNames
@@ -15347,7 +15347,7 @@ AirflowNetwork:Distribution:Linkage,
 AirflowNetwork:Distribution:DuctViewFactors,
        \extensible:2
        \memo This object is used to allow user-defined view factors to be used for duct-surface radiation
-       \memo calculations.
+       \memo calculations. All surfaces must be in the same enclosure.
   A1,  \field Linkage Name
        \required-field
        \type object-list
@@ -15541,8 +15541,8 @@ Exterior:FuelEquipment,
        \key Coal
        \key OtherFuel1
        \key OtherFuel2
-       \key DistrictHeatingSteam
        \key DistrictHeatingWater
+       \key DistrictHeatingSteam
        \key DistrictCooling
   A3 , \field Schedule Name
        \required-field
@@ -22380,6 +22380,8 @@ Sizing:Parameters,
       \note blank => set the timesteps in averaging window to
       \note Number of Timesteps per Hour resulting in a 1 hour averaging window
       \note default is number of timesteps for 1 hour averaging window
+      \note If the PerformancePrecisionTradeoffs Override Mode is set to non-Normal,
+      \note this field will be overwritten to 1
       \type integer
       \minimum 1
 
@@ -24412,9 +24414,9 @@ ZoneHVAC:PackagedTerminalAirConditioner,
    A13, \field Cooling Coil Name
         \required-field
         \type object-list
-        \object-list CoilCoolingDX
         \object-list CoolingCoilsDXSingleSpeed
         \object-list CoolingCoilsDXVariableSpeed
+        \object-list CoilCoolingDX
         \note Needs to match a DX cooling coil object.
    A14, \field Fan Placement
         \type choice
@@ -24602,9 +24604,9 @@ ZoneHVAC:PackagedTerminalHeatPump,
    A13, \field Cooling Coil Name
         \required-field
         \type object-list
-        \object-list CoilCoolingDX
         \object-list CoolingCoilsDXSingleSpeed
         \object-list CoolingCoilsDXVariableSpeed
+        \object-list CoilCoolingDX
         \note Needs to match in the DX Cooling Coil object.
    N8 , \field Cooling Convergence Tolerance
         \type real
@@ -24743,7 +24745,7 @@ ZoneHVAC:WaterToAirHeatPump,
         \note is used when no heating or cooling is required and the DX coil compressor is off.
         \note If this field is left blank or zero, the supply air flow rate from the previous
         \note on cycle (either cooling or heating) is used.
-   A7,  \field No Load Supply Air Flow Rate Control Set To Low Speed
+   A7 , \field No Load Supply Air Flow Rate Control Set To Low Speed
         \type choice
         \key Yes
         \key No
@@ -24875,7 +24877,7 @@ ZoneHVAC:WaterToAirHeatPump,
         \note Enter the type of performance specification object used to describe the multispeed coil or fan.
    A23, \field Design Specification Multispeed Object Name
         \type object-list
-        \object-list UnitarySystemPerformaceNames
+        \object-list UnitarySystemPerformanceNames
         \note The name of the performance specification object used to describe the multispeed coil or fan.
    N9;  \field DX Heating Coil Sizing Ratio
         \type real
@@ -25458,7 +25460,7 @@ ZoneHVAC:EvaporativeCoolerUnit,
         \units percent
 
 ZoneHVAC:HybridUnitaryHVAC,
-        \memo Hybrid Unitary HVAC. A black box model for multi-mode packaged forced air equipment. Independent variables include outdoor air conditions and indoor air conditions. Controlled inputs include operating mode, supply air flow rate, and outdoor air faction. Empirical lookup tables are required to map supply air temperature supply air humidity, electricity use, fuel uses, water use, fan electricity use, and external static pressure as a function of each indpednent varaible and each controlled input. In each timestep the model will choose one or more combinations of settings for mode, supply air flow rate, outdoor air faction, and part runtime fraction so as to satisfy zone requests for sensible cooling, heating, ventilation, and/or dehumidification with the least resource consumption. Equipment in this class may consume electricity, water, and up to two additional fuel types.
+        \memo Hybrid Unitary HVAC. A black box model for multi-mode packaged forced air equipment. Independent variables include outdoor air conditions and indoor air conditions. Controlled inputs include operating mode, supply air flow rate, and outdoor air faction. Empirical lookup tables are required to map supply air temperature supply air humidity, electricity use, fuel uses, water use, fan electricity use, and external static pressure as a function of each independent variable and each controlled input. In each timestep the model will choose one or more combinations of settings for mode, supply air flow rate, outdoor air faction, and part runtime fraction so as to satisfy zone requests for sensible cooling, heating, ventilation, and/or dehumidification with the least resource consumption. Equipment in this class may consume electricity, water, and up to two additional fuel types.
         \extensible:25 repeat last twenty five fields remembering to move the semi-colon to the last value
     A1, \field Name
         \required-field
@@ -25561,8 +25563,8 @@ ZoneHVAC:HybridUnitaryHVAC,
         \key Coal
         \key OtherFuel1
         \key OtherFuel2
-        \key DistrictHeatingSteam
         \key DistrictHeatingWater
+        \key DistrictHeatingSteam
         \key DistrictCooling
         \note Select the fuel type associated with field: "System Electric Power Lookup Table" in each mode.
         \note If this field is blank, default first fuel type = Electricity.
@@ -25580,8 +25582,8 @@ ZoneHVAC:HybridUnitaryHVAC,
         \key Coal
         \key OtherFuel1
         \key OtherFuel2
-        \key DistrictHeatingSteam
         \key DistrictHeatingWater
+        \key DistrictHeatingSteam
         \key DistrictCooling
         \note Select the fuel type associated with field: "System Second Fuel Consumption Lookup Table" in each mode.
         \note If this field is blank, default second fuel type = None.
@@ -25599,8 +25601,8 @@ ZoneHVAC:HybridUnitaryHVAC,
         \key Coal
         \key OtherFuel1
         \key OtherFuel2
-        \key DistrictHeatingSteam
         \key DistrictHeatingWater
+        \key DistrictHeatingSteam
         \key DistrictCooling
         \note Select the fuel type associated with field: "System Third Fuel Consumption Lookup Table" in each mode.
         \note If this field is blank, default third fuel type = None.
@@ -25800,7 +25802,7 @@ ZoneHVAC:HybridUnitaryHVAC,
         \type real
         \units C
         \note Enter the maximum return air temperature allowed for Mode 1.
-        \note Mode 1 will not be considred when the return air temperature is above the value in this field.
+        \note Mode 1 will not be considered when the return air temperature is above the value in this field.
         \note If this field is blank, there will be no upper constraint on return air temperature.
    N16, \field Mode 1 Minimum Return Air Humidity Ratio
         \type real
@@ -26230,7 +26232,7 @@ ZoneHVAC:TerminalUnit:VariableRefrigerantFlow,
        \note Enter the type of performance specification object used to describe the multispeed coil or fan.
   A21; \field Design Specification Multispeed Object Name
        \type object-list
-       \object-list UnitarySystemPerformaceNames
+       \object-list UnitarySystemPerformanceNames
        \note The name of the performance specification object used to describe the multispeed coil or fan.
 
 \group Zone HVAC Radiative/Convective Units
@@ -31913,7 +31915,7 @@ Coil:Cooling:DX:TwoStageWithHumidityControlMode,
   A5 , \field Crankcase Heater Capacity Function of Temperature Curve Name
        \note A Curve:* or Table:Lookup object encoding the relationship between
        \note the crankcase heater capacity and the outdoor air temperature. When this field is
-       \note missing or empty, constant crankcase heater capacity will be assumed
+       \note missing or empty, constant crankcase heater capacity will be assumed.
        \type object-list
        \object-list UnivariateFunctions
   N2 , \field Maximum Outdoor Dry-Bulb Temperature for Crankcase Heater Operation
@@ -38120,7 +38122,7 @@ AirLoopHVAC:UnitarySystem,
        \note Enter the type of performance specification object used to describe the multispeed coil.
   A28; \field Design Specification Multispeed Object Name
        \type object-list
-       \object-list UnitarySystemPerformaceNames
+       \object-list UnitarySystemPerformanceNames
        \note The name of the performance specification object used to describe the multispeed coil.
 
 UnitarySystemPerformance:Multispeed,
@@ -38130,7 +38132,7 @@ UnitarySystemPerformance:Multispeed,
        \extensible:2 - repeat last two fields, remembering to remove ; from "inner" fields.
   A1 , \field Name
        \required-field
-       \reference UnitarySystemPerformaceNames
+       \reference UnitarySystemPerformanceNames
   N1 , \field Number of Speeds for Heating
        \required-field
        \type integer
@@ -44151,7 +44153,7 @@ Chiller:Electric,
        \default General
   A14, \field Thermosiphon Capacity Fraction Curve Name
        \type object-list
-       \object-list UniVariateFunctions
+       \object-list UnivariateFunctions
        \note quadratic curve = a + b * (Tevap, out - Tcond, in) is typical, other univariate curves may be used
        \note Tevap, out = evaporator outlet temperature
        \note Tcond, in = condenser inlet temperature
@@ -44541,7 +44543,7 @@ Chiller:ConstantCOP,
        \note throughout the entire simulation.
   A9 , \field Thermosiphon Capacity Fraction Curve Name
        \type object-list
-       \object-list UniVariateFunctions
+       \object-list UnivariateFunctions
        \note quadratic curve = a + b * (Tevap, out - Tcond, in) is typical, other univariate curves may be used
        \note Tevap, out = evaporator outlet temperature
        \note Tcond, in = condenser inlet temperature
@@ -45406,14 +45408,14 @@ HeatPump:PlantLoop:EIR:Cooling,
    N5,  \field Reference Coefficient of Performance
         \type real
         \minimum> 0.0
-        \default 3.0
         \units W/W
+        \default 3.0
    N6,  \field Sizing Factor
         \note Multiplies the autosized load side reference flow rate which is then used to autosize the capacity
         \type real
         \minimum> 0.0
         \default 1.0
-   A10,  \field Capacity Modifier Function of Temperature Curve Name
+   A10, \field Capacity Modifier Function of Temperature Curve Name
         \note Cooling capacity modifier as a function of CW supply temp and entering condenser temp
         \required-field
         \type object-list
@@ -45594,8 +45596,8 @@ HeatPump:PlantLoop:EIR:Heating,
    N5,  \field Reference Coefficient of Performance
         \type real
         \minimum> 0.0
-        \default 3.0
         \units W/W
+        \default 3.0
    N6,  \field Sizing Factor
         \note Multiplies the autosized load side reference flow rate which is then used to autosize the capacity
         \type real
@@ -45766,10 +45768,10 @@ HeatPump:AirToWater:FuelFired:Heating,
        \min-fields 31
   A1 , \field Name
        \required-field
-       \reference HeatPumpAirToWaterFuelFiredHeatingNames
-       \note Name of the fuel fired absorption heat pump system system
        \reference-class-name validBranchEquipmentTypes
        \reference validBranchEquipmentNames
+       \reference HeatPumpAirToWaterFuelFiredHeatingNames
+       \note Name of the fuel fired absorption heat pump system system
   A2 , \field Water Inlet Node Name
        \required-field
        \type node
@@ -45948,10 +45950,10 @@ HeatPump:AirToWater:FuelFired:Cooling,
        \min-fields 26
   A1 , \field Name
        \required-field
-       \reference HeatPumpAirToWaterFuelFiredCoolingNames
-       \note Name of the fuel fired absorption heat pump system system
        \reference-class-name validBranchEquipmentTypes
        \reference validBranchEquipmentNames
+       \reference HeatPumpAirToWaterFuelFiredCoolingNames
+       \note Name of the fuel fired absorption heat pump system system
   A2 , \field Water Inlet Node Name
        \required-field
        \type node
@@ -47627,7 +47629,7 @@ CoolingTower:VariableSpeed:Merkel,
        \default 0.008
        \note Rate of drift loss as a percentage of circulating condenser water flow rate
        \note Typical values are between 0.002 and 0.2% The default value is 0.008%
-  A11 ,\field Blowdown Calculation Mode
+  A11, \field Blowdown Calculation Mode
        \type choice
        \key ConcentrationRatio
        \key ScheduledRate
@@ -49699,8 +49701,8 @@ WaterHeater:Mixed,
        \key Gasoline
        \key OtherFuel1
        \key OtherFuel2
-       \key DistrictHeatingSteam
        \key DistrictHeatingWater
+       \key DistrictHeatingSteam
   N8 , \field Heater Thermal Efficiency
        \required-field
        \type real
@@ -49725,8 +49727,8 @@ WaterHeater:Mixed,
        \key Gasoline
        \key OtherFuel1
        \key OtherFuel2
-       \key DistrictHeatingSteam
        \key DistrictHeatingWater
+       \key DistrictHeatingSteam
   N10, \field Off Cycle Parasitic Heat Fraction to Tank
        \type real
        \minimum 0.0
@@ -49749,8 +49751,8 @@ WaterHeater:Mixed,
        \key Gasoline
        \key OtherFuel1
        \key OtherFuel2
-       \key DistrictHeatingSteam
        \key DistrictHeatingWater
+       \key DistrictHeatingSteam
   N12, \field On Cycle Parasitic Heat Fraction to Tank
        \type real
        \minimum 0.0
@@ -49963,8 +49965,8 @@ WaterHeater:Stratified,
        \key Gasoline
        \key OtherFuel1
        \key OtherFuel2
-       \key DistrictHeatingSteam
        \key DistrictHeatingWater
+       \key DistrictHeatingSteam
   N11, \field Heater Thermal Efficiency
        \required-field
        \type real
@@ -49986,8 +49988,8 @@ WaterHeater:Stratified,
        \key Gasoline
        \key OtherFuel1
        \key OtherFuel2
-       \key DistrictHeatingSteam
        \key DistrictHeatingWater
+       \key DistrictHeatingSteam
   N13, \field Off Cycle Parasitic Heat Fraction to Tank
        \type real
        \minimum 0.0
@@ -50015,8 +50017,8 @@ WaterHeater:Stratified,
        \key Gasoline
        \key OtherFuel1
        \key OtherFuel2
-       \key DistrictHeatingSteam
        \key DistrictHeatingWater
+       \key DistrictHeatingSteam
   N16, \field On Cycle Parasitic Heat Fraction to Tank
        \type real
        \minimum 0.0
@@ -51486,8 +51488,8 @@ PlantEquipmentList,
     \memo If no equipment object types and equipment names are specified, then the corresponding
     \memo PlantEquipmentOperation:* object will assume all available plant equipment for the loop
     \memo should be OFF (not operate) within the specified lower/upper limit.
-    \extensible:2
     \min-fields 1
+    \extensible:2
   A1 , \field Name
         \required-field
         \reference PlantAndCondenserEquipmentLists
@@ -51506,8 +51508,8 @@ CondenserEquipmentList,
     \memo If no equipment object types and equipment names are specified, then the corresponding
     \memo PlantEquipmentOperation:* object will assume all available condenser equipment for the loop
     \memo should be OFF (not operate) within the specified lower/upper limit.
-    \extensible:2
     \min-fields 1
+    \extensible:2
     \max-fields 21
   A1 , \field Name
         \required-field
@@ -52515,9 +52517,9 @@ EnergyManagementSystem:MeteredOutputVariable,
        \key WellWaterDrawn
        \key CondensateWaterCollected
        \key EnergyTransfer
-       \key DistrictHeatingSteam
        \key DistrictCooling
        \key DistrictHeatingWater
+       \key DistrictHeatingSteam
        \key ElectricityProducedOnSite
        \key SolarWaterHeating
        \key SolarAirHeating
@@ -52864,7 +52866,7 @@ ExternalInterface:FunctionalMockupUnitExport:To:Schedule,
        \retaincase
   N1 ; \field Initial Value
        \type real
-       \note Used during the first call of EnergyPlus.
+       \note Used during EnergyPlus sizing and warm-up.
 
 ExternalInterface:FunctionalMockupUnitExport:To:Actuator,
        \memo Hardware portion of EMS used to set up actuators in the model
@@ -52890,7 +52892,7 @@ ExternalInterface:FunctionalMockupUnitExport:To:Actuator,
        \retaincase
   N1 ; \field Initial Value
        \type real
-       \note Used during the first call of EnergyPlus.
+       \note Used during EnergyPlus sizing and warm-up.
        \note If no value is specified, then the actuated component will only be updated after sizing and warm-up.
 
 ExternalInterface:FunctionalMockupUnitExport:To:Variable,
@@ -53171,6 +53173,7 @@ PlantComponent:UserDefined,
    A8  ,\field Plant Connection 1 Simulation Program Calling Manager Name
         \type object-list
         \object-list ProgramNames
+        \note For use with the API (Library, Callback) workflow, this field should be the same string that the user
         \note provides when registering a callback function using the API.  In this workflow, the callback name is not entered
         \note elsewhere in the IDF, so the object-list will not include this user-specified function identifier.  This will
         \note cause a warning when editing this field in IDF-Editor.
@@ -57074,7 +57077,6 @@ Generator:MicroTurbine,
       \type alpha
       \reference GeneratorNames
       \reference MicroTurbineGeneratorNames
-      ! The following references (especially validPlantEquipmentNames) is needed or the PlantEquipmentList will end up empty
       \reference-class-name validPlantEquipmentTypes
       \reference validPlantEquipmentNames
       \reference-class-name validCondenserEquipmentTypes
@@ -63625,8 +63627,8 @@ Meter:Custom,
         \key Coal
         \key OtherFuel1
         \key OtherFuel2
-        \key DistrictHeatingSteam
         \key DistrictHeatingWater
+        \key DistrictHeatingSteam
         \key DistrictCooling
         \key Water
         \key Generic
@@ -63653,8 +63655,8 @@ Meter:CustomDecrement,
         \key Coal
         \key OtherFuel1
         \key OtherFuel2
-        \key DistrictHeatingSteam
         \key DistrictHeatingWater
+        \key DistrictHeatingSteam
         \key DistrictCooling
         \key Water
         \key Generic
@@ -64283,9 +64285,9 @@ PythonPlugin:OutputVariable,
        \key WellWaterDrawn
        \key CondensateWaterCollected
        \key EnergyTransfer
-       \key DistrictHeatingSteam
        \key DistrictCooling
        \key DistrictHeatingWater
+       \key DistrictHeatingSteam
        \key ElectricityProducedOnSite
        \key SolarWaterHeating
        \key SolarAirHeating
