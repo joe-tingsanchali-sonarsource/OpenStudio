@@ -1274,7 +1274,6 @@ SizingPeriod:WeatherFileDays,
        \memo Use a weather file period for design sizing calculations.
   A1 , \field Name
        \reference RunPeriodsAndDesignDays
-       \reference SizingPeriodWeatherFileDays
        \required-field
        \note user supplied name for reporting
   N1 , \field Begin Month
