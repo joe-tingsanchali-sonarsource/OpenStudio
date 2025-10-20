@@ -148,7 +148,7 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_CoilHeatingWaterToAirHeatPumpVariabl
     EXPECT_EQ(speed.referenceUnitGrossRatedHeatingCOP(),
               eg.getDouble(Coil_Heating_WaterToAirHeatPump_VariableSpeedEquationFitExtensibleFields::SpeedReferenceUnitGrossRatedHeatingCOP).get());
     EXPECT_EQ(speed.referenceUnitRatedAirFlow(),
-              eg.getDouble(Coil_Heating_WaterToAirHeatPump_VariableSpeedEquationFitExtensibleFields::SpeedReferenceUnitRatedAirFlow).get());
+              eg.getDouble(Coil_Heating_WaterToAirHeatPump_VariableSpeedEquationFitExtensibleFields::SpeedReferenceUnitRatedAirFlowRate).get());
     EXPECT_EQ(speed.referenceUnitRatedWaterFlowRate(),
               eg.getDouble(Coil_Heating_WaterToAirHeatPump_VariableSpeedEquationFitExtensibleFields::SpeedReferenceUnitRatedWaterFlowRate).get());
 

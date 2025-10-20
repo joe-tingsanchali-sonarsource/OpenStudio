@@ -135,17 +135,17 @@ namespace energyplus {
 
       // Rated Water Heating Capacity at Speed
       if ((value = speed.ratedWaterHeatingCapacity())) {
-        eg.setDouble(Coil_WaterHeating_AirToWaterHeatPump_VariableSpeedExtensibleFields::RatedWaterHeatingCapacityatSpeed, value.get());
+        eg.setDouble(Coil_WaterHeating_AirToWaterHeatPump_VariableSpeedExtensibleFields::SpeedRatedWaterHeatingCapacity, value.get());
       }
 
       // Rated Water Heating COP at Speed
       if ((value = speed.ratedWaterHeatingCOP())) {
-        eg.setDouble(Coil_WaterHeating_AirToWaterHeatPump_VariableSpeedExtensibleFields::RatedWaterHeatingCOPatSpeed, value.get());
+        eg.setDouble(Coil_WaterHeating_AirToWaterHeatPump_VariableSpeedExtensibleFields::SpeedRatedWaterHeatingCOP, value.get());
       }
 
       // Rated Sensible Heat Ratio at Speed
       if ((value = speed.ratedSensibleHeatRatio())) {
-        eg.setDouble(Coil_WaterHeating_AirToWaterHeatPump_VariableSpeedExtensibleFields::RatedSensibleHeatRatioatSpeed, value.get());
+        eg.setDouble(Coil_WaterHeating_AirToWaterHeatPump_VariableSpeedExtensibleFields::SpeedRatedSensibleHeatRatio, value.get());
       }
 
       // Speed Reference Unit Rated Air Flow Rate

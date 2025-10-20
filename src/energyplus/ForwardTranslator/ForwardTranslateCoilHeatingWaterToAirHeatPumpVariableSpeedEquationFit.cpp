@@ -114,7 +114,7 @@ namespace energyplus {
 
       // SpeedReferenceUnitRatedAirFlow
       if ((value = speed.referenceUnitRatedAirFlow())) {
-        eg.setDouble(Coil_Heating_WaterToAirHeatPump_VariableSpeedEquationFitExtensibleFields::SpeedReferenceUnitRatedAirFlow, value.get());
+        eg.setDouble(Coil_Heating_WaterToAirHeatPump_VariableSpeedEquationFitExtensibleFields::SpeedReferenceUnitRatedAirFlowRate, value.get());
       }
 
       // SpeedReferenceUnitRatedWaterFlowRate

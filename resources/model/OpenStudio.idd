@@ -1411,10 +1411,21 @@ OS:Site:WaterMainsTemperature,
   N1, \field Annual Average Outdoor Air Temperature
        \type real
        \units C
-  N2; \field Maximum Difference In Monthly Average Outdoor Air Temperatures
+  N2, \field Maximum Difference In Monthly Average Outdoor Air Temperatures
        \type real
        \units deltaC
        \minimum 0
+  N3,  \field Temperature Multiplier
+       \note If calculation method is Schedule, this input field is ignored.
+       \type real
+       \units dimensionless
+       \required-field
+       \minimum 0
+  N4;  \field Temperature Offset
+       \note If calculation method is Schedule, this input field is ignored.
+       \type real
+       \units deltaC
+       \required-field
 
 OS:SizingPeriod:DesignDay,
        \min-fields 20
@@ -13748,7 +13759,7 @@ OS:Boiler:HotWater,
        \type real
        \units W
        \autosizable
-       \minimum 0.0
+       \minimum> 0.0
        \default autosize
   N2, \field Nominal Thermal Efficiency
        \type real
@@ -40723,7 +40734,6 @@ OS:ExternalInterface:FunctionalMockupUnitExport:To:Schedule,
        \retaincase
   N1 ; \field Initial Value
        \type real
-       \required-field
        \note Used during the first call of EnergyPlus.
 
 OS:ExternalInterface:FunctionalMockupUnitExport:To:Actuator,
@@ -40755,8 +40765,8 @@ OS:ExternalInterface:FunctionalMockupUnitExport:To:Actuator,
        \retaincase
   N1 ; \field Initial Value
        \type real
-       \required-field
        \note Used during the first call of EnergyPlus.
+       \note If no value is specified, then the actuated component will only be updated after sizing and warm-up.
 
 OS:ExternalInterface:FunctionalMockupUnitExport:To:Variable,
        \memo Declares Erl variable as having global scope
