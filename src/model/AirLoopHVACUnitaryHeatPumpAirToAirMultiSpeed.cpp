@@ -852,7 +852,6 @@ namespace model {
     autosizeSpeed4SupplyAirFlowRateDuringCoolingOperation();
     auto schedule = model.alwaysOnDiscreteSchedule();
     setSupplyAirFanOperatingModeSchedule(schedule);
-    setDXHeatingCoilSizingRatio(1.0);
   }
 
   IddObjectType AirLoopHVACUnitaryHeatPumpAirToAirMultiSpeed::iddObjectType() {
