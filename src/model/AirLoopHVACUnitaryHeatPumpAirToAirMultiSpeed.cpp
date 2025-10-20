@@ -8,6 +8,8 @@
 #include "AirLoopHVACUnitaryHeatPumpAirToAirMultiSpeed.hpp"
 #include "AirLoopHVACUnitaryHeatPumpAirToAirMultiSpeed_Impl.hpp"
 #include "AirLoopHVAC.hpp"
+#include "CoilHeatingDXMultiSpeed.hpp"
+#include "CoilHeatingDXMultiSpeed_Impl.hpp"
 #include "Node.hpp"
 #include "Schedule.hpp"
 #include "Schedule_Impl.hpp"
@@ -1229,13 +1231,25 @@ namespace model {
 
   // DEPRECATED
   double AirLoopHVACUnitaryHeatPumpAirToAirMultiSpeed::minimumOutdoorDryBulbTemperatureforCompressorOperation() const {
-    DEPRECATED_AT_MSG(3, 11, 0, "TODO.");
-    return -999;
+    // Former v25.1.0 IDD note said this "Needs to match the corresponding minimum outdoor temperature defined in the DX heating coil object"
+    DEPRECATED_AT_MSG(3, 11, 0,
+                      "This field was previously unused and removed in EnergyPlus 25.2.0. Set the Minimum OAT for Compressor Operation on the child "
+                      "DX MultiSpeed Coils if any.");
+    if (auto hc_ = heatingCoil().optionalCast<CoilHeatingDXMultiSpeed>()) {
+      return hc_->minimumOutdoorDryBulbTemperatureforCompressorOperation();
+    }
+    return -1000.0;
   }
 
   bool AirLoopHVACUnitaryHeatPumpAirToAirMultiSpeed::setMinimumOutdoorDryBulbTemperatureforCompressorOperation(
     double minimumOutdoorDryBulbTemperatureforCompressorOperation) {
-    DEPRECATED_AT_MSG(3, 11, 0, "TODO.");
+    DEPRECATED_AT_MSG(3, 11, 0,
+                      "This field was previously unused and removed in EnergyPlus 25.2.0. Set the Minimum OAT for Compressor Operation on the child "
+                      "DX MultiSpeed Coils if any.");
+    if (auto hc_ = heatingCoil().optionalCast<CoilHeatingDXMultiSpeed>()) {
+      return hc_->setMinimumOutdoorDryBulbTemperatureforCompressorOperation(minimumOutdoorDryBulbTemperatureforCompressorOperation);
+    }
+
     return false;
   }
 
