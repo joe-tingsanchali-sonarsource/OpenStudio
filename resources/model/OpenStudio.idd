@@ -1411,10 +1411,21 @@ OS:Site:WaterMainsTemperature,
   N1, \field Annual Average Outdoor Air Temperature
        \type real
        \units C
-  N2; \field Maximum Difference In Monthly Average Outdoor Air Temperatures
+  N2, \field Maximum Difference In Monthly Average Outdoor Air Temperatures
        \type real
        \units deltaC
        \minimum 0
+  N3,  \field Temperature Multiplier
+       \note If calculation method is Schedule, this input field is ignored.
+       \type real
+       \units dimensionless
+       \required-field
+       \minimum 0
+  N4;  \field Temperature Offset
+       \note If calculation method is Schedule, this input field is ignored.
+       \type real
+       \units deltaC
+       \required-field
 
 OS:SizingPeriod:DesignDay,
        \min-fields 20

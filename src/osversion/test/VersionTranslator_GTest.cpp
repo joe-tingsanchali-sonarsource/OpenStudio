@@ -4628,3 +4628,24 @@ TEST_F(OSVersionFixture, can_still_load_older_components) {
   EXPECT_EQ(1, model.getObjectsByType("OS:ComponentData").size());
   EXPECT_EQ(2, model.objects().size());
 }
+
+TEST_F(OSVersionFixture, update_3_10_0_to_3_10_1_SiteWaterMainsTemperature) {
+  openstudio::path path = resourcesPath() / toPath("osversion/3_10_1/test_vt_SiteWaterMainsTemperature.osm");
+  osversion::VersionTranslator vt;
+  boost::optional<model::Model> model = vt.loadModel(path);
+  ASSERT_TRUE(model) << "Failed to load " << path;
+
+  openstudio::path outPath = resourcesPath() / toPath("osversion/3_10_1/test_vt_SiteWaterMainsTemperature_updated.osm");
+  model->save(outPath, true);
+
+  std::vector<WorkspaceObject> swmts = model->getObjectsByType("OS:Site:WaterMainsTemperature");
+  ASSERT_EQ(1u, swmts.size());
+  const auto& swmt = swmts.front();
+
+  EXPECT_EQ("CorrelationFromWeatherFile", swmt.getString(1).get());  // Calculation Method
+  EXPECT_TRUE(swmt.isEmpty(2));                                      // Temperature Schedule Name
+  EXPECT_TRUE(swmt.isEmpty(3));                                      // Annual Average Outdoor Air Temperature
+  EXPECT_TRUE(swmt.isEmpty(4));                                      // Maximum Difference In Monthly Average Outdoor Air Temperatures
+  EXPECT_EQ(1.0, swmt.getDouble(5).get());                           // Temperature Multiplier
+  EXPECT_EQ(0.0, swmt.getDouble(6).get());                           // Temperature Offset
+}
