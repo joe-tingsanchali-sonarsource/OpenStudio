@@ -9800,6 +9800,7 @@ namespace osversion {
         if (!object.getDouble(10)) {
           newObject.setString(10, "Autosize");
         }
+
         ss << newObject;
         m_refactored.emplace_back(std::move(object), std::move(newObject));
 
@@ -9864,8 +9865,8 @@ namespace osversion {
 
         newObject.setDouble(32, 0.25);
 
-        m_refactored.push_back(RefactoredObjectData(object, newObject));
         ss << newObject;
+        m_refactored.emplace_back(std::move(object), std::move(newObject));
 
       } else if (iddname == "OS:HeatPump:AirToWater:FuelFired:Cooling") {
 
@@ -9884,8 +9885,8 @@ namespace osversion {
 
         newObject.setDouble(27, 0.25);
 
-        m_refactored.push_back(RefactoredObjectData(object, newObject));
         ss << newObject;
+        m_refactored.emplace_back(std::move(object), std::move(newObject));
 
       } else if (iddname == "OS:ZoneHVAC:PackagedTerminalHeatPump") {
 
@@ -9904,8 +9905,8 @@ namespace osversion {
 
         newObject.setDouble(25, 1.0);
 
-        m_refactored.push_back(RefactoredObjectData(object, newObject));
         ss << newObject;
+        m_refactored.emplace_back(std::move(object), std::move(newObject));
 
       } else if (iddname == "OS:ZoneHVAC:WaterToAirHeatPump") {
 
@@ -9924,8 +9925,8 @@ namespace osversion {
 
         newObject.setDouble(25, 1.0);
 
-        m_refactored.push_back(RefactoredObjectData(object, newObject));
         ss << newObject;
+        m_refactored.emplace_back(std::move(object), std::move(newObject));
 
       } else if (iddname == "OS:AirLoopHVAC:UnitaryHeatPump:AirToAir") {
 
@@ -9944,8 +9945,8 @@ namespace osversion {
 
         newObject.setDouble(18, 1.0);
 
-        m_refactored.push_back(RefactoredObjectData(object, newObject));
         ss << newObject;
+        m_refactored.emplace_back(std::move(object), std::move(newObject));
 
       } else if (iddname == "OS:AirLoopHVAC:UnitaryHeatPump:AirToAir:MultiSpeed") {
 
@@ -9964,8 +9965,8 @@ namespace osversion {
 
         newObject.setDouble(10, 1.0);
 
-        m_refactored.push_back(RefactoredObjectData(object, newObject));
         ss << newObject;
+        m_refactored.emplace_back(std::move(object), std::move(newObject));
 
         // No-op
       } else {
