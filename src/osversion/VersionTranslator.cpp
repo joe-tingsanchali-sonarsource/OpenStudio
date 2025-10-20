@@ -9780,7 +9780,6 @@ namespace osversion {
         ss << newObject;
         m_refactored.emplace_back(std::move(object), std::move(newObject));
 
-        // No-op
       } else if (iddname == "OS:ThermalStorage:ChilledWater:Stratified") {
 
         // 1 Field was made required from 3.10.0 to 3.10.1:
@@ -9802,7 +9801,6 @@ namespace osversion {
         ss << newObject;
         m_refactored.emplace_back(std::move(object), std::move(newObject));
 
-        // No-op
       } else if (iddname == "OS:Sizing:Zone") {
 
         // 2 Fields have been added from 3.10.0 to 3.10.1:
