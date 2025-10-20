@@ -39331,12 +39331,12 @@ AirLoopHVAC:UnitaryHeatPump:AirToAir:MultiSpeed,
         \object-list HeatingCoilsDXMultiSpeed
         \object-list HeatingCoilsElectricMultiStage
         \object-list HeatingCoilsGasMultiStage
-   N1 , \field Minimum Outdoor Dry-Bulb Temperature for Compressor Operation
+   N1 , \field DX Heating Coil Sizing Ratio
         \type real
-        \default -8.0
-        \units C
-        \note Needs to match the corresponding minimum outdoor temperature defined
-        \note in the DX heating coil object.
+        \default 1.0
+        \minimum> 0
+        \note Used to adjust heat pump heating capacity with respect to DX cooling capacity
+        \note used only for heat pump configurations (i.e., a DX cooling and DX heating coil is used)
    A12, \field Cooling Coil Object Type
         \required-field
         \type choice

@@ -4724,3 +4724,45 @@ TEST_F(OSVersionFixture, update_3_10_0_to_3_10_1_HeatPumpAirToWaterFuelFired) {
   EXPECT_EQ(0.0, clg.getDouble(26).get());   // Standby Electric Power
   EXPECT_EQ(0.25, clg.getDouble(27).get());  // Minimum Unloading Ratio
 }
+
+TEST_F(OSVersionFixture, update_3_10_0_to_3_10_1_DXHeatingCoilSizingRatio) {
+  openstudio::path path = resourcesPath() / toPath("osversion/3_10_1/test_vt_DXHeatingCoilSizingRatio.osm");
+  osversion::VersionTranslator vt;
+  boost::optional<model::Model> model = vt.loadModel(path);
+  ASSERT_TRUE(model) << "Failed to load " << path;
+
+  openstudio::path outPath = resourcesPath() / toPath("osversion/3_10_1/test_vt_DXHeatingCoilSizingRatio_updated.osm");
+  model->save(outPath, true);
+
+  std::vector<WorkspaceObject> pthps = model->getObjectsByType("OS:ZoneHVAC:PackagedTerminalHeatPump");
+  ASSERT_EQ(1u, pthps.size());
+  const auto& pthp = pthps.front();
+
+  ASSERT_TRUE(pthp.getTarget(24));
+  EXPECT_EQ("Always Off Discrete", pthp.getTarget(24)->nameString());  // Supply Air Fan Operating Mode Schedule Name
+  EXPECT_EQ(1.0, pthp.getDouble(25).get());                            // DX Heating Coil Sizing Ratio
+
+  std::vector<WorkspaceObject> wahps = model->getObjectsByType("OS:ZoneHVAC:WaterToAirHeatPump");
+  ASSERT_EQ(1u, wahps.size());
+  const auto& wahp = wahps.front();
+
+  EXPECT_TRUE(wahp.isEmpty(24));             // Availability Manager List Name
+  EXPECT_EQ(1.0, wahp.getDouble(25).get());  // DX Heating Coil Sizing Ratio
+
+  std::vector<WorkspaceObject> unitarys1 = model->getObjectsByType("OS:AirLoopHVAC:UnitaryHeatPump:AirToAir");
+  ASSERT_EQ(1u, unitarys1.size());
+  const auto& unitary1 = unitarys1.front();
+
+  EXPECT_TRUE(unitary1.isEmpty(17));             // Supply Air Fan Operating Mode Schedule Name
+  EXPECT_EQ(1.0, unitary1.getDouble(18).get());  // DX Heating Coil Sizing Ratio
+
+  std::vector<WorkspaceObject> unitarys2 = model->getObjectsByType("OS:AirLoopHVAC:UnitaryHeatPump:AirToAir:MultiSpeed");
+  ASSERT_EQ(1u, unitarys2.size());
+  const auto& unitary2 = unitarys2.front();
+
+  ASSERT_TRUE(unitary2.getTarget(9));
+  EXPECT_EQ("Coil Heating Electric Multi Stage 1", unitary2.getTarget(9)->nameString());  // Heating Coil
+  EXPECT_EQ(1.0, unitary2.getDouble(10).get());                                           // DX Heating Coil Sizing Ratio
+  ASSERT_TRUE(unitary2.getTarget(11));
+  EXPECT_EQ("Coil Cooling DX Multi Speed 1", unitary2.getTarget(11)->nameString());  // Cooling Coil
+}

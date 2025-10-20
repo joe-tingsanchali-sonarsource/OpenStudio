@@ -9800,6 +9800,7 @@ namespace osversion {
         if (!object.getDouble(10)) {
           newObject.setString(10, "Autosize");
         }
+
         ss << newObject;
         m_refactored.emplace_back(std::move(object), std::move(newObject));
 
@@ -9864,8 +9865,8 @@ namespace osversion {
 
         newObject.setDouble(32, 0.25);
 
-        m_refactored.push_back(RefactoredObjectData(object, newObject));
         ss << newObject;
+        m_refactored.emplace_back(std::move(object), std::move(newObject));
 
       } else if (iddname == "OS:HeatPump:AirToWater:FuelFired:Cooling") {
 
@@ -9884,8 +9885,88 @@ namespace osversion {
 
         newObject.setDouble(27, 0.25);
 
-        m_refactored.push_back(RefactoredObjectData(object, newObject));
         ss << newObject;
+        m_refactored.emplace_back(std::move(object), std::move(newObject));
+
+      } else if (iddname == "OS:ZoneHVAC:PackagedTerminalHeatPump") {
+
+        // 1 Field has been inserted from 3.10.0 to 3.10.1:
+        // ------------------------------------------------
+        // * DX Heating Coil Sizing Ratio * 25
+
+        auto iddObject = idd_3_10_1.getObject(iddname);
+        IdfObject newObject(iddObject.get());
+
+        for (size_t i = 0; i < object.numFields(); ++i) {
+          if ((value = object.getString(i))) {
+            newObject.setString(i, value.get());
+          }
+        }
+
+        newObject.setDouble(25, 1.0);
+
+        ss << newObject;
+        m_refactored.emplace_back(std::move(object), std::move(newObject));
+
+      } else if (iddname == "OS:ZoneHVAC:WaterToAirHeatPump") {
+
+        // 1 Field has been inserted from 3.10.0 to 3.10.1:
+        // ------------------------------------------------
+        // * DX Heating Coil Sizing Ratio * 25
+
+        auto iddObject = idd_3_10_1.getObject(iddname);
+        IdfObject newObject(iddObject.get());
+
+        for (size_t i = 0; i < object.numFields(); ++i) {
+          if ((value = object.getString(i))) {
+            newObject.setString(i, value.get());
+          }
+        }
+
+        newObject.setDouble(25, 1.0);
+
+        ss << newObject;
+        m_refactored.emplace_back(std::move(object), std::move(newObject));
+
+      } else if (iddname == "OS:AirLoopHVAC:UnitaryHeatPump:AirToAir") {
+
+        // 1 Field has been inserted from 3.10.0 to 3.10.1:
+        // ------------------------------------------------
+        // * DX Heating Coil Sizing Ratio * 18
+
+        auto iddObject = idd_3_10_1.getObject(iddname);
+        IdfObject newObject(iddObject.get());
+
+        for (size_t i = 0; i < object.numFields(); ++i) {
+          if ((value = object.getString(i))) {
+            newObject.setString(i, value.get());
+          }
+        }
+
+        newObject.setDouble(18, 1.0);
+
+        ss << newObject;
+        m_refactored.emplace_back(std::move(object), std::move(newObject));
+
+      } else if (iddname == "OS:AirLoopHVAC:UnitaryHeatPump:AirToAir:MultiSpeed") {
+
+        // 1 Field has been inserted from 3.10.0 to 3.10.1:
+        // ------------------------------------------------
+        // * DX Heating Coil Sizing Ratio * 10
+
+        auto iddObject = idd_3_10_1.getObject(iddname);
+        IdfObject newObject(iddObject.get());
+
+        for (size_t i = 0; i < object.numFields(); ++i) {
+          if ((value = object.getString(i))) {
+            newObject.setString(i, value.get());
+          }
+        }
+
+        newObject.setDouble(10, 1.0);
+
+        ss << newObject;
+        m_refactored.emplace_back(std::move(object), std::move(newObject));
 
         // No-op
       } else {
