@@ -14510,7 +14510,7 @@ OS:HeatPump:PlantLoop:EIR:Cooling,
 
 OS:HeatPump:AirToWater:FuelFired:Heating,
        \memo The object defines a fuel-fired absorption heat pump based on equation-fit models.
-       \min-fields 32
+       \min-fields 33
    A1, \field Handle
        \type handle
        \required-field
@@ -14687,15 +14687,20 @@ OS:HeatPump:AirToWater:FuelFired:Heating,
        \object-list UnivariateFunctions
        \note Auxiliary Electric EIRFPLR - Auxiliary Electric Energy Input Ratio Function of PLR (Part Load Ratio) Curve Name,
        \note which is a cubic curve or a lookup table.
-   N13;\field Standby Electric Power
+   N13,\field Standby Electric Power
        \units W
        \minimum 0
        \required-field
        \note Standby Electric Power in [W]
+   N14;\field Minimum Unloading Ratio
+       \minimum 0
+       \maximum 1
+       \required-field
+       \note Minimum modulation level of the gas-fired heat pump. Typically less than 1.0 and slightly higher than the minimum part load ratio.
 
 OS:HeatPump:AirToWater:FuelFired:Cooling,
        \memo The object defines a fuel-fired absorption heat pump based on equation-fit models.
-       \min-fields 27
+       \min-fields 28
    A1, \field Handle
        \type handle
        \required-field
@@ -14845,11 +14850,16 @@ OS:HeatPump:AirToWater:FuelFired:Cooling,
        \object-list UnivariateFunctions
        \note Auxiliary Electric EIRFPLR - Auxiliary Electric Energy Input Ratio Function of PLR (Part Load Ratio) Curve Name,
        \note which is a cubic curve or a lookup table.
-   N10;\field Standby Electric Power
+   N10,\field Standby Electric Power
        \units W
        \minimum 0
        \required-field
        \note Standby Electric Power in [W]
+   N11;\field Minimum Unloading Ratio
+       \minimum 0
+       \maximum 1
+       \required-field
+       \note Minimum modulation level of the gas-fired heat pump. Typically less than 1.0 and slightly higher than the minimum part load ratio.
 
 OS:Chiller:Electric:EIR,
        \memo This chiller model is the empirical model from the DOE-2 building Energy
