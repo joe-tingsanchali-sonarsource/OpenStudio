@@ -4674,3 +4674,29 @@ TEST_F(OSVersionFixture, update_3_10_0_to_3_10_1_ThermalStorageChilledWaterStrat
   // After insertion and also last field: Ambient Temperature Indicator
   EXPECT_EQ("Outdoors", ts.getString(11).get());
 }
+
+TEST_F(OSVersionFixture, update_3_10_0_to_3_10_1_Sizing) {
+  openstudio::path path = resourcesPath() / toPath("osversion/3_10_1/test_vt_Sizing.osm");
+  osversion::VersionTranslator vt;
+  boost::optional<model::Model> model = vt.loadModel(path);
+  ASSERT_TRUE(model) << "Failed to load " << path;
+
+  openstudio::path outPath = resourcesPath() / toPath("osversion/3_10_1/test_vt_Sizing_updated.osm");
+  model->save(outPath, true);
+
+  std::vector<WorkspaceObject> szs = model->getObjectsByType("OS:Sizing:Zone");
+  ASSERT_EQ(1u, szs.size());
+  const auto& sz = szs.front();
+
+  EXPECT_EQ("Coincident", sz.getString(39).get());  // Sizing Option
+  EXPECT_EQ("None", sz.getString(40).get());        // Heating Coil Sizing Method
+  EXPECT_EQ(1.0, sz.getDouble(41).get());           // Maximum Heating Capacity To Cooling Load Sizing Ratio
+
+  std::vector<WorkspaceObject> sss = model->getObjectsByType("OS:Sizing:System");
+  ASSERT_EQ(1u, sss.size());
+  const auto& ss = sss.front();
+
+  EXPECT_EQ("autosize", ss.getString(38).get());  // Occupant Diversity
+  EXPECT_EQ("None", ss.getString(39).get());      // Heating Coil Sizing Method
+  EXPECT_EQ(1.0, ss.getDouble(40).get());         // Maximum Heating Capacity To Cooling Capacity Sizing Ratio
+}

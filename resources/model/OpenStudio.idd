@@ -28667,7 +28667,7 @@ OS:Sizing:System,
        \key Bypass
        \key VT
        \key OnOff
-  N27; \field Occupant Diversity
+  N27, \field Occupant Diversity
        \type real
        \maximum 1.0
        \minimum 0.0
@@ -28675,6 +28675,20 @@ OS:Sizing:System,
        \note The Occupant Diversity is used to determine a multi-zone system's outdoor air intake when the System Outdoor Air Method is
        \note Standard62.1VentilationRateProcedure or the Standard62.1SimplifiedProcedure. If set to be autosized, it will be calculated
        \note using the information in the People objects assigned to each zone attached to this system/airloop.
+       \required-field
+  A13, \field Heating Coil Sizing Method
+       \note Size a heat pump heating coil using the Cooling, Heating or GreaterOfHeatingOrCooling capacities
+       \type choice
+       \key None
+       \key CoolingCapacity
+       \key HeatingCapacity
+       \key GreaterOfHeatingOrCooling
+       \required-field
+  N28; \field Maximum Heating Capacity To Cooling Capacity Sizing Ratio
+       \note The limit of heating coil capacity to cooling coil capacity
+       \type real
+       \units W/W
+       \minimum 1.0
        \required-field
 
 OS:Sizing:Zone,
@@ -28943,12 +28957,24 @@ OS:Sizing:Zone,
        \minimum 0.0
        \maximum 1.0
        \units dimensionless
-  A13; \field Sizing Option
+  A13, \field Sizing Option
        \note NonCoincident is available only if Do Space Heat Balance for Sizing=Yes in ZoneAirHeatBalanceAlgorithm.
        \type choice
        \key Coincident
        \key NonCoincident
        \required-field
+  A14,\field Heating Coil Sizing Method
+      \type choice
+      \key None
+      \key CoolingCapacity
+      \key HeatingCapacity
+      \key GreaterOfHeatingOrCooling
+      \required-field
+  N27;\field Maximum Heating Capacity To Cooling Load Sizing Ratio
+      \type real
+      \units W/W
+      \minimum 1.0
+      \required-field
 
 OS:Splitter,
        \extensible:1
