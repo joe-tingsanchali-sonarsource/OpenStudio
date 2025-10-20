@@ -74,8 +74,10 @@ You can also refer to the [OpenStudio SDK Python Binding Version Compatibility M
 
 ## New Features, Major Fixes and API-breaking changes
 
-
-
+* [#5481](https://github.com/NREL/OpenStudio/pull/5481) - ExternalInterface's optional Initial Value field
+    * Field `Initial Value` is made optional for `ExternalInterface:FunctionalMockupUnitExport:To:Schedule` and `ExternalInterface:FunctionalMockupUnitExport:To:Actuator`
+    * API-breaking change for `ExternalInterface:FunctionalMockupUnitExport:To:Schedule` and `ExternalInterface:FunctionalMockupUnitExport:To:Actuator`:
+        * `initialValue` (`double` to `boost::optional<double>`)
 
 ## Minor changes and bug fixes
 

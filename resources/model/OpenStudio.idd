@@ -40734,7 +40734,6 @@ OS:ExternalInterface:FunctionalMockupUnitExport:To:Schedule,
        \retaincase
   N1 ; \field Initial Value
        \type real
-       \required-field
        \note Used during the first call of EnergyPlus.
 
 OS:ExternalInterface:FunctionalMockupUnitExport:To:Actuator,
@@ -40766,8 +40765,8 @@ OS:ExternalInterface:FunctionalMockupUnitExport:To:Actuator,
        \retaincase
   N1 ; \field Initial Value
        \type real
-       \required-field
        \note Used during the first call of EnergyPlus.
+       \note If no value is specified, then the actuated component will only be updated after sizing and warm-up.
 
 OS:ExternalInterface:FunctionalMockupUnitExport:To:Variable,
        \memo Declares Erl variable as having global scope
