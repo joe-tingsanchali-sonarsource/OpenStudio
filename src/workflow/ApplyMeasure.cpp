@@ -286,18 +286,22 @@ end
             LOG(Debug, "Reporting Measure '" << measureDirName << "' does not have a modelOutputRequests method");
           }
         } else if (apply_measure_type == ApplyMeasureType::EnergyPlusOutputRequest) {
-          LOG(Debug, "Calling measure.energyPlusOutputRequests for '" << measureDirName << "'");
+          if ((*thisEngine)->hasMethod(measureScriptObject, "energyPlusOutputRequests")) {
+            LOG(Debug, "Calling measure.energyPlusOutputRequests for '" << measureDirName << "'");
 
-          std::vector<IdfObject> idfObjects;
-          idfObjects = static_cast<openstudio::measure::ReportingMeasure*>(measurePtr)->energyPlusOutputRequests(runner, argmap);
+            std::vector<IdfObject> idfObjects;
+            idfObjects = static_cast<openstudio::measure::ReportingMeasure*>(measurePtr)->energyPlusOutputRequests(runner, argmap);
 
-          int num_added = 0;
-          for (auto& idfObject : idfObjects) {
-            if (openstudio::workflow::util::addEnergyPlusOutputRequest(workspace_.get(), idfObject)) {
-              ++num_added;
+            int num_added = 0;
+            for (auto& idfObject : idfObjects) {
+              if (openstudio::workflow::util::addEnergyPlusOutputRequest(workspace_.get(), idfObject)) {
+                ++num_added;
+              }
             }
+            LOG(Debug, "Finished measure.energyPlusOutputRequests for '" << measureDirName << "', " << num_added << " output requests added");
+          } else {
+            LOG(Debug, "Reporting Measure '" << measureDirName << "' does not have an energyPlusOutputRequests method");
           }
-          LOG(Debug, "Finished measure.energyPlusOutputRequests for '" << measureDirName << "', " << num_added << " output requests added");
         } else {
           static_cast<openstudio::measure::ReportingMeasure*>(measurePtr)->run(runner, argmap);
         }
