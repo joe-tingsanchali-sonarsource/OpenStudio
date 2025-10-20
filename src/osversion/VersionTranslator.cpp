@@ -9758,7 +9758,29 @@ namespace osversion {
     for (const IdfObject& object : idf_3_10_0.objects()) {
       auto iddname = object.iddObject().name();
 
-      if (iddname == "OS:EvaporativeFluidCooler:SingleSpeed") {
+      if (iddname == "OS:Site:WaterMainsTemperature") {
+
+        // 2 Fields have been inserted from 3.10.0 to 3.10.1:
+        // ------------------------------------------------
+        // * Temperature Multiplier * 5
+        // * Temperature Offset * 6
+
+        auto iddObject = idd_3_10_1.getObject(iddname);
+        IdfObject newObject(iddObject.get());
+
+        for (size_t i = 0; i < object.numFields(); ++i) {
+          if ((value = object.getString(i))) {
+            newObject.setString(i, value.get());
+          }
+        }
+
+        newObject.setDouble(5, 1.0);
+        newObject.setDouble(6, 0.0);
+
+        ss << newObject;
+        m_refactored.emplace_back(std::move(object), std::move(newObject));
+
+      } else if (iddname == "OS:EvaporativeFluidCooler:SingleSpeed") {
 
         // 1 Field has been inserted from 3.10.0 to 3.10.1:
         // ------------------------------------------------
