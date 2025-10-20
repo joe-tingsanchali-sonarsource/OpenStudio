@@ -9778,7 +9778,7 @@ namespace osversion {
         newObject.setDouble(6, 0.0);
 
         ss << newObject;
-         m_refactored.emplace_back(std::move(object), std::move(newObject));
+        m_refactored.emplace_back(std::move(object), std::move(newObject));
 
         // No-op
       } else {
