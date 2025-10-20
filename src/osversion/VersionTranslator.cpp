@@ -9797,8 +9797,8 @@ namespace osversion {
           newObject.setDouble(16, 25.6);
         }
 
-        m_refactored.push_back(RefactoredObjectData(object, newObject));
         ss << newObject;
+        m_refactored.emplace_back(std::move(object), std::move(newObject));
 
       } else if (iddname == "OS:EvaporativeFluidCooler:TwoSpeed") {
 
@@ -9829,8 +9829,8 @@ namespace osversion {
           newObject.setDouble(26, 25.6);
         }
 
-        m_refactored.push_back(RefactoredObjectData(object, newObject));
         ss << newObject;
+        m_refactored.emplace_back(std::move(object), std::move(newObject));
 
         // No-op
       } else {
