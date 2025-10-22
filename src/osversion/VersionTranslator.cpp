@@ -8006,12 +8006,12 @@ namespace osversion {
         }
       }
 
-      auto discreteSch = IdfObject(idd_3_7_0.getObject("OS:Schedule:Constant").get());
+      auto continuousSch = IdfObject(idd_3_7_0.getObject("OS:Schedule:Constant").get());
 
       continuousSchHandleStr = toString(createUUID());  // Store in state variable
-      discreteSch.setString(0, continuousSchHandleStr);
-      discreteSch.setString(1, name);
-      discreteSch.setDouble(3, val);
+      continuousSch.setString(0, continuousSchHandleStr);
+      continuousSch.setString(1, name);
+      continuousSch.setDouble(3, val);
 
       IdfObject typeLimits(idd_3_7_0.getObject("OS:ScheduleTypeLimits").get());
       typeLimits.setString(0, toString(createUUID()));
@@ -8021,13 +8021,13 @@ namespace osversion {
       typeLimits.setString(4, "Continuous");
       typeLimits.setString(5, "");
 
-      discreteSch.setString(2, typeLimits.getString(0).get());
+      continuousSch.setString(2, typeLimits.getString(0).get());
 
-      ss << discreteSch;
+      ss << continuousSch;
       ss << typeLimits;
 
       // Register new objects
-      m_new.emplace_back(std::move(discreteSch));
+      m_new.emplace_back(std::move(continuousSch));
       m_new.emplace_back(std::move(typeLimits));
       LOG(Trace, "Created 'Always On Continuous' Schedule with handle " << continuousSchHandleStr);
 
