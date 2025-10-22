@@ -2293,7 +2293,7 @@ set(${target_name}_test_src
   test/SetpointManagerWarmest_GTest.cpp
   test/SetpointManagerWarmestTemperatureFlow_GTest.cpp
   test/SetpointManagerSystemNodeResetHumidity_GTest.cpp
-  test/SetpointManagerSystemNodeResetTemperature_GTest.cpp
+  test/SpaceLoadConvenience_GTest.cpp
   test/ScheduleDay_GTest.cpp
   test/ScheduleInterval_GTest.cpp
   test/ScheduleRuleset_GTest.cpp
