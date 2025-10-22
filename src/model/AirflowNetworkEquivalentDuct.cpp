@@ -89,7 +89,7 @@ namespace model {
           case IddObjectType::OS_Coil_Cooling_WaterToAirHeatPump_EquationFit:
             return std::string("Coil:Cooling:WaterToAirHeatPump:EquationFit");
           case IddObjectType::OS_Coil_Heating_WaterToAirHeatPump_EquationFit:
-            return std::string("Coil:Cooling:WaterToAirHeatPump:EquationFit");
+            return std::string("Coil:Heating:WaterToAirHeatPump:EquationFit");
           case IddObjectType::OS_Coil_Cooling_WaterToAirHeatPump_VariableSpeedEquationFit:
             return std::string("Coil:Cooling:WaterToAirHeatPump:VariableSpeedEquationFit");
           case IddObjectType::OS_Coil_Heating_WaterToAirHeatPump_VariableSpeedEquationFit:
