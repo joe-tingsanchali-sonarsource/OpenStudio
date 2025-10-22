@@ -1073,8 +1073,12 @@ namespace model {
         return value.get();
       }
 
+      // get all surfaces, sort so results are repeatable
+      std::vector<Surface> surfaces = this->surfaces();
+      std::sort(surfaces.begin(), surfaces.end(), IdfObjectNameLess());
+
       double result = 0;
-      for (const Surface& surface : this->surfaces()) {
+      for (const Surface& surface : surfaces) {
         if (istringEqual(surface.surfaceType(), "Floor")) {
           if (surface.isAirWall()) {
             continue;
