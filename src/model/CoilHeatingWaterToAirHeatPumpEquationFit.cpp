@@ -11,6 +11,8 @@
 #include "ZoneHVACWaterToAirHeatPump_Impl.hpp"
 #include "AirLoopHVACUnitarySystem.hpp"
 #include "AirLoopHVACUnitarySystem_Impl.hpp"
+#include "AirflowNetworkEquivalentDuct.hpp"
+#include "AirflowNetworkEquivalentDuct_Impl.hpp"
 #include "Node.hpp"
 #include "Node_Impl.hpp"
 #include "Model.hpp"
@@ -103,6 +105,16 @@ namespace model {
 
     unsigned CoilHeatingWaterToAirHeatPumpEquationFit_Impl::waterOutletPort() const {
       return OS_Coil_Heating_WaterToAirHeatPump_EquationFitFields::WaterOutletNodeName;
+    }
+
+    std::vector<ModelObject> CoilHeatingWaterToAirHeatPumpEquationFit_Impl::children() const {
+      std::vector<ModelObject> children;
+
+      std::vector<AirflowNetworkEquivalentDuct> myAFNItems =
+        getObject<ModelObject>().getModelObjectSources<AirflowNetworkEquivalentDuct>(AirflowNetworkEquivalentDuct::iddObjectType());
+      children.insert(children.end(), myAFNItems.begin(), myAFNItems.end());
+
+      return children;
     }
 
     boost::optional<Schedule> CoilHeatingWaterToAirHeatPumpEquationFit_Impl::optionalAvailabilitySchedule() const {
@@ -343,6 +355,32 @@ namespace model {
         }
       }
 
+      return boost::none;
+    }
+
+    AirflowNetworkEquivalentDuct CoilHeatingWaterToAirHeatPumpEquationFit_Impl::getAirflowNetworkEquivalentDuct(double length, double diameter) {
+      boost::optional<AirflowNetworkEquivalentDuct> opt = airflowNetworkEquivalentDuct();
+      if (opt) {
+        if (opt->airPathLength() != length) {
+          opt->setAirPathLength(length);
+        }
+        if (opt->airPathHydraulicDiameter() != diameter) {
+          opt->setAirPathHydraulicDiameter(diameter);
+        }
+      }
+      return AirflowNetworkEquivalentDuct(model(), length, diameter, handle());
+    }
+
+    boost::optional<AirflowNetworkEquivalentDuct> CoilHeatingWaterToAirHeatPumpEquationFit_Impl::airflowNetworkEquivalentDuct() const {
+      std::vector<AirflowNetworkEquivalentDuct> myAFN =
+        getObject<ModelObject>().getModelObjectSources<AirflowNetworkEquivalentDuct>(AirflowNetworkEquivalentDuct::iddObjectType());
+      auto count = myAFN.size();
+      if (count == 1) {
+        return myAFN[0];
+      } else if (count > 1) {
+        LOG(Warn, briefDescription() << " has more than one AirflowNetwork EquivalentDuct attached, returning first.");
+        return myAFN[0];
+      }
       return boost::none;
     }
 
@@ -726,6 +764,14 @@ namespace model {
 
   bool CoilHeatingWaterToAirHeatPumpEquationFit::setPartLoadFractionCorrelationCurve(const Curve& partLoadFractionCorrelationCurve) {
     return getImpl<detail::CoilHeatingWaterToAirHeatPumpEquationFit_Impl>()->setPartLoadFractionCorrelationCurve(partLoadFractionCorrelationCurve);
+  }
+
+  AirflowNetworkEquivalentDuct CoilHeatingWaterToAirHeatPumpEquationFit::getAirflowNetworkEquivalentDuct(double length, double diameter) {
+    return getImpl<detail::CoilHeatingWaterToAirHeatPumpEquationFit_Impl>()->getAirflowNetworkEquivalentDuct(length, diameter);
+  }
+
+  boost::optional<AirflowNetworkEquivalentDuct> CoilHeatingWaterToAirHeatPumpEquationFit::airflowNetworkEquivalentDuct() const {
+    return getImpl<detail::CoilHeatingWaterToAirHeatPumpEquationFit_Impl>()->airflowNetworkEquivalentDuct();
   }
 
   /// @cond
