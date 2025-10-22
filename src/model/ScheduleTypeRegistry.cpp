@@ -514,6 +514,8 @@ namespace model {
       {"ZoneHVACIdealLoadsAirSystem", "Availability", "availabilitySchedule", false, "Availability", 0.0, 1.0},
       {"ZoneHVACIdealLoadsAirSystem", "Heating Availability", "heatingAvailabilitySchedule", false, "Availability", 0.0, 1.0},
       {"ZoneHVACIdealLoadsAirSystem", "Cooling Availability", "coolingAvailabilitySchedule", false, "Availability", 0.0, 1.0},
+      {"ZoneHVACIdealLoadsAirSystem", "Heating Fuel Efficiency", "heatingFuelEfficiencySchedule", true, "", OptionalDouble(), OptionalDouble()},
+      {"ZoneHVACIdealLoadsAirSystem", "Cooling Fuel Efficiency", "coolingFuelEfficiencySchedule", true, "", OptionalDouble(), OptionalDouble()},
       {"ZoneHVACFourPipeFanCoil", "Availability", "availabilitySchedule", false, "Availability", 0.0, 1.0},
       {"ZoneHVACFourPipeFanCoil", "Outdoor Air", "outdoorAirSchedule", true, "", 0.0, 1.0},
       {"ZoneHVACFourPipeFanCoil", "Supply Air Fan Operating Mode", "supplyAirFanOperatingModeSchedule", false, "ControlMode", 0.0, 1.0},

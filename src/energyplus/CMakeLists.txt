@@ -858,6 +858,7 @@ set(${target_name}_test_src
   Test/ZoneAirHeatBalanceAlgorithm_GTest.cpp
   Test/ZoneHVACBaseboardRadiantConvectiveWater_GTest.cpp
   Test/ZoneHVACEvaporativeCoolerUnit_GTest.cpp
+  Test/ZoneHVACIdealLoadsAirSystem_GTest.cpp
   Test/ZoneHVACLowTemperatureRadiantElectric_GTest.cpp
   Test/ZoneHVACLowTempRadiantConstFlow_GTest.cpp
   Test/ZoneHVACLowTempRadiantVarFlow_GTest.cpp

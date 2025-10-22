@@ -29994,6 +29994,59 @@ OS:ZoneHVAC:IdealLoadsAirSystem,
        \minimum 0.0
        \maximum 1.0
        \default 0.65
+  A16, \field Design Specification ZoneHVAC Sizing Object Name
+       \note Enter the name of a DesignSpecificationZoneHVACSizing object.
+       \type object-list
+       \object-list DesignSpecificationZoneHVACSizingName
+  A17, \field Heating Fuel Efficiency Schedule Name
+       \type object-list
+       \object-list ScheduleNames
+       \note Reference heating fuel efficiency value for converting heating
+       \note ideal loads into fuel energy consumption.
+       \note The minimum schedule value must be greater than 0.0. The maximum value
+       \note depends on the technology, and can exceed 1.0.
+       \note If blank, heating fuel efficiency value is always 1.0.
+  A18, \field Heating Fuel Type
+       \type choice
+       \key Electricity
+       \key NaturalGas
+       \key Propane
+       \key FuelOilNo1
+       \key FuelOilNo2
+       \key Coal
+       \key Diesel
+       \key Gasoline
+       \key OtherFuel1
+       \key OtherFuel2
+       \key DistrictCooling
+       \key DistrictHeatingWater
+       \key DistrictHeatingSteam
+       \required-field
+  A19, \field Cooling Fuel Efficiency Schedule Name
+       \type object-list
+       \object-list ScheduleNames
+       \note Reference cooling fuel efficiency value for converting cooling
+       \note ideal loads into fuel energy consumption.
+       \note The minimum schedule value must be greater than 0.0. The maximum value
+       \note depends on the technology, and can exceed 1.0.
+       \note If blank, cooling fuel efficiency value is always 1.0.
+  A20; \field Cooling Fuel Type
+       \type choice
+       \key Electricity
+       \key NaturalGas
+       \key Propane
+       \key FuelOilNo1
+       \key FuelOilNo2
+       \key Coal
+       \key Diesel
+       \key Gasoline
+       \key OtherFuel1
+       \key OtherFuel2
+       \key DistrictCooling
+       \key DistrictHeatingWater
+       \key DistrictHeatingSteam
+       \required-field
+
 
 OS:ZoneHVAC:FourPipeFanCoil,
         \min-fields 25
