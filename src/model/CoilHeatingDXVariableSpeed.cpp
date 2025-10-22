@@ -29,6 +29,9 @@
 #include "Model_Impl.hpp"
 #include "Node.hpp"
 #include "AirLoopHVAC.hpp"
+#include "Schedule.hpp"
+#include "Schedule_Impl.hpp"
+#include "ScheduleTypeRegistry.hpp"
 
 #include <utilities/idd/IddFactory.hxx>
 #include <utilities/idd/OS_Coil_Heating_DX_VariableSpeed_FieldEnums.hxx>
@@ -86,12 +89,42 @@ namespace model {
       return CoilHeatingDXVariableSpeed::iddObjectType();
     }
 
+    std::vector<ScheduleTypeKey> CoilHeatingDXVariableSpeed_Impl::getScheduleTypeKeys(const Schedule& schedule) const {
+      std::vector<ScheduleTypeKey> result;
+      UnsignedVector fieldIndices = getSourceIndices(schedule.handle());
+      UnsignedVector::const_iterator b(fieldIndices.begin());
+      UnsignedVector::const_iterator e(fieldIndices.end());
+      if (std::find(b, e, OS_Coil_Heating_DX_VariableSpeedFields::AvailabilityScheduleName) != e) {
+        result.push_back(ScheduleTypeKey("CoilHeatingDXVariableSpeed", "Availability Schedule"));
+      }
+      return result;
+    }
+
     unsigned CoilHeatingDXVariableSpeed_Impl::inletPort() const {
       return OS_Coil_Heating_DX_VariableSpeedFields::IndoorAirInletNodeName;
     }
 
     unsigned CoilHeatingDXVariableSpeed_Impl::outletPort() const {
       return OS_Coil_Heating_DX_VariableSpeedFields::IndoorAirOutletNodeName;
+    }
+
+    boost::optional<Schedule> CoilHeatingDXVariableSpeed_Impl::optionalAvailabilitySchedule() const {
+      return getObject<ModelObject>().getModelObjectTarget<Schedule>(OS_Coil_Heating_DX_VariableSpeedFields::AvailabilityScheduleName);
+    }
+
+    Schedule CoilHeatingDXVariableSpeed_Impl::availabilitySchedule() const {
+      boost::optional<Schedule> value = optionalAvailabilitySchedule();
+      if (!value) {
+        // it is an error if we get here, however we don't want to crash
+        // so we hook up to global always on schedule
+        LOG(Error, "Required availability schedule not set, using 'Always On' schedule");
+        value = this->model().alwaysOnDiscreteSchedule();
+        OS_ASSERT(value);
+        const_cast<CoilHeatingDXVariableSpeed_Impl*>(this)->setAvailabilitySchedule(*value);
+        value = optionalAvailabilitySchedule();
+      }
+      OS_ASSERT(value);
+      return value.get();
     }
 
     int CoilHeatingDXVariableSpeed_Impl::nominalSpeedLevel() const {
@@ -196,6 +229,12 @@ namespace model {
       if (value) {
         result = openstudio::istringEqual(value.get(), "autosize");
       }
+      return result;
+    }
+
+    bool CoilHeatingDXVariableSpeed_Impl::setAvailabilitySchedule(Schedule& schedule) {
+      bool result = setSchedule(OS_Coil_Heating_DX_VariableSpeedFields::AvailabilityScheduleName, "CoilHeatingDXVariableSpeed",
+                                "Availability Schedule", schedule);
       return result;
     }
 
@@ -599,8 +638,11 @@ namespace model {
     partLoadFraction.setMinimumValueofx(0.0);
     partLoadFraction.setMaximumValueofx(1.0);
 
-    bool ok = true;
-    setNominalSpeedLevel(1);
+    auto always_on = model.alwaysOnDiscreteSchedule();
+    bool ok = setAvailabilitySchedule(always_on);
+    OS_ASSERT(ok);
+    ok = setNominalSpeedLevel(1);
+    OS_ASSERT(ok);
     autosizeRatedHeatingCapacityAtSelectedNominalSpeedLevel();
     autosizeRatedAirFlowRateAtSelectedNominalSpeedLevel();
     ok = setEnergyPartLoadFractionCurve(partLoadFraction);
@@ -631,8 +673,11 @@ namespace model {
     : StraightComponent(CoilHeatingDXVariableSpeed::iddObjectType(), model) {
     OS_ASSERT(getImpl<detail::CoilHeatingDXVariableSpeed_Impl>());
 
-    bool ok = true;
-    setNominalSpeedLevel(1);
+    auto always_on = model.alwaysOnDiscreteSchedule();
+    bool ok = setAvailabilitySchedule(always_on);
+    OS_ASSERT(ok);
+    ok = setNominalSpeedLevel(1);
+    OS_ASSERT(ok);
     autosizeRatedHeatingCapacityAtSelectedNominalSpeedLevel();
     autosizeRatedAirFlowRateAtSelectedNominalSpeedLevel();
     ok = setEnergyPartLoadFractionCurve(partLoadFraction);
@@ -669,6 +714,10 @@ namespace model {
 
   std::vector<std::string> CoilHeatingDXVariableSpeed::defrostControlValues() {
     return getIddKeyNames(IddFactory::instance().getObject(iddObjectType()).get(), OS_Coil_Heating_DX_VariableSpeedFields::DefrostControl);
+  }
+
+  Schedule CoilHeatingDXVariableSpeed::availabilitySchedule() const {
+    return getImpl<detail::CoilHeatingDXVariableSpeed_Impl>()->availabilitySchedule();
   }
 
   int CoilHeatingDXVariableSpeed::nominalSpeedLevel() const {
@@ -737,6 +786,10 @@ namespace model {
 
   bool CoilHeatingDXVariableSpeed::isResistiveDefrostHeaterCapacityAutosized() const {
     return getImpl<detail::CoilHeatingDXVariableSpeed_Impl>()->isResistiveDefrostHeaterCapacityAutosized();
+  }
+
+  bool CoilHeatingDXVariableSpeed::setAvailabilitySchedule(Schedule& schedule) {
+    return getImpl<detail::CoilHeatingDXVariableSpeed_Impl>()->setAvailabilitySchedule(schedule);
   }
 
   bool CoilHeatingDXVariableSpeed::setNominalSpeedLevel(int nominalSpeedLevel) {

@@ -20369,7 +20369,7 @@ OS:Coil:Cooling:WaterToAirHeatPump:EquationFit,
        \memo compressor), single-speed, equation-fit model. Optional inputs for moisture
        \memo evaporation from wet coil when compressor cycles off with continuous fan operation.
        \memo Equation-fit model uses normalized curves to describe the heat pump performance.
-       \min-fields 23
+       \min-fields 24
   A1,  \field Handle
        \type handle
        \required-field
@@ -20379,19 +20379,25 @@ OS:Coil:Cooling:WaterToAirHeatPump:EquationFit,
        \reference CoolingCoilsWaterToAirHP
        \reference ConnectionObject
        \reference DesuperHeatingWaterOnlySources
-  A3,  \field Water Inlet Node Name
+  A3,  \field Availability Schedule Name
+       \note Availability schedule name for this system. Schedule value > 0 means the system is available.
+       \note If this field is blank, the system is always available.
+       \type object-list
+       \object-list ScheduleNames
+       \required-field
+  A4,  \field Water Inlet Node Name
        \type object-list
        \required-field
        \object-list ConnectionNames
-  A4,  \field Water Outlet Node Name
+  A5,  \field Water Outlet Node Name
        \type object-list
        \required-field
        \object-list ConnectionNames
-  A5,  \field Air Inlet Node Name
+  A6,  \field Air Inlet Node Name
        \type object-list
        \required-field
        \object-list ConnectionNames
-  A6,  \field Air Outlet Node Name
+  A7,  \field Air Outlet Node Name
        \type object-list
        \required-field
        \object-list ConnectionNames
@@ -20451,19 +20457,19 @@ OS:Coil:Cooling:WaterToAirHeatPump:EquationFit,
        \type real
        \required-field
        \minimum> 0
-  A7,  \field Total Cooling Capacity Curve Name
+  A8,  \field Total Cooling Capacity Curve Name
        \required-field
        \type object-list
        \object-list QuadvariateFunctions
-  A8, \field Sensible Cooling Capacity Curve Name
+  A9,  \field Sensible Cooling Capacity Curve Name
        \required-field
        \type object-list
        \object-list QuintvariateFunctions
-  A9, \field Cooling Power Consumption Curve Name
+  A10, \field Cooling Power Consumption Curve Name
        \required-field
        \type object-list
        \object-list QuadvariateFunctions
-  A10, \field Part Load Fraction Correlation Curve Name
+  A11, \field Part Load Fraction Correlation Curve Name
        \note quadratic curve = a + b*PLR + c*PLR**2
        \note cubic curve = a + b*PLR + c*PLR**2 + d*PLR**3
        \note PLR = part load ratio (cooling load/steady state capacity)
@@ -21514,19 +21520,25 @@ OS:Coil:Heating:WaterToAirHeatPump:EquationFit,
        \required-field
        \reference HeatingCoilsWaterToAirHP
        \reference ConnectionObject
-  A3,  \field Water Inlet Node Name
+  A3,  \field Availability Schedule Name
+       \note Availability schedule name for this system. Schedule value > 0 means the system is available.
+       \note If this field is blank, the system is always available.
+       \type object-list
+       \object-list ScheduleNames
+       \required-field
+  A4,  \field Water Inlet Node Name
        \type object-list
        \required-field
        \object-list ConnectionNames
-  A4,  \field Water Outlet Node Name
+  A5,  \field Water Outlet Node Name
        \type object-list
        \required-field
        \object-list ConnectionNames
-  A5,  \field Air Inlet Node Name
+  A6,  \field Air Inlet Node Name
        \type object-list
        \required-field
        \object-list ConnectionNames
-  A6,  \field Air Outlet Node Name
+  A7,  \field Air Outlet Node Name
        \type object-list
        \required-field
        \object-list ConnectionNames
@@ -21581,15 +21593,15 @@ OS:Coil:Heating:WaterToAirHeatPump:EquationFit,
        \type real
        \minimum> 0
        \required-field
-  A7,  \field Heating Capacity Curve Name
+  A8,  \field Heating Capacity Curve Name
        \required-field
        \type object-list
        \object-list QuadvariateFunctions
-  A8,  \field Heating Power Consumption Curve Name
+  A9,  \field Heating Power Consumption Curve Name
        \required-field
        \type object-list
        \object-list QuadvariateFunctions
-  A9;  \field Part Load Fraction Correlation Curve Name
+  A10; \field Part Load Fraction Correlation Curve Name
        \note quadratic curve = a + b*PLR + c*PLR**2
        \note cubic curve = a + b*PLR + c*PLR**2 + d*PLR**3
        \note PLR = part load ratio (heat load/steady state capacity)
@@ -21778,7 +21790,7 @@ OS:Coil:Heating:DX:MultiSpeed:StageData,
        \object-list BivariateFunctions
 
 OS:Coil:Heating:DX:VariableSpeed,
-        \min-fields 20
+        \min-fields 21
    A1,  \field Handle
         \type handle
         \required-field
@@ -21788,11 +21800,17 @@ OS:Coil:Heating:DX:VariableSpeed,
         \reference HeatingCoilsDXVariableSpeed
         \reference AFNCoilNames
         \reference ConnectionObject
-   A3,  \field Indoor Air Inlet Node Name
+   A3,  \field Availability Schedule Name
+        \note Availability schedule name for this system. Schedule value > 0 means the system is available.
+        \note If this field is blank, the system is always available.
+        \type object-list
+        \object-list ScheduleNames
+        \required-field
+   A4,  \field Indoor Air Inlet Node Name
         \type object-list
         \required-field
         \object-list ConnectionNames
-   A4,  \field Indoor Air Outlet Node Name
+   A5,  \field Indoor Air Outlet Node Name
         \type object-list
         \required-field
         \object-list ConnectionNames
@@ -21811,14 +21829,14 @@ OS:Coil:Heating:DX:VariableSpeed,
         \type real
         \autosizable
         \required-field
-   A5,  \field Energy Part Load Fraction Curve Name
+   A6,  \field Energy Part Load Fraction Curve Name
         \required-field
         \type object-list
         \object-list UnivariateFunctions
         \note quadratic curve = a + b*PLR + c*PLR**2
         \note cubic curve = a + b*PLR + c*PLR**2 + d*PLR**3
         \note PLR = part load ratio (heating load/steady state capacity)
-   A6,  \field Defrost Energy Input Ratio Function of Temperature Curve Name
+   A7,  \field Defrost Energy Input Ratio Function of Temperature Curve Name
         \type object-list
         \object-list BivariateFunctions
         \note biquadratic curve = a + b*wb + c*wb**2 + d*oat + e*oat**2 + f*wb*oat
@@ -21845,7 +21863,7 @@ OS:Coil:Heating:DX:VariableSpeed,
         \minimum 0.0
         \units W
         \ip-units W
-   A7,  \field Crankcase Heater Capacity Function of Temperature Curve Name
+   A8,  \field Crankcase Heater Capacity Function of Temperature Curve Name
         \note A Curve:* or Table:Lookup object encoding the relationship between
         \note the crankcase heater capacity and the outdoor air temperature. When this field is
         \note missing or empty, constant crankcase heater capacity will be assumed.
@@ -21856,12 +21874,12 @@ OS:Coil:Heating:DX:VariableSpeed,
         \type real
         \minimum 0.0
         \units C
-   A8,  \field Defrost Strategy
+   A9,  \field Defrost Strategy
         \required-field
         \type choice
         \key ReverseCycle
         \key Resistive
-   A9,  \field Defrost Control
+   A10, \field Defrost Control
         \required-field
         \type choice
         \key Timed
@@ -21877,7 +21895,7 @@ OS:Coil:Heating:DX:VariableSpeed,
         \autosizable
         \units W
         \ip-units W
-   A10; \field Speed Data List
+   A11; \field Speed Data List
         \type object-list
         \object-list ModelObjectLists
 
@@ -21958,7 +21976,7 @@ OS:Coil:Heating:DX:VariableSpeed:SpeedData,
         \note ffa = Fraction of the full load Air Flow
 
 OS:Coil:Cooling:DX:VariableSpeed,
-        \min-fields 26
+        \min-fields 27
    A1,  \field Handle
         \type handle
         \required-field
@@ -21969,11 +21987,17 @@ OS:Coil:Cooling:DX:VariableSpeed,
         \reference DesuperHeatingCoilSources
         \reference AFNCoilNames
         \reference ConnectionObject
-   A3,  \field Indoor Air Inlet Node Name
+   A3,  \field Availability Schedule Name
+        \note Availability schedule name for this system. Schedule value > 0 means the system is available.
+        \note If this field is blank, the system is always available.
+        \type object-list
+        \object-list ScheduleNames
+        \required-field
+   A4,  \field Indoor Air Inlet Node Name
         \type object-list
         \required-field
         \object-list ConnectionNames
-   A4,  \field Indoor Air Outlet Node Name
+   A5,  \field Indoor Air Outlet Node Name
         \type object-list
         \required-field
         \object-list ConnectionNames
@@ -22024,13 +22048,13 @@ OS:Coil:Cooling:DX:VariableSpeed,
         \required-field
         \note Programmed time delay for fan to shut off after compressor cycle off.
         \note Enter 0 when fan operating mode is continuous
-   A5,  \field Energy Part Load Fraction Curve Name
+   A6,  \field Energy Part Load Fraction Curve Name
         \required-field
         \type object-list
         \object-list UnivariateFunctions
-   A6,  \field Condenser Air Inlet Node Name
+   A7,  \field Condenser Air Inlet Node Name
         \type alpha
-   A7,  \field Condenser Type
+   A8,  \field Condenser Type
         \required-field
         \type choice
         \key AirCooled
@@ -22047,7 +22071,7 @@ OS:Coil:Cooling:DX:VariableSpeed,
         \minimum 0.0
         \units W
         \ip-units W
-   A8,  \field Crankcase Heater Capacity Function of Temperature Curve Name
+   A9,  \field Crankcase Heater Capacity Function of Temperature Curve Name
         \note A Curve:* or Table:Lookup object encoding the relationship between
         \note the crankcase heater capacity and the outdoor air temperature. When this field is
         \note missing or empty, constant crankcase heater capacity will be assumed.
@@ -22062,10 +22086,10 @@ OS:Coil:Cooling:DX:VariableSpeed,
         \type real
         \required-field
         \units C
-   A9,  \field Supply Water Storage Tank Name
+   A10, \field Supply Water Storage Tank Name
         \type object-list
         \object-list WaterStorageTankNames
-   A10, \field Condensate Collection Water Storage Tank Name
+   A11, \field Condensate Collection Water Storage Tank Name
         \type object-list
         \object-list WaterStorageTankNames
    N13, \field Basin Heater Capacity
@@ -22078,10 +22102,10 @@ OS:Coil:Cooling:DX:VariableSpeed,
         \type real
         \units C
         \minimum 2.0
-   A11, \field Basin Heater Operating Schedule Name
+   A12, \field Basin Heater Operating Schedule Name
         \type object-list
         \object-list ScheduleNames
-   A12; \field Speed Data List
+   A13; \field Speed Data List
         \type object-list
         \object-list ModelObjectLists
 
@@ -22167,7 +22191,7 @@ OS:Coil:Cooling:DX:VariableSpeed:SpeedData,
         \object-list UnivariateFunctions
 
 OS:Coil:Heating:WaterToAirHeatPump:VariableSpeedEquationFit,
-        \min-fields 12
+        \min-fields 13
    A1,  \field Handle
         \type handle
         \required-field
@@ -22176,19 +22200,25 @@ OS:Coil:Heating:WaterToAirHeatPump:VariableSpeedEquationFit,
         \type alpha
         \reference HeatingCoilsWaterToAirVSHP
         \reference ConnectionObject
-   A3,  \field Water-to-Refrigerant HX Water Inlet Node Name
+   A3,  \field Availability Schedule Name
+        \note Availability schedule name for this system. Schedule value > 0 means the system is available.
+        \note If this field is blank, the system is always available.
+        \type object-list
+        \object-list ScheduleNames
+        \required-field
+   A4,  \field Water-to-Refrigerant HX Water Inlet Node Name
         \type object-list
         \required-field
         \object-list ConnectionNames
-   A4,  \field Water-to-Refrigerant HX Water Outlet Node Name
+   A5,  \field Water-to-Refrigerant HX Water Outlet Node Name
         \type object-list
         \required-field
         \object-list ConnectionNames
-   A5,  \field Indoor Air Inlet Node Name
+   A6,  \field Indoor Air Inlet Node Name
         \type object-list
         \required-field
         \object-list ConnectionNames
-   A6,  \field Indoor Air Outlet Node Name
+   A7,  \field Indoor Air Outlet Node Name
         \type object-list
         \required-field
         \object-list ConnectionNames
@@ -22213,11 +22243,11 @@ OS:Coil:Heating:WaterToAirHeatPump:VariableSpeedEquationFit,
         \type real
         \autosizable
         \required-field
-   A7,  \field Energy Part Load Fraction Curve Name
+   A8,  \field Energy Part Load Fraction Curve Name
         \required-field
         \type object-list
         \object-list UnivariateFunctions
-   A8;  \field Speed Data List
+   A9;  \field Speed Data List
         \type object-list
         \object-list ModelObjectLists
 
@@ -22288,7 +22318,7 @@ OS:Coil:Heating:WaterToAirHeatPump:VariableSpeedEquationFit:SpeedData,
         \object-list BivariateFunctions
 
 OS:Coil:Cooling:WaterToAirHeatPump:VariableSpeedEquationFit,
-        \min-fields 18
+        \min-fields 19
    A1,  \field Handle
         \type handle
         \required-field
@@ -22298,19 +22328,25 @@ OS:Coil:Cooling:WaterToAirHeatPump:VariableSpeedEquationFit,
         \reference CoolingCoilsWaterToAirVSHP
         \reference DesuperHeatingWaterOnlySources
         \reference ConnectionObject
-   A3,  \field Water-to-Refrigerant HX Water Inlet Node Name
+   A3,  \field Availability Schedule Name
+        \note Availability schedule name for this system. Schedule value > 0 means the system is available.
+        \note If this field is blank, the system is always available.
+        \type object-list
+        \object-list ScheduleNames
+        \required-field
+   A4,  \field Water-to-Refrigerant HX Water Inlet Node Name
         \type object-list
         \required-field
         \object-list ConnectionNames
-   A4,  \field Water-to-Refrigerant HX Water Outlet Node Name
+   A5,  \field Water-to-Refrigerant HX Water Outlet Node Name
         \type object-list
         \required-field
         \object-list ConnectionNames
-   A5,  \field Indoor Air Inlet Node Name
+   A6,  \field Indoor Air Inlet Node Name
         \type object-list
         \required-field
         \object-list ConnectionNames
-   A6,  \field Indoor Air Outlet Node Name
+   A7,  \field Indoor Air Outlet Node Name
         \type object-list
         \required-field
         \object-list ConnectionNames
@@ -22367,16 +22403,16 @@ OS:Coil:Cooling:WaterToAirHeatPump:VariableSpeedEquationFit,
         \required-field
         \note Programmed time delay for heat pump fan to shut off after compressor cycle off.
         \note Enter 0 when fan operating mode is continuous
-   A7,  \field Use Hot Gas Reheat
+   A8,  \field Use Hot Gas Reheat
         \type choice
         \key Yes
         \key No
         \required-field
-   A8,  \field Energy Part Load Fraction Curve Name
+   A9,  \field Energy Part Load Fraction Curve Name
         \required-field
         \type object-list
         \object-list UnivariateFunctions
-   A9;  \field Speed Data List
+   A10; \field Speed Data List
         \type object-list
         \object-list ModelObjectLists
 
@@ -32013,7 +32049,7 @@ OS:Coil:WaterHeating:AirToWaterHeatPump,
        \memo Heat pump water heater (HPWH) heating coil, air-to-water direct-expansion (DX)
        \memo system which includes a water heating coil, evaporator air coil, evaporator
        \memo fan, electric compressor, and water pump. Part of a WaterHeater:HeatPump system.
-       \min-fields 30
+       \min-fields 31
   A1, \field Handle
        \type handle
        \required-field
@@ -32023,6 +32059,12 @@ OS:Coil:WaterHeating:AirToWaterHeatPump,
        \reference HeatPumpWaterHeaterDXCoils
        \reference ConnectionObject
        \note Unique name for this instance of a heat pump water heater DX coil.
+  A3 , \field Availability Schedule Name
+       \note Availability schedule name for this system. Schedule value > 0 means the system is available.
+       \note If this field is blank, the system is always available.
+       \type object-list
+       \object-list ScheduleNames
+       \required-field
   N1 , \field Rated Heating Capacity
        \required-field
        \type real
@@ -32092,21 +32134,21 @@ OS:Coil:WaterHeating:AirToWaterHeatPump,
        \note A warning message will be issued if the ratio of Rated Condenser Water Flow Rate
        \note to Heating Capacity is less than 1.79405E-8 m3/s/W (0.083 gpm/MBH)
        \note or greater than 8.97024E-8 m3/s/W (0.417 gpm/MBH), but the simulation will continue.
-  A3 , \field Evaporator Fan Power Included in Rated COP
+  A4 , \field Evaporator Fan Power Included in Rated COP
        \type choice
        \key Yes
        \key No
        \required-field
        \note Select Yes if the evaporator fan power is included in the rated COP. This choice field
        \note impacts the calculation of compressor electric power.
-  A4 , \field Condenser Pump Power Included in Rated COP
+  A5 , \field Condenser Pump Power Included in Rated COP
        \type choice
        \key Yes
        \key No
        \required-field
        \note Select Yes if the condenser pump power is included in the rated COP. This choice field
        \note impacts the calculation of compressor electric power.
-  A5 , \field Condenser Pump Heat Included in Rated Heating Capacity and Rated COP
+  A6 , \field Condenser Pump Heat Included in Rated Heating Capacity and Rated COP
        \type choice
        \key Yes
        \key No
@@ -32128,21 +32170,21 @@ OS:Coil:WaterHeating:AirToWaterHeatPump,
        \required-field
        \note Fraction of pump heat transferred to the condenser water. The pump is assumed
        \note to be located downstream of the condenser.
-  A6 , \field Evaporator Air Inlet Node Name
+  A7 , \field Evaporator Air Inlet Node Name
        \type object-list
        \object-list ConnectionNames
        \note The node from which the DX coil draws its inlet air.
-  A7 , \field Evaporator Air Outlet Node Name
+  A8 , \field Evaporator Air Outlet Node Name
        \type object-list
        \object-list ConnectionNames
        \note The node to which the DX coil sends its outlet air.
-  A8 , \field Condenser Water Inlet Node
+  A9 , \field Condenser Water Inlet Node
        \type object-list
        \object-list ConnectionNames
        \note The node from which the DX coil condenser draws its inlet water.
        \note This name should match the source side outlet node name in the associated
        \note water heater tank object.
-  A9 , \field Condenser Water Outlet Node
+  A10, \field Condenser Water Outlet Node
        \type object-list
        \object-list ConnectionNames
        \note The node to which the DX coil condenser sends its outlet water.
@@ -32157,7 +32199,7 @@ OS:Coil:WaterHeating:AirToWaterHeatPump,
        \note surrounding the compressor is below the Maximum Ambient Temperature for Crankcase
        \note Heater Operation and the DX coil is off.  The ambient temperature surrounding the
        \note compressor is set by the WaterHeater:HeatPump parent object (field Compressor Location).
-  A10, \field Crankcase Heater Capacity Function of Temperature Curve Name
+  A11, \field Crankcase Heater Capacity Function of Temperature Curve Name
        \note A Curve:* or Table:Lookup object encoding the relationship between
        \note the crankcase heater capacity and the outdoor air temperature. When this field is
        \note missing or empty, constant crankcase heater capacity will be assumed.
@@ -32172,7 +32214,7 @@ OS:Coil:WaterHeating:AirToWaterHeatPump,
        \note surrounding the compressor is below the Maximum Outdoor Temperature for Crankcase
        \note Heater Operation and the unit is off. The ambient temperature surrounding the
        \note compressor is set by the WaterHeater:HeatPump parent object (field Compressor Location).
-  A11, \field Evaporator Air Temperature Type for Curve Objects
+  A12, \field Evaporator Air Temperature Type for Curve Objects
        \type choice
        \key DryBulbTemperature
        \key WetBulbTemperature
@@ -32180,7 +32222,7 @@ OS:Coil:WaterHeating:AirToWaterHeatPump,
        \note Determines temperature type for heating capacity curves and
        \note heating COP curves. This input determines whether
        \note the inlet air dry-bulb or wet-bulb temperature is used to evaluate these curves.
-  A12, \field Heating Capacity Function of Temperature Curve
+  A13, \field Heating Capacity Function of Temperature Curve
        \type object-list
        \object-list UnivariateFunctions
        \object-list BivariateFunctions
@@ -32192,7 +32234,7 @@ OS:Coil:WaterHeating:AirToWaterHeatPump,
        \note tw = condenser inlet water temperature (C).
        \note The field Evaporator Air Temperature Type for Curve Objects determines if dry-bulb or wet-bulb
        \note is used as the evaporator inlet air temperature (ta).
-  A13, \field Heating Capacity Function of Air Flow Fraction Curve
+  A14, \field Heating Capacity Function of Air Flow Fraction Curve
        \type object-list
        \required-field
        \object-list UnivariateFunctions
@@ -32202,7 +32244,7 @@ OS:Coil:WaterHeating:AirToWaterHeatPump,
        \note ff = fraction of the rated evaporator air flow rate.
        \note Use curve coefficients of 1,0,0 or leave this field blank when neglecting performance impacts
        \note due to variations in air flow rate fraction.
-  A14, \field Heating Capacity Function of Water Flow Fraction Curve
+  A15, \field Heating Capacity Function of Water Flow Fraction Curve
        \type object-list
        \required-field
        \object-list UnivariateFunctions
@@ -32212,7 +32254,7 @@ OS:Coil:WaterHeating:AirToWaterHeatPump,
        \note ff = fraction of the rated condenser water flow rate.
        \note Use curve coefficients of 1,0,0 or leave this field blank when neglecting performance impacts
        \note due to variations in water flow rate fraction.
-  A15, \field Heating COP Function of Temperature Curve
+  A16, \field Heating COP Function of Temperature Curve
        \type object-list
        \object-list UnivariateFunctions
        \object-list BivariateFunctions
@@ -32224,7 +32266,7 @@ OS:Coil:WaterHeating:AirToWaterHeatPump,
        \note tw = condenser inlet water temperature (C).
        \note The field Evaporator Air Temperature Type for Curve Objects determines if dry-bulb or wet-bulb
        \note is used as the evaporator inlet air temperature (ta).
-  A16, \field Heating COP Function of Air Flow Fraction Curve
+  A17, \field Heating COP Function of Air Flow Fraction Curve
        \type object-list
        \object-list UnivariateFunctions
        \required-field
@@ -32234,7 +32276,7 @@ OS:Coil:WaterHeating:AirToWaterHeatPump,
        \note ff = fraction of the rated evaporator air flow rate.
        \note Use curve coefficients of 1,0,0 or leave this field blank when neglecting performance impacts
        \note due to variations in air flow rate fraction.
-  A17, \field Heating COP Function of Water Flow Fraction Curve
+  A18, \field Heating COP Function of Water Flow Fraction Curve
        \type object-list
        \required-field
        \object-list UnivariateFunctions
@@ -32244,7 +32286,7 @@ OS:Coil:WaterHeating:AirToWaterHeatPump,
        \note ff = fraction of the rated condenser water flow rate.
        \note Use curve coefficients of 1,0,0 or leave this field blank when neglecting performance impacts
        \note due to variations in water flow rate fraction.
-  A18; \field Part Load Fraction Correlation Curve
+  A19; \field Part Load Fraction Correlation Curve
        \type object-list
        \required-field
        \object-list UnivariateFunctions
@@ -32473,7 +32515,7 @@ OS:Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed,
        \memo variable-speed Heat pump water heater (VSHPWH) heating coil, air-to-water direct-expansion (DX)
        \memo system which includes a variable-speed water heating coil, evaporator air coil, evaporator
        \memo fan, electric compressor, and water pump. Part of a WaterHeater:HeatPump system.
-       \min-fields 23
+       \min-fields 24
   A1,  \field Handle
        \type handle
        \required-field
@@ -32482,6 +32524,12 @@ OS:Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed,
        \type alpha
        \reference HeatPumpWaterHeaterDXCoilsVariableSpeed
        \note Unique name for this instance of a variable-speed heat pump water heater DX coil.
+  A3,  \field Availability Schedule Name
+       \note Availability schedule name for this system. Schedule value > 0 means the system is available.
+       \note If this field is blank, the system is always available.
+       \type object-list
+       \object-list ScheduleNames
+       \required-field
   N1,  \field Nominal Speed Level
        \units dimensionless
        \type integer
@@ -32536,21 +32584,21 @@ OS:Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed,
        \note A warning message will be issued if the ratio of Rated Condenser Water Flow Rate
        \note to Heating Capacity is less than 1.79405E-8 m3/s/W (0.083 gpm/MBH)
        \note or greater than 8.97024E-8 m3/s/W (0.417 gpm/MBH), but the simulation will continue.
-  A3,  \field Evaporator Fan Power Included in Rated COP
+  A4,  \field Evaporator Fan Power Included in Rated COP
        \type choice
        \key Yes
        \key No
        \required-field
        \note Select Yes if the evaporator fan power is included in the rated COP. This choice field
        \note impacts the calculation of compressor electric power.
-  A4,  \field Condenser Pump Power Included in Rated COP
+  A5,  \field Condenser Pump Power Included in Rated COP
        \type choice
        \key Yes
        \key No
        \required-field
        \note Select Yes if the condenser pump power is included in the rated COP. This choice field
        \note impacts the calculation of compressor electric power.
-  A5,  \field Condenser Pump Heat Included in Rated Heating Capacity and Rated COP
+  A6,  \field Condenser Pump Heat Included in Rated Heating Capacity and Rated COP
        \type choice
        \key Yes
        \key No
@@ -32564,21 +32612,21 @@ OS:Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed,
        \maximum 1
        \note Fraction of pump heat transferred to the condenser water. The pump is assumed
        \note to be located downstream of the condenser.
-  A6,  \field Evaporator Air Inlet Node Name
+  A7,  \field Evaporator Air Inlet Node Name
        \type object-list
        \object-list ConnectionNames
        \note The node from which the DX coil draws its inlet air.
-  A7,  \field Evaporator Air Outlet Node Name
+  A8,  \field Evaporator Air Outlet Node Name
        \type object-list
        \object-list ConnectionNames
        \note The node to which the DX coil sends its outlet air.
-  A8,  \field Condenser Water Inlet Node Name
+  A9,  \field Condenser Water Inlet Node Name
        \type object-list
        \object-list ConnectionNames
        \note The node from which the DX coil condenser draws its inlet water.
        \note This name should match the source side outlet node name in the associated
        \note water heater tank object.
-  A9,  \field Condenser Water Outlet Node Name
+  A10, \field Condenser Water Outlet Node Name
        \type object-list
        \object-list ConnectionNames
        \note The node to which the DX coil condenser sends its outlet water.
@@ -32593,7 +32641,7 @@ OS:Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed,
        \note surrounding the compressor is below the Maximum Ambient Temperature for Crankcase
        \note Heater Operation and the DX coil is off.  The ambient temperature surrounding the
        \note compressor is set by the WaterHeater:HeatPump parent object (field Compressor Location).
-  A10, \field Crankcase Heater Capacity Function of Temperature Curve Name
+  A11, \field Crankcase Heater Capacity Function of Temperature Curve Name
        \note A Curve:* or Table:Lookup object encoding the relationship between
        \note the crankcase heater capacity and the outdoor air temperature. When this field is
        \note missing or empty, constant crankcase heater capacity will be assumed.
@@ -32608,7 +32656,7 @@ OS:Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed,
        \note surrounding the compressor is below the Maximum Outdoor Temperature for Crankcase
        \note Heater Operation and the unit is off. The ambient temperature surrounding the
        \note compressor is set by the WaterHeater:HeatPump parent object (field Compressor Location).
-  A11, \field Evaporator Air Temperature Type for Curve Objects
+  A12, \field Evaporator Air Temperature Type for Curve Objects
        \type choice
        \key DryBulbTemperature
        \key WetBulbTemperature
@@ -32616,7 +32664,7 @@ OS:Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed,
        \note Determines temperature type for heating capacity curves and
        \note heating COP curves. This input determines whether
        \note the inlet air dry-bulb or wet-bulb temperature is used to evaluate these curves.
-  A12, \field Part Load Fraction Correlation Curve Name
+  A13, \field Part Load Fraction Correlation Curve Name
        \required-field
        \type object-list
        \object-list UnivariateFunctions
@@ -32627,7 +32675,7 @@ OS:Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed,
        \note PLR = part load ratio (heating delivered/steady state heating capacity).
        \note Use curve coefficients of 1,0,0 or leave this field blank when neglecting performance impacts
        \note due to variations in part load ratio.
-  A13; \field Speed Data List
+  A14; \field Speed Data List
        \type object-list
        \object-list ModelObjectLists
 
@@ -32736,7 +32784,7 @@ OS:Coil:WaterHeating:AirToWaterHeatPump:Wrapped,
        \memo Heat pump water heater (HPWH) heating coil, air-to-water direct-expansion (DX)
        \memo system which includes a water heating coil, evaporator air coil, evaporator
        \memo fan, electric compressor, and water pump. Part of a WaterHeater:HeatPump:WrappedCondenser system.
-       \min-fields 21
+       \min-fields 22
   A1, \field Handle
        \type handle
        \required-field
@@ -32745,6 +32793,12 @@ OS:Coil:WaterHeating:AirToWaterHeatPump:Wrapped,
        \type alpha
        \reference HeatPumpWaterHeaterDXCoilsWrapped
        \note Unique name for this instance of a heat pump water heater DX coil.
+  A3 , \field Availability Schedule Name
+       \note Availability schedule name for this system. Schedule value > 0 means the system is available.
+       \note If this field is blank, the system is always available.
+       \type object-list
+       \object-list ScheduleNames
+       \required-field
   N1 , \field Rated Heating Capacity
        \required-field
        \type real
@@ -32801,18 +32855,18 @@ OS:Coil:WaterHeating:AirToWaterHeatPump:Wrapped,
        \note Evaporator air flow rate corresponding to rated coil performance
        \note (heating capacity, COP and SHR).
        \note Default is 5.035E-5 m3/s/W (31.25 cfm/MBH) of rated heating capacity when autocalculated.
-  A3 , \field Evaporator Fan Power Included in Rated COP
+  A4 , \field Evaporator Fan Power Included in Rated COP
        \type choice
        \key Yes
        \key No
        \required-field
        \note Select Yes if the evaporator fan power is included in the rated COP. This choice field
        \note impacts the calculation of compressor electric power.
-  A4,  \field Evaporator Air Inlet Node Name
+  A5,  \field Evaporator Air Inlet Node Name
        \type object-list
        \object-list ConnectionNames
        \note The node from which the DX coil draws its inlet air.
-  A5,  \field Evaporator Air Outlet Node Name
+  A6,  \field Evaporator Air Outlet Node Name
        \type object-list
        \object-list ConnectionNames
        \note The node to which the DX coil sends its outlet air.
@@ -32825,7 +32879,7 @@ OS:Coil:WaterHeating:AirToWaterHeatPump:Wrapped,
        \note surrounding the compressor is below the Maximum Ambient Temperature for Crankcase
        \note Heater Operation and the DX coil is off.  The ambient temperature surrounding the
        \note compressor is set by the WaterHeater:HeatPump:WrappedCondenser parent object (field Compressor Location).
-  A6,  \field Crankcase Heater Capacity Function of Temperature Curve Name
+  A7,  \field Crankcase Heater Capacity Function of Temperature Curve Name
        \note A Curve:* or Table:Lookup object encoding the relationship between
        \note the crankcase heater capacity and the outdoor air temperature. When this field is
        \note missing or empty, constant crankcase heater capacity will be assumed.
@@ -32840,7 +32894,7 @@ OS:Coil:WaterHeating:AirToWaterHeatPump:Wrapped,
        \note surrounding the compressor is below the Maximum Outdoor Temperature for Crankcase
        \note Heater Operation and the unit is off. The ambient temperature surrounding the
        \note compressor is set by the WaterHeater:HeatPump:WrappedCondenser parent object (field Compressor Location).
-  A7,  \field Evaporator Air Temperature Type for Curve Objects
+  A8,  \field Evaporator Air Temperature Type for Curve Objects
        \type choice
        \key DryBulbTemperature
        \key WetBulbTemperature
@@ -32848,7 +32902,7 @@ OS:Coil:WaterHeating:AirToWaterHeatPump:Wrapped,
        \note Determines temperature type for heating capacity curves and
        \note heating COP curves. This input determines whether
        \note the inlet air dry-bulb or wet-bulb temperature is used to evaluate these curves.
-  A8,  \field Heating Capacity Function of Temperature Curve Name
+  A9,  \field Heating Capacity Function of Temperature Curve Name
        \type object-list
        \object-list UnivariateFunctions
        \object-list BivariateFunctions
@@ -32860,7 +32914,7 @@ OS:Coil:WaterHeating:AirToWaterHeatPump:Wrapped,
        \note tw = condenser inlet water temperature (C).
        \note The field Evaporator Air Temperature Type for Curve Objects determines if dry-bulb or wet-bulb
        \note is used as the evaporator inlet air temperature (ta).
-  A9,  \field Heating Capacity Function of Air Flow Fraction Curve Name
+  A10, \field Heating Capacity Function of Air Flow Fraction Curve Name
        \type object-list
        \required-field
        \object-list UnivariateFunctions
@@ -32870,7 +32924,7 @@ OS:Coil:WaterHeating:AirToWaterHeatPump:Wrapped,
        \note ff = fraction of the rated evaporator air flow rate.
        \note Use curve coefficients of 1,0,0 or leave this field blank when neglecting performance impacts
        \note due to variations in air flow rate fraction.
-  A10, \field Heating COP Function of Temperature Curve Name
+  A11, \field Heating COP Function of Temperature Curve Name
        \type object-list
        \required-field
        \object-list UnivariateFunctions
@@ -32882,7 +32936,7 @@ OS:Coil:WaterHeating:AirToWaterHeatPump:Wrapped,
        \note tw = condenser inlet water temperature (C).
        \note The field Evaporator Air Temperature Type for Curve Objects determines if dry-bulb or wet-bulb
        \note is used as the evaporator inlet air temperature (ta).
-  A11, \field Heating COP Function of Air Flow Fraction Curve Name
+  A12, \field Heating COP Function of Air Flow Fraction Curve Name
        \type object-list
        \required-field
        \object-list UnivariateFunctions
@@ -32892,7 +32946,7 @@ OS:Coil:WaterHeating:AirToWaterHeatPump:Wrapped,
        \note ff = fraction of the rated evaporator air flow rate.
        \note Use curve coefficients of 1,0,0 or leave this field blank when neglecting performance impacts
        \note due to variations in air flow rate fraction.
-  A12; \field Part Load Fraction Correlation Curve Name
+  A13; \field Part Load Fraction Correlation Curve Name
        \type object-list
        \required-field
        \object-list UnivariateFunctions

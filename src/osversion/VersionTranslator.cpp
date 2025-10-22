@@ -7981,12 +7981,12 @@ namespace osversion {
     }};
 
     // Could make it a static inside the lambda, except that it won't be reset so if you try to translate twice it fails
-    std::string discreteSchHandleStr;
+    std::string continuousSchHandleStr;
 
-    auto getOrCreateAlwaysOnContinuousSheduleHandleStr = [this, &ss, &idf_3_6_1, &idd_3_7_0, &discreteSchHandleStr]() -> std::string {
-      if (!discreteSchHandleStr.empty()) {
-        LOG(Trace, "Already found 'Always On Continuous' Schedule in model with handle " << discreteSchHandleStr);
-        return discreteSchHandleStr;
+    auto getOrCreateAlwaysOnContinuousScheduleHandleStr = [this, &ss, &idf_3_6_1, &idd_3_7_0, &continuousSchHandleStr]() -> std::string {
+      if (!continuousSchHandleStr.empty()) {
+        LOG(Trace, "Already found 'Always On Continuous' Schedule in model with handle " << continuousSchHandleStr);
+        return continuousSchHandleStr;
       }
 
       const std::string name = "Always On Continuous";
@@ -7997,21 +7997,21 @@ namespace osversion {
           if (istringEqual(name_.get(), name)) {
             if (boost::optional<double> value = object.getDouble(3)) {
               if (equal<double>(value.get(), val)) {
-                discreteSchHandleStr = object.getString(0).get();  // Store in state variable
-                LOG(Trace, "Found existing 'Always On Continuous' Schedule in model with handle " << discreteSchHandleStr);
-                return discreteSchHandleStr;
+                continuousSchHandleStr = object.getString(0).get();  // Store in state variable
+                LOG(Trace, "Found existing 'Always On Continuous' Schedule in model with handle " << continuousSchHandleStr);
+                return continuousSchHandleStr;
               }
             }
           }
         }
       }
 
-      auto discreteSch = IdfObject(idd_3_7_0.getObject("OS:Schedule:Constant").get());
+      auto continuousSch = IdfObject(idd_3_7_0.getObject("OS:Schedule:Constant").get());
 
-      discreteSchHandleStr = toString(createUUID());  // Store in state variable
-      discreteSch.setString(0, discreteSchHandleStr);
-      discreteSch.setString(1, name);
-      discreteSch.setDouble(3, val);
+      continuousSchHandleStr = toString(createUUID());  // Store in state variable
+      continuousSch.setString(0, continuousSchHandleStr);
+      continuousSch.setString(1, name);
+      continuousSch.setDouble(3, val);
 
       IdfObject typeLimits(idd_3_7_0.getObject("OS:ScheduleTypeLimits").get());
       typeLimits.setString(0, toString(createUUID()));
@@ -8021,17 +8021,17 @@ namespace osversion {
       typeLimits.setString(4, "Continuous");
       typeLimits.setString(5, "");
 
-      discreteSch.setString(2, typeLimits.getString(0).get());
+      continuousSch.setString(2, typeLimits.getString(0).get());
 
-      ss << discreteSch;
+      ss << continuousSch;
       ss << typeLimits;
 
       // Register new objects
-      m_new.emplace_back(std::move(discreteSch));
+      m_new.emplace_back(std::move(continuousSch));
       m_new.emplace_back(std::move(typeLimits));
-      LOG(Trace, "Created 'Always On Continuous' Schedule with handle " << discreteSchHandleStr);
+      LOG(Trace, "Created 'Always On Continuous' Schedule with handle " << continuousSchHandleStr);
 
-      return discreteSchHandleStr;
+      return continuousSchHandleStr;
     };
 
     for (const IdfObject& object : idf_3_6_1.objects()) {
@@ -8655,7 +8655,7 @@ namespace osversion {
         }
 
         // Add the new "Capacity Fraction Schedule"
-        newObject.setString(5, getOrCreateAlwaysOnContinuousSheduleHandleStr());
+        newObject.setString(5, getOrCreateAlwaysOnContinuousScheduleHandleStr());
 
         ss << newObject;
         m_refactored.emplace_back(std::move(object), std::move(newObject));
@@ -8674,7 +8674,7 @@ namespace osversion {
           }
         }
         // Add the new "Capacity Fraction Schedule"
-        newObject.setString(5, getOrCreateAlwaysOnContinuousSheduleHandleStr());
+        newObject.setString(5, getOrCreateAlwaysOnContinuousScheduleHandleStr());
 
         ss << newObject;
         m_refactored.emplace_back(std::move(object), std::move(newObject));
@@ -9757,10 +9757,93 @@ namespace osversion {
     IdfFile targetIdf(idd_3_10_1.iddFile());
     ss << targetIdf.versionObject().get();
 
+    // Could make it a static inside the lambda, except that it won't be reset so if you try to translate twice it fails
+    std::string discreteSchHandleStr;
+
+    auto getOrCreateAlwaysOnDiscreteScheduleHandleStr = [this, &ss, &idf_3_10_0, &idd_3_10_1, &discreteSchHandleStr]() -> std::string {
+      if (!discreteSchHandleStr.empty()) {
+        LOG(Trace, "Already found 'Always On Discrete' Schedule in model with handle " << discreteSchHandleStr);
+        return discreteSchHandleStr;
+      }
+
+      const std::string name = "Always On Discrete";
+      const double val = 1.0;
+      // Add an alwaysOnDiscreteSchedule if one does not already exist
+      for (const IdfObject& object : idf_3_10_0.getObjectsByType(idf_3_10_0.iddFile().getObject("OS:Schedule:Constant").get())) {
+        if (boost::optional<std::string> name_ = object.getString(1)) {
+          if (istringEqual(name_.get(), name)) {
+            if (boost::optional<double> value = object.getDouble(3)) {
+              if (equal<double>(value.get(), val)) {
+                discreteSchHandleStr = object.getString(0).get();  // Store in state variable
+                LOG(Trace, "Found existing 'Always On Discrete' Schedule in model with handle " << discreteSchHandleStr);
+                return discreteSchHandleStr;
+              }
+            }
+          }
+        }
+      }
+
+      auto discreteSch = IdfObject(idd_3_10_1.getObject("OS:Schedule:Constant").get());
+
+      discreteSchHandleStr = toString(createUUID());  // Store in state variable
+      discreteSch.setString(0, discreteSchHandleStr);
+      discreteSch.setString(1, name);
+      discreteSch.setDouble(3, val);
+
+      IdfObject typeLimits(idd_3_10_1.getObject("OS:ScheduleTypeLimits").get());
+      typeLimits.setString(0, toString(createUUID()));
+      typeLimits.setString(1, name + " Limits");
+      typeLimits.setDouble(2, 0.0);
+      typeLimits.setDouble(3, 1.0);
+      typeLimits.setString(4, "Discrete");
+      typeLimits.setString(5, "Availability");
+
+      discreteSch.setString(2, typeLimits.getString(0).get());
+
+      ss << discreteSch;
+      ss << typeLimits;
+
+      // Register new objects
+      m_new.emplace_back(std::move(discreteSch));
+      m_new.emplace_back(std::move(typeLimits));
+      LOG(Trace, "Created 'Always On Discrete' Schedule with handle " << discreteSchHandleStr);
+
+      return discreteSchHandleStr;
+    };
+
     for (const IdfObject& object : idf_3_10_0.objects()) {
       auto iddname = object.iddObject().name();
 
-      if (iddname == "OS:Site:WaterMainsTemperature") {
+      if ((iddname == "OS:Coil:Cooling:DX:VariableSpeed") || (iddname == "OS:Coil:Heating:DX:VariableSpeed")
+          || (iddname == "OS:Coil:Cooling:WaterToAirHeatPump:EquationFit") || (iddname == "OS:Coil:Heating:WaterToAirHeatPump:EquationFit")
+          || (iddname == "OS:Coil:Cooling:WaterToAirHeatPump:VariableSpeedEquationFit")
+          || (iddname == "OS:Coil:Heating:WaterToAirHeatPump:VariableSpeedEquationFit") || (iddname == "OS:Coil:WaterHeating:AirToWaterHeatPump")
+          || (iddname == "OS:Coil:WaterHeating:AirToWaterHeatPump:Wrapped") || (iddname == "OS:Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed")) {
+
+        // 1 Field has been inserted from 3.10.0 to 3.10.1:
+        // ------------------------------------------------
+        // * Availability Schedule Name * 2
+
+        auto iddObject = idd_3_10_1.getObject(iddname);
+        IdfObject newObject(iddObject.get());
+
+        for (size_t i = 0; i < object.numFields(); ++i) {
+          if ((value = object.getString(i))) {
+            if (i < 2) {
+              newObject.setString(i, value.get());
+            } else {
+              newObject.setString(i + 1, value.get());
+            }
+          }
+        }
+
+        // Applicability Schedule
+        newObject.setString(2, getOrCreateAlwaysOnDiscreteScheduleHandleStr());
+
+        ss << newObject;
+        m_refactored.emplace_back(std::move(object), std::move(newObject));
+
+      } else if (iddname == "OS:Site:WaterMainsTemperature") {
 
         // 2 Fields have been inserted from 3.10.0 to 3.10.1:
         // ------------------------------------------------

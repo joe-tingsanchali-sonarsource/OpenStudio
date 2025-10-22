@@ -42,6 +42,8 @@ namespace model {
 
       virtual IddObjectType iddObjectType() const override;
 
+      virtual std::vector<ScheduleTypeKey> getScheduleTypeKeys(const Schedule& schedule) const override;
+
       //virtual bool addToNode(Node & node);
 
       virtual unsigned airInletPort() const override;
@@ -62,6 +64,8 @@ namespace model {
       //@}
       /** @name Getters */
       //@{
+
+      Schedule availabilitySchedule() const;
 
       boost::optional<double> ratedAirFlowRate() const;
 
@@ -133,6 +137,8 @@ namespace model {
       /** @name Setters */
       //@{
 
+      bool setAvailabilitySchedule(Schedule& schedule);
+
       bool setRatedAirFlowRate(boost::optional<double> ratedAirFlowRate);
 
       void resetRatedAirFlowRate();
@@ -197,6 +203,7 @@ namespace model {
      private:
       REGISTER_LOGGER("openstudio.model.CoilCoolingWaterToAirHeatPumpEquationFit");
 
+      boost::optional<Schedule> optionalAvailabilitySchedule() const;
       boost::optional<Curve> optionalTotalCoolingCapacityCurve() const;
       boost::optional<Curve> optionalSensibleCoolingCapacityCurve() const;
       boost::optional<Curve> optionalCoolingPowerConsumptionCurve() const;
