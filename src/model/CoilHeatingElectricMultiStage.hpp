@@ -109,6 +109,12 @@ namespace model {
    */
     bool removeStage(unsigned index);
 
+    /** Creates a new equivalent duct object if an object is not already attached. */
+    AirflowNetworkEquivalentDuct getAirflowNetworkEquivalentDuct(double length, double diameter);
+
+    /** Returns the attached equivalent duct object, if any. */
+    boost::optional<AirflowNetworkEquivalentDuct> airflowNetworkEquivalentDuct() const;
+
     //@}
    protected:
     /// @cond

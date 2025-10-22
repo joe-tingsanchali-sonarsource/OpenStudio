@@ -31,7 +31,9 @@ namespace model {
     class CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFit_Impl;
     class CoilHeatingDesuperheater_Impl;
     class CoilHeatingGas_Impl;
+    class CoilHeatingGasMultiStage_Impl;
     class CoilHeatingElectric_Impl;
+    class CoilHeatingElectricMultiStage_Impl;
     class CoilHeatingDXSingleSpeed_Impl;
     class CoilHeatingDXVariableSpeed_Impl;
     class CoilCoolingWater_Impl;
@@ -117,7 +119,9 @@ namespace model {
     friend class detail::CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit_Impl;
     friend class detail::CoilHeatingDXSingleSpeed_Impl;
     friend class detail::CoilHeatingElectric_Impl;
+    friend class detail::CoilHeatingElectricMultiStage_Impl;
     friend class detail::CoilHeatingGas_Impl;
+    friend class detail::CoilHeatingGasMultiStage_Impl;
     friend class detail::CoilHeatingDesuperheater_Impl;
     friend class detail::CoilHeatingWater_Impl;
     friend class detail::CoilHeatingWaterToAirHeatPumpEquationFit_Impl;

@@ -87,6 +87,9 @@ namespace model {
       bool removeStage(const CoilHeatingElectricMultiStageStageData& stage);
       bool removeStage(unsigned index);
 
+      AirflowNetworkEquivalentDuct getAirflowNetworkEquivalentDuct(double length, double diameter);
+      boost::optional<AirflowNetworkEquivalentDuct> airflowNetworkEquivalentDuct() const;
+
       //@}
      protected:
      private:

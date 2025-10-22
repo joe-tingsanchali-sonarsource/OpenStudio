@@ -52,8 +52,12 @@
   %ignore openstudio::model::CoilHeatingDXVariableSpeed::airflowNetworkEquivalentDuct;
   %ignore openstudio::model::CoilHeatingElectric::getAirflowNetworkEquivalentDuct;
   %ignore openstudio::model::CoilHeatingElectric::airflowNetworkEquivalentDuct;
+  %ignore openstudio::model::CoilHeatingElectricMultiStage::getAirflowNetworkEquivalentDuct;
+  %ignore openstudio::model::CoilHeatingElectricMultiStage::airflowNetworkEquivalentDuct;
   %ignore openstudio::model::CoilHeatingGas::getAirflowNetworkEquivalentDuct;
   %ignore openstudio::model::CoilHeatingGas::airflowNetworkEquivalentDuct;
+  %ignore openstudio::model::CoilHeatingGasMultiStage::getAirflowNetworkEquivalentDuct;
+  %ignore openstudio::model::CoilHeatingGasMultiStage::airflowNetworkEquivalentDuct;
   %ignore openstudio::model::CoilHeatingWaterToAirHeatPumpEquationFit::getAirflowNetworkEquivalentDuct;
   %ignore openstudio::model::CoilHeatingWaterToAirHeatPumpEquationFit::airflowNetworkEquivalentDuct;
   %ignore openstudio::model::CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFit::getAirflowNetworkEquivalentDuct;

@@ -20849,6 +20849,7 @@ OS:Coil:Heating:Electric:MultiStage,
        \required-field
        \reference HeatingCoilsElectricMultiStage
        \reference ConnectionObject
+       \reference AFNCoilNames
   A3 , \field Availability Schedule
        \note Availability schedule name for this system. Schedule value > 0 means the system is available.
        \note If this field is blank, the system is always available.
@@ -20976,9 +20977,10 @@ OS:Coil:Heating:Gas:MultiStage,
       \required-field
   A2, \field Name
       \required-field
-      \reference HeatingCoilsGasMultiStage
       \type alpha
+      \reference HeatingCoilsGasMultiStage
       \reference ConnectionObject
+      \reference AFNCoilNames
   A3, \field Availability Schedule
       \type object-list
       \object-list ScheduleNames

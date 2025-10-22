@@ -17,6 +17,8 @@
 #include "AirLoopHVACUnitarySystem_Impl.hpp"
 #include "AirLoopHVACUnitaryHeatPumpAirToAirMultiSpeed.hpp"
 #include "AirLoopHVACUnitaryHeatPumpAirToAirMultiSpeed_Impl.hpp"
+#include "AirflowNetworkEquivalentDuct.hpp"
+#include "AirflowNetworkEquivalentDuct_Impl.hpp"
 #include "ScheduleTypeLimits.hpp"
 #include "ScheduleTypeRegistry.hpp"
 
@@ -103,6 +105,10 @@ namespace model {
         result.push_back(curve.get());
       }
 
+      std::vector<AirflowNetworkEquivalentDuct> myAFNItems =
+        getObject<ModelObject>().getModelObjectSources<AirflowNetworkEquivalentDuct>(AirflowNetworkEquivalentDuct::iddObjectType());
+      result.insert(result.end(), myAFNItems.begin(), myAFNItems.end());
+
       return result;
     }
 
@@ -135,6 +141,32 @@ namespace model {
 
     bool CoilHeatingGasMultiStage_Impl::addToNode(Node& node) {
       return false;
+    }
+
+    AirflowNetworkEquivalentDuct CoilHeatingGasMultiStage_Impl::getAirflowNetworkEquivalentDuct(double length, double diameter) {
+      boost::optional<AirflowNetworkEquivalentDuct> opt = airflowNetworkEquivalentDuct();
+      if (opt) {
+        if (opt->airPathLength() != length) {
+          opt->setAirPathLength(length);
+        }
+        if (opt->airPathHydraulicDiameter() != diameter) {
+          opt->setAirPathHydraulicDiameter(diameter);
+        }
+      }
+      return AirflowNetworkEquivalentDuct(model(), length, diameter, handle());
+    }
+
+    boost::optional<AirflowNetworkEquivalentDuct> CoilHeatingGasMultiStage_Impl::airflowNetworkEquivalentDuct() const {
+      std::vector<AirflowNetworkEquivalentDuct> myAFN =
+        getObject<ModelObject>().getModelObjectSources<AirflowNetworkEquivalentDuct>(AirflowNetworkEquivalentDuct::iddObjectType());
+      auto count = myAFN.size();
+      if (count == 1) {
+        return myAFN[0];
+      } else if (count > 1) {
+        LOG(Warn, briefDescription() << " has more than one AirflowNetwork EquivalentDuct attached, returning first.");
+        return myAFN[0];
+      }
+      return boost::none;
     }
 
     boost::optional<Schedule> CoilHeatingGasMultiStage_Impl::optionalAvailabilitySchedule() const {
@@ -440,6 +472,14 @@ namespace model {
 
   bool CoilHeatingGasMultiStage::removeStage(unsigned index) {
     return getImpl<detail::CoilHeatingGasMultiStage_Impl>()->removeStage(index);
+  }
+
+  AirflowNetworkEquivalentDuct CoilHeatingGasMultiStage::getAirflowNetworkEquivalentDuct(double length, double diameter) {
+    return getImpl<detail::CoilHeatingGasMultiStage_Impl>()->getAirflowNetworkEquivalentDuct(length, diameter);
+  }
+
+  boost::optional<AirflowNetworkEquivalentDuct> CoilHeatingGasMultiStage::airflowNetworkEquivalentDuct() const {
+    return getImpl<detail::CoilHeatingGasMultiStage_Impl>()->airflowNetworkEquivalentDuct();
   }
 
   /// @cond

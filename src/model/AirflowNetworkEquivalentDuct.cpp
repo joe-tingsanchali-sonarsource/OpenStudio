@@ -84,6 +84,10 @@ namespace model {
             return std::string("Coil:Heating:Desuperheater");
           case IddObjectType::OS_Coil_Cooling_DX:
             return std::string("Coil:Cooling:DX");
+          case IddObjectType::OS_Coil_Heating_Gas_MultiStage:
+            return std::string("Coil:Heating:Gas:MultiStage");
+          case IddObjectType::OS_Coil_Heating_Electric_MultiStage:
+            return std::string("Coil:Heating:Electric:MultiStage");
           case IddObjectType::OS_Coil_Cooling_DX_SingleSpeed_ThermalStorage:
             return std::string("Coil:Cooling:DX:SingleSpeed:ThermalStorage");
           case IddObjectType::OS_Coil_Cooling_WaterToAirHeatPump_EquationFit:

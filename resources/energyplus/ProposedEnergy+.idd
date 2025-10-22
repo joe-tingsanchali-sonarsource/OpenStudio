@@ -27458,7 +27458,7 @@ ZoneHVAC:HighTemperatureRadiant,
         \default 2.0
    A7 , \field Heating Setpoint Temperature Schedule Name
         \required-field
-        \note This setpoint is a "mean air temperature", a "mean radiant temperature" or an 
+        \note This setpoint is a "mean air temperature", a "mean radiant temperature" or an
         \note "operative temperature" setpoint depending on the control type
         \type object-list
         \object-list ScheduleNames
@@ -32673,6 +32673,7 @@ Coil:Heating:Electric:MultiStage,
        \type alpha
        \required-field
        \reference HeatingCoilsElectricMultiStage
+       \reference AFNCoilNames
   A2 , \field Availability Schedule Name
        \note Availability schedule name for this system. Schedule value > 0 means the system is available.
        \note If this field is blank, the system is always available.
@@ -32791,6 +32792,7 @@ Coil:Heating:Gas:MultiStage,
   A1 , \field Name
        \required-field
        \reference HeatingCoilsGasMultiStage
+       \reference AFNCoilNames
        \type alpha
   A2 , \field Availability Schedule Name
        \note Availability schedule name for this system. Schedule value > 0 means the system is available.
