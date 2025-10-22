@@ -3933,6 +3933,7 @@ namespace model {
     REGISTER_CONSTRUCTOR(AirflowNetworkZoneExhaustFan);
     REGISTER_CONSTRUCTOR(AirGap);
     REGISTER_CONSTRUCTOR(AirLoopHVAC);
+    REGISTER_CONSTRUCTOR(AirLoopHVACExhaustSystem);
     REGISTER_CONSTRUCTOR(AirLoopHVACUnitaryHeatCoolVAVChangeoverBypass);
     REGISTER_CONSTRUCTOR(AirLoopHVACUnitaryHeatPumpAirToAirMultiSpeed);
     REGISTER_CONSTRUCTOR(AirLoopHVACUnitaryHeatPumpAirToAir);
@@ -4449,6 +4450,7 @@ namespace model {
     REGISTER_CONSTRUCTOR(ZoneControlThermostatStagedDualSetpoint);
     REGISTER_CONSTRUCTOR(ZoneHVACEquipmentList);
     REGISTER_CONSTRUCTOR(ZoneHVACEvaporativeCoolerUnit);
+    REGISTER_CONSTRUCTOR(ZoneHVACExhaustControl);
     REGISTER_CONSTRUCTOR(ZoneHVACBaseboardConvectiveElectric);
     REGISTER_CONSTRUCTOR(ZoneHVACBaseboardConvectiveWater);
     REGISTER_CONSTRUCTOR(ZoneHVACBaseboardRadiantConvectiveElectric);
@@ -4512,6 +4514,7 @@ namespace model {
     REGISTER_COPYCONSTRUCTORS(AirflowNetworkZoneExhaustFan);
     REGISTER_COPYCONSTRUCTORS(AirGap);
     REGISTER_COPYCONSTRUCTORS(AirLoopHVAC);
+    REGISTER_COPYCONSTRUCTORS(AirLoopHVACExhaustSystem);
     REGISTER_COPYCONSTRUCTORS(AirLoopHVACUnitaryHeatCoolVAVChangeoverBypass);
     REGISTER_COPYCONSTRUCTORS(AirLoopHVACUnitaryHeatPumpAirToAir);
     REGISTER_COPYCONSTRUCTORS(AirLoopHVACUnitaryHeatPumpAirToAirMultiSpeed);
@@ -5028,6 +5031,7 @@ namespace model {
     REGISTER_COPYCONSTRUCTORS(ZoneControlThermostatStagedDualSetpoint);
     REGISTER_COPYCONSTRUCTORS(ZoneHVACEquipmentList);
     REGISTER_COPYCONSTRUCTORS(ZoneHVACEvaporativeCoolerUnit);
+    REGISTER_COPYCONSTRUCTORS(ZoneHVACExhaustControl);
     REGISTER_COPYCONSTRUCTORS(ZoneHVACBaseboardConvectiveElectric);
     REGISTER_COPYCONSTRUCTORS(ZoneHVACBaseboardConvectiveWater);
     REGISTER_COPYCONSTRUCTORS(ZoneHVACBaseboardRadiantConvectiveElectric);

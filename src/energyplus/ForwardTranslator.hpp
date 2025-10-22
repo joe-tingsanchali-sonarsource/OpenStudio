@@ -54,6 +54,7 @@ namespace model {
   class AirflowNetworkOccupantVentilationControl;
   class AirGap;
   class AirLoopHVAC;
+  class AirLoopHVACExhaustSystem;
   class AirLoopHVACUnitaryHeatCoolVAVChangeoverBypass;
   class AirLoopHVACUnitaryHeatPumpAirToAir;
   class AirLoopHVACUnitaryHeatPumpAirToAirMultiSpeed;
@@ -487,6 +488,7 @@ namespace model {
   class ZoneHVACEnergyRecoveryVentilatorController;
   class ZoneHVACEquipmentList;
   class ZoneHVACEvaporativeCoolerUnit;
+  class ZoneHVACExhaustControl;
   class ZoneHVACFourPipeFanCoil;
   class ZoneHVACHighTemperatureRadiant;
   class ZoneHVACIdealLoadsAirSystem;
@@ -661,6 +663,8 @@ namespace energyplus {
     boost::optional<IdfObject> translateAirGap(model::AirGap& modelObject);
 
     boost::optional<IdfObject> translateAirLoopHVAC(model::AirLoopHVAC& modelObject);
+
+    boost::optional<IdfObject> translateAirLoopHVACExhaustSystem(model::AirLoopHVACExhaustSystem& modelObject);
 
     boost::optional<IdfObject> translateAirLoopHVACOutdoorAirSystem(model::AirLoopHVACOutdoorAirSystem& modelObject);
 
@@ -1582,6 +1586,8 @@ namespace energyplus {
     boost::optional<IdfObject> translateZoneHVACEquipmentList(model::ZoneHVACEquipmentList& modelObject);
 
     boost::optional<IdfObject> translateZoneHVACEvaporativeCoolerUnit(model::ZoneHVACEvaporativeCoolerUnit& modelObject);
+
+    boost::optional<IdfObject> translateZoneHVACExhaustControl(model::ZoneHVACExhaustControl& modelObject);
 
     boost::optional<IdfObject> translateZoneHVACFourPipeFanCoil(model::ZoneHVACFourPipeFanCoil& modelObject);
 
