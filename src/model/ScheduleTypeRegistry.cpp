@@ -341,6 +341,7 @@ namespace model {
       {"People", "Number of People", "numberofPeopleSchedule", true, "", 0.0, 1.0},
       {"People", "Activity Level", "activityLevelSchedule", true, "ActivityLevel", 0.0, OptionalDouble()},
       {"People", "Work Efficiency", "workEfficiencySchedule", true, "", 0.0, 1.0},
+      {"People", "Clothing Insulation Calculation Method", "clothingInsulationCalculationMethodSchedule", false, "", 1.0, 2.0},
       {"People", "Clothing Insulation", "clothingInsulationSchedule", true, "ClothingInsulation", 0.0, OptionalDouble()},
       {"People", "Air Velocity", "airVelocitySchedule", true, "Velocity", 0.0, OptionalDouble()},
       {"People", "Ankle Level Air Velocity", "ankleLevelAirVelocitySchedule", true, "Velocity", 0.0, OptionalDouble()},

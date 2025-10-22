@@ -4939,3 +4939,24 @@ TEST_F(OSVersionFixture, update_3_10_0_to_3_10_1_CoilAvailabilitySchedules) {
     EXPECT_EQ(1, coil.getInt(3).get());
   }
 }
+
+TEST_F(OSVersionFixture, update_3_10_0_to_3_10_1_People) {
+  openstudio::path path = resourcesPath() / toPath("osversion/3_10_1/test_vt_People.osm");
+  osversion::VersionTranslator vt;
+  boost::optional<model::Model> model = vt.loadModel(path);
+  ASSERT_TRUE(model) << "Failed to load " << path;
+
+  openstudio::path outPath = resourcesPath() / toPath("osversion/3_10_1/test_vt_People_updated.osm");
+  model->save(outPath, true);
+
+  std::vector<WorkspaceObject> ps = model->getObjectsByType("OS:People");
+  ASSERT_EQ(1u, ps.size());
+  const auto& p = ps.front();
+
+  EXPECT_TRUE(p.isEmpty(7));                                                 // Work Efficiency Schedule Name
+  EXPECT_EQ("ClothingInsulationSchedule", p.getString(8).get());             // Clothing Insulation Calculation Method
+  EXPECT_TRUE(p.isEmpty(9));                                                 // Clothing Insulation Calculation Method Schedule Name
+  EXPECT_EQ("Clothing Insulation Schedule", p.getTarget(10)->nameString());  // Clothing Insulation Schedule Name
+  EXPECT_TRUE(p.isEmpty(11));                                                // Air Velocity Schedule Name
+  EXPECT_EQ(1.0, p.getDouble(12).get());                                     // Multiplier
+}

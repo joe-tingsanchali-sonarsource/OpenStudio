@@ -7021,12 +7021,22 @@ OS:People,
        \note optional (only required for thermal comfort runs)
        \type object-list
        \object-list ScheduleNames
-  A9, \field Clothing Insulation Schedule Name
+  A9, \field Clothing Insulation Calculation Method
+       \type choice
+       \key ClothingInsulationSchedule
+       \key DynamicClothingModelASHRAE55
+       \key CalculationMethodSchedule
+       \required-field
+  A10, \field Clothing Insulation Calculation Method Schedule Name
+       \type object-list
+       \object-list ScheduleNames
+       \note a schedule value of 1 for the Scheduled method, and 2 for the DynamicClothingModelASHRAE55 method
+  A11, \field Clothing Insulation Schedule Name
        \note use "Clo" from ASHRAE or Thermal Comfort guides
        \note optional (only required for thermal comfort runs)
        \type object-list
        \object-list ScheduleNames
-  A10, \field Air Velocity Schedule Name
+  A12, \field Air Velocity Schedule Name
        \note units in the schedule are m/s
        \note optional (only required for thermal comfort runs)
        \type object-list
@@ -7035,7 +7045,7 @@ OS:People,
        \type real
        \minimum 0.0
        \default 1.0
-  A11, \field Ankle Level Air Velocity Schedule Name
+  A13, \field Ankle Level Air Velocity Schedule Name
        \type object-list
        \object-list ScheduleNames
        \note units in the schedule are m/s

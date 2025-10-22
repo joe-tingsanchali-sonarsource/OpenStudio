@@ -10077,6 +10077,31 @@ namespace osversion {
         ss << newObject;
         m_refactored.emplace_back(std::move(object), std::move(newObject));
 
+      } else if (iddname == "OS:People") {
+
+        // 2 Fields have been inserted from 3.10.0 to 3.10.1:
+        // ------------------------------------------------
+        // * Clothing Insulation Calculation Method * 8
+        // * Clothing Insulation Calculation Method Schedule Name * 9
+
+        auto iddObject = idd_3_10_1.getObject(iddname);
+        IdfObject newObject(iddObject.get());
+
+        for (size_t i = 0; i < object.numFields(); ++i) {
+          if ((value = object.getString(i))) {
+            if (i < 8) {
+              newObject.setString(i, value.get());
+            } else {
+              newObject.setString(i + 2, value.get());
+            }
+          }
+        }
+
+        newObject.setString(8, "ClothingInsulationSchedule");
+
+        ss << newObject;
+        m_refactored.emplace_back(std::move(object), std::move(newObject));
+
         // No-op
       } else {
         ss << object;
