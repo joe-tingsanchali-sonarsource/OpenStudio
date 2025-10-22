@@ -69,6 +69,8 @@ namespace model {
 
     boost::optional<double> nominalCoolingCapacity() const;
 
+    bool isNominalCoolingCapacityAutosized() const;
+
     std::string ambientTemperatureIndicator() const;
 
     boost::optional<Schedule> ambientTemperatureSchedule() const;
@@ -165,7 +167,7 @@ namespace model {
 
     bool setNominalCoolingCapacity(double nominalCoolingCapacity);
 
-    void resetNominalCoolingCapacity();
+    void autosizeNominalCoolingCapacity();
 
     bool setAmbientTemperatureIndicator(const std::string& ambientTemperatureIndicator);
 
@@ -248,6 +250,8 @@ namespace model {
     //@}
     /** @name Other */
     //@{
+
+    boost::optional<double> autosizedNominalCoolingCapacity() const;
 
     boost::optional<double> autosizedUseSideDesignFlowRate() const;
 

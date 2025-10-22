@@ -79,6 +79,17 @@ You can also refer to the [OpenStudio SDK Python Binding Version Compatibility M
     * API-breaking change for `ExternalInterface:FunctionalMockupUnitExport:To:Schedule` and `ExternalInterface:FunctionalMockupUnitExport:To:Actuator`:
         * `initialValue` (`double` to `boost::optional<double>`)
 
+* [#5495](https://github.com/NREL/OpenStudio/pull/5495) - New ThermalStorageChilledWaterStratified default
+    * Field `Nominal Cooling Capacity` is made required (also made autosizable) for `ThermalStorage:ChilledWater:Stratified`
+    * API-breaking change for `ThermalStorage:ChilledWater:Stratified`:
+        * `resetNominalCoolingCapacity` is removed
+
+* [#5492](https://github.com/NREL/OpenStudio/pull/5492) - New DX Heating Coil Sizing Ratio fields
+    * Replaces `Minimum Outdoor Dry-Bulb Temperature for Compressor Operation` with `DX Heating Coil Sizing Ratio` for `AirLoopHVAC:UnitaryHeatPump:AirToAir:MultiSpeed`
+    * Deprecated methods for `AirLoopHVAC:UnitaryHeatPump:AirToAir:MultiSpeed`:
+        * `minimumOutdoorDryBulbTemperatureforCompressorOperation`
+        * `setMinimumOutdoorDryBulbTemperatureforCompressorOperation`
+
 * [#5486](https://github.com/NREL/OpenStudio/pull/5486) - New EvaporativeFluidCooler defaults
     * Adds `Heat Rejection Capacity and Nominal Capacity Sizing Ratio` for `EvaporativeFluidCooler:SingleSpeed`
     * Fields are made required for `EvaporativeFluidCooler:SingleSpeed` and `EvaporativeFluidCooler:TwoSpeed`:

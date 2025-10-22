@@ -8,6 +8,9 @@
 #include "../../model/Node.hpp"
 #include "../../model/CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFit.hpp"
 #include "../../model/CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFitSpeedData.hpp"
+#include "../../model/Schedule.hpp"
+#include "../../model/Schedule_Impl.hpp"
+
 #include <utilities/idd/Coil_Heating_WaterToAirHeatPump_VariableSpeedEquationFit_FieldEnums.hxx>
 #include "../../model/Curve.hpp"
 #include "../../utilities/core/Logger.hpp"
@@ -33,6 +36,14 @@ namespace energyplus {
 
     // Name
     IdfObject idfObject = createRegisterAndNameIdfObject(IddObjectType::Coil_Heating_WaterToAirHeatPump_VariableSpeedEquationFit, modelObject);
+
+    // AvailabilityScheduleName
+    {
+      auto schedule = modelObject.availabilitySchedule();
+      if (boost::optional<IdfObject> _schedule = translateAndMapModelObject(schedule)) {
+        idfObject.setString(Coil_Heating_WaterToAirHeatPump_VariableSpeedEquationFitFields::AvailabilityScheduleName, _schedule->name().get());
+      }
+    }
 
     // WatertoRefrigerantHXWaterInletNodeName
     if (auto node = modelObject.waterInletModelObject()) {

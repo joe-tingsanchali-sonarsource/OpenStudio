@@ -116,6 +116,7 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_CoilHeatingWaterToAirHeatPumpVariabl
 
   EXPECT_EQ("My CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFit",
             idf_coil.getString(Coil_Heating_WaterToAirHeatPump_VariableSpeedEquationFitFields::Name).get());
+  EXPECT_EQ("Always On Discrete", idf_coil.getString(Coil_Heating_WaterToAirHeatPump_VariableSpeedEquationFitFields::AvailabilityScheduleName).get());
   EXPECT_EQ("Coil Water Inlet Node",
             idf_coil.getString(Coil_Heating_WaterToAirHeatPump_VariableSpeedEquationFitFields::WatertoRefrigerantHXWaterInletNodeName).get());
   EXPECT_EQ("Coil Water Outlet Node",
