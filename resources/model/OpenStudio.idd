@@ -29988,7 +29988,7 @@ OS:ZoneHVAC:IdealLoadsAirSystem,
        \minimum 0.0
        \maximum 1.0
        \default 0.70
-  N11; \field Latent Heat Recovery Effectiveness
+  N11, \field Latent Heat Recovery Effectiveness
        \note Applicable only if Heat Recovery Type is Enthalpy.
        \units dimensionless
        \minimum 0.0
