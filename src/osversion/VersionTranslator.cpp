@@ -146,8 +146,8 @@ namespace osversion {
     m_updateMethods[VersionString("3.8.0")] = &VersionTranslator::update_3_7_0_to_3_8_0;
     m_updateMethods[VersionString("3.9.0")] = &VersionTranslator::update_3_8_0_to_3_9_0;
     m_updateMethods[VersionString("3.10.0")] = &VersionTranslator::update_3_9_0_to_3_10_0;
-    m_updateMethods[VersionString("3.10.1")] = &VersionTranslator::update_3_10_0_to_3_10_1;
-    // m_updateMethods[VersionString("3.10.1")] = &VersionTranslator::defaultUpdate;
+    m_updateMethods[VersionString("3.11.0")] = &VersionTranslator::update_3_10_0_to_3_11_0;
+    // m_updateMethods[VersionString("3.12.0")] = &VersionTranslator::defaultUpdate;
 
     // List of previous versions that may be updated to this one.
     //   - To increment the translator, add an entry for the version just released (branched for
@@ -187,7 +187,7 @@ namespace osversion {
       VersionString("3.6.0"),  VersionString("3.6.1"),  VersionString("3.7.0"),  VersionString("3.8.0"),  VersionString("3.9.0"),
       VersionString("3.10.0"),
       // Note: do **not** include the **current** version in m_startVersions, stop at the previous release
-      //VersionString("3.10.1"),
+      //VersionString("3.11.0"),
     };
   }
 
@@ -9749,18 +9749,18 @@ namespace osversion {
 
   }  // end update_3_9_0_to_3_10_0
 
-  std::string VersionTranslator::update_3_10_0_to_3_10_1(const IdfFile& idf_3_10_0, const IddFileAndFactoryWrapper& idd_3_10_1) {
+  std::string VersionTranslator::update_3_10_0_to_3_11_0(const IdfFile& idf_3_10_0, const IddFileAndFactoryWrapper& idd_3_11_0) {
     std::stringstream ss;
     boost::optional<std::string> value;
 
     ss << idf_3_10_0.header() << '\n' << '\n';
-    IdfFile targetIdf(idd_3_10_1.iddFile());
+    IdfFile targetIdf(idd_3_11_0.iddFile());
     ss << targetIdf.versionObject().get();
 
     // Could make it a static inside the lambda, except that it won't be reset so if you try to translate twice it fails
     std::string discreteSchHandleStr;
 
-    auto getOrCreateAlwaysOnDiscreteScheduleHandleStr = [this, &ss, &idf_3_10_0, &idd_3_10_1, &discreteSchHandleStr]() -> std::string {
+    auto getOrCreateAlwaysOnDiscreteScheduleHandleStr = [this, &ss, &idf_3_10_0, &idd_3_11_0, &discreteSchHandleStr]() -> std::string {
       if (!discreteSchHandleStr.empty()) {
         LOG(Trace, "Already found 'Always On Discrete' Schedule in model with handle " << discreteSchHandleStr);
         return discreteSchHandleStr;
@@ -9783,14 +9783,14 @@ namespace osversion {
         }
       }
 
-      auto discreteSch = IdfObject(idd_3_10_1.getObject("OS:Schedule:Constant").get());
+      auto discreteSch = IdfObject(idd_3_11_0.getObject("OS:Schedule:Constant").get());
 
       discreteSchHandleStr = toString(createUUID());  // Store in state variable
       discreteSch.setString(0, discreteSchHandleStr);
       discreteSch.setString(1, name);
       discreteSch.setDouble(3, val);
 
-      IdfObject typeLimits(idd_3_10_1.getObject("OS:ScheduleTypeLimits").get());
+      IdfObject typeLimits(idd_3_11_0.getObject("OS:ScheduleTypeLimits").get());
       typeLimits.setString(0, toString(createUUID()));
       typeLimits.setString(1, name + " Limits");
       typeLimits.setDouble(2, 0.0);
@@ -9820,11 +9820,11 @@ namespace osversion {
           || (iddname == "OS:Coil:Heating:WaterToAirHeatPump:VariableSpeedEquationFit") || (iddname == "OS:Coil:WaterHeating:AirToWaterHeatPump")
           || (iddname == "OS:Coil:WaterHeating:AirToWaterHeatPump:Wrapped") || (iddname == "OS:Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed")) {
 
-        // 1 Field has been inserted from 3.10.0 to 3.10.1:
+        // 1 Field has been inserted from 3.10.0 to 3.11.0:
         // ------------------------------------------------
         // * Availability Schedule Name * 2
 
-        auto iddObject = idd_3_10_1.getObject(iddname);
+        auto iddObject = idd_3_11_0.getObject(iddname);
         IdfObject newObject(iddObject.get());
 
         for (size_t i = 0; i < object.numFields(); ++i) {
@@ -9845,12 +9845,12 @@ namespace osversion {
 
       } else if (iddname == "OS:Site:WaterMainsTemperature") {
 
-        // 2 Fields have been inserted from 3.10.0 to 3.10.1:
+        // 2 Fields have been inserted from 3.10.0 to 3.11.0:
         // ------------------------------------------------
         // * Temperature Multiplier * 5
         // * Temperature Offset * 6
 
-        auto iddObject = idd_3_10_1.getObject(iddname);
+        auto iddObject = idd_3_11_0.getObject(iddname);
         IdfObject newObject(iddObject.get());
 
         for (size_t i = 0; i < object.numFields(); ++i) {
@@ -9867,11 +9867,11 @@ namespace osversion {
 
       } else if (iddname == "OS:ThermalStorage:ChilledWater:Stratified") {
 
-        // 1 Field was made required from 3.10.0 to 3.10.1:
+        // 1 Field was made required from 3.10.0 to 3.11.0:
         // ------------------------------------------------
         // * Nominal Cooling Capacity * 10
 
-        auto iddObject = idd_3_10_1.getObject(iddname);
+        auto iddObject = idd_3_11_0.getObject(iddname);
         IdfObject newObject(iddObject.get());
 
         for (size_t i = 0; i < object.numFields(); ++i) {
@@ -9889,12 +9889,12 @@ namespace osversion {
 
       } else if (iddname == "OS:Sizing:Zone") {
 
-        // 2 Fields have been added from 3.10.0 to 3.10.1:
+        // 2 Fields have been added from 3.10.0 to 3.11.0:
         // ------------------------------------------------
         // * Heating Coil Sizing Method * 40
         // * Maximum Heating Capacity To Cooling Load Sizing Ratio * 41
 
-        auto iddObject = idd_3_10_1.getObject(iddname);
+        auto iddObject = idd_3_11_0.getObject(iddname);
         IdfObject newObject(iddObject.get());
 
         for (size_t i = 0; i < object.numFields(); ++i) {
@@ -9911,12 +9911,12 @@ namespace osversion {
 
       } else if (iddname == "OS:Sizing:System") {
 
-        // 2 Fields have been added from 3.10.0 to 3.10.1:
+        // 2 Fields have been added from 3.10.0 to 3.11.0:
         // ------------------------------------------------
         // * Heating Coil Sizing Method * 39
         // * Maximum Heating Capacity To Cooling Capacity Sizing Ratio * 40
 
-        auto iddObject = idd_3_10_1.getObject(iddname);
+        auto iddObject = idd_3_11_0.getObject(iddname);
         IdfObject newObject(iddObject.get());
 
         for (size_t i = 0; i < object.numFields(); ++i) {
@@ -9933,11 +9933,11 @@ namespace osversion {
 
       } else if (iddname == "OS:HeatPump:AirToWater:FuelFired:Heating") {
 
-        // 1 Field has been added from 3.10.0 to 3.10.1:
+        // 1 Field has been added from 3.10.0 to 3.11.0:
         // ------------------------------------------------
         // * Minimum Unloading Ratio * 32
 
-        auto iddObject = idd_3_10_1.getObject(iddname);
+        auto iddObject = idd_3_11_0.getObject(iddname);
         IdfObject newObject(iddObject.get());
 
         for (size_t i = 0; i < object.numFields(); ++i) {
@@ -9953,11 +9953,11 @@ namespace osversion {
 
       } else if (iddname == "OS:HeatPump:AirToWater:FuelFired:Cooling") {
 
-        // 1 Field has been added from 3.10.0 to 3.10.1:
+        // 1 Field has been added from 3.10.0 to 3.11.0:
         // ------------------------------------------------
         // * Minimum Unloading Ratio * 27
 
-        auto iddObject = idd_3_10_1.getObject(iddname);
+        auto iddObject = idd_3_11_0.getObject(iddname);
         IdfObject newObject(iddObject.get());
 
         for (size_t i = 0; i < object.numFields(); ++i) {
@@ -9973,11 +9973,11 @@ namespace osversion {
 
       } else if (iddname == "OS:ZoneHVAC:PackagedTerminalHeatPump") {
 
-        // 1 Field has been inserted from 3.10.0 to 3.10.1:
+        // 1 Field has been inserted from 3.10.0 to 3.11.0:
         // ------------------------------------------------
         // * DX Heating Coil Sizing Ratio * 25
 
-        auto iddObject = idd_3_10_1.getObject(iddname);
+        auto iddObject = idd_3_11_0.getObject(iddname);
         IdfObject newObject(iddObject.get());
 
         for (size_t i = 0; i < object.numFields(); ++i) {
@@ -9993,11 +9993,11 @@ namespace osversion {
 
       } else if (iddname == "OS:ZoneHVAC:WaterToAirHeatPump") {
 
-        // 1 Field has been inserted from 3.10.0 to 3.10.1:
+        // 1 Field has been inserted from 3.10.0 to 3.11.0:
         // ------------------------------------------------
         // * DX Heating Coil Sizing Ratio * 25
 
-        auto iddObject = idd_3_10_1.getObject(iddname);
+        auto iddObject = idd_3_11_0.getObject(iddname);
         IdfObject newObject(iddObject.get());
 
         for (size_t i = 0; i < object.numFields(); ++i) {
@@ -10013,11 +10013,11 @@ namespace osversion {
 
       } else if (iddname == "OS:AirLoopHVAC:UnitaryHeatPump:AirToAir") {
 
-        // 1 Field has been inserted from 3.10.0 to 3.10.1:
+        // 1 Field has been inserted from 3.10.0 to 3.11.0:
         // ------------------------------------------------
         // * DX Heating Coil Sizing Ratio * 18
 
-        auto iddObject = idd_3_10_1.getObject(iddname);
+        auto iddObject = idd_3_11_0.getObject(iddname);
         IdfObject newObject(iddObject.get());
 
         for (size_t i = 0; i < object.numFields(); ++i) {
@@ -10033,11 +10033,11 @@ namespace osversion {
 
       } else if (iddname == "OS:AirLoopHVAC:UnitaryHeatPump:AirToAir:MultiSpeed") {
 
-        // 1 Field has been inserted from 3.10.0 to 3.10.1:
+        // 1 Field has been inserted from 3.10.0 to 3.11.0:
         // ------------------------------------------------
         // * DX Heating Coil Sizing Ratio * 10
 
-        auto iddObject = idd_3_10_1.getObject(iddname);
+        auto iddObject = idd_3_11_0.getObject(iddname);
         IdfObject newObject(iddObject.get());
 
         for (size_t i = 0; i < object.numFields(); ++i) {
@@ -10053,11 +10053,11 @@ namespace osversion {
 
       } else if (iddname == "OS:Controller:MechanicalVentilation") {
 
-        // 1 Field has been modified from 3.10.0 to 3.10.1:
+        // 1 Field has been modified from 3.10.0 to 3.11.0:
         // ------------------------------------------------
         // * System Outdoor Air Method * 4 - Removed ProportionalControl as mapping to ProportionalControlBasedonOccupancySchedule
 
-        auto iddObject = idd_3_10_1.getObject(iddname);
+        auto iddObject = idd_3_11_0.getObject(iddname);
         IdfObject newObject(iddObject.get());
 
         for (size_t i = 0; i < object.numFields(); ++i) {
@@ -10079,12 +10079,12 @@ namespace osversion {
 
       } else if (iddname == "OS:People") {
 
-        // 2 Fields have been inserted from 3.10.0 to 3.10.1:
+        // 2 Fields have been inserted from 3.10.0 to 3.11.0:
         // ------------------------------------------------
         // * Clothing Insulation Calculation Method * 8
         // * Clothing Insulation Calculation Method Schedule Name * 9
 
-        auto iddObject = idd_3_10_1.getObject(iddname);
+        auto iddObject = idd_3_11_0.getObject(iddname);
         IdfObject newObject(iddObject.get());
 
         for (size_t i = 0; i < object.numFields(); ++i) {
@@ -10110,6 +10110,6 @@ namespace osversion {
 
     return ss.str();
 
-  }  // end update_3_10_0_to_3_10_1
+  }  // end update_3_10_0_to_3_11_0
 }  // namespace osversion
 }  // namespace openstudio
