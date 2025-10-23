@@ -83,6 +83,98 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_ZoneHVACIdealLoadsAirSystem) {
   EXPECT_TRUE(zoneHVACIdealLoadsAirSystem.setDehumidificationControlType("Humidistat"));
   EXPECT_TRUE(zoneHVACIdealLoadsAirSystem.setCoolingSensibleHeatRatio(0.1));
   EXPECT_TRUE(zoneHVACIdealLoadsAirSystem.setHumidificationControlType("Humidistat"));
+
+  EXPECT_TRUE(zoneHVACIdealLoadsAirSystem.setDemandControlledVentilationType("OccupancySchedule"));
+  EXPECT_TRUE(zoneHVACIdealLoadsAirSystem.setOutdoorAirEconomizerType("DifferentialDryBulb"));
+  EXPECT_TRUE(zoneHVACIdealLoadsAirSystem.setHeatRecoveryType("Sensible"));
+  EXPECT_TRUE(zoneHVACIdealLoadsAirSystem.setSensibleHeatRecoveryEffectiveness(0.2));
+  EXPECT_TRUE(zoneHVACIdealLoadsAirSystem.setLatentHeatRecoveryEffectiveness(0.3));
+  ScheduleCompact heatingFuelEfficiencySchedule(m);
+  EXPECT_TRUE(zoneHVACIdealLoadsAirSystem.setHeatingFuelEfficiencySchedule(heatingFuelEfficiencySchedule));
+  EXPECT_TRUE(zoneHVACIdealLoadsAirSystem.setHeatingFuelType("DistrictHeatingWater"));
+  ScheduleCompact coolingFuelEfficiencySchedule(m);
+  EXPECT_TRUE(zoneHVACIdealLoadsAirSystem.setCoolingFuelEfficiencySchedule(coolingFuelEfficiencySchedule));
+  EXPECT_TRUE(zoneHVACIdealLoadsAirSystem.setCoolingFuelType("DistrictCooling"));
+
+  // Need to be in a thermal zone to be translated, with at least one space
+  ThermalZone z(m);
+  zoneHVACIdealLoadsAirSystem.addToThermalZone(z);
+  Space s(m);
+  s.setThermalZone(z);
+  DesignSpecificationOutdoorAir dsoa(m);
+  EXPECT_TRUE(s.setDesignSpecificationOutdoorAir(dsoa));
+
+  z.inletPortList().modelObjects()[0].setName("Zone Air Inlet Node");
+  z.exhaustPortList().modelObjects()[0].setName("Zone Air Exhaust Node");
+
+  const Workspace w = ft.translateModel(m);
+  const auto idfObjs = w.getObjectsByType(IddObjectType::ZoneHVAC_IdealLoadsAirSystem);
+  ASSERT_EQ(1u, idfObjs.size());
+  const auto& idfObject = idfObjs.front();
+
+  EXPECT_EQ(zoneHVACIdealLoadsAirSystem.nameString(), idfObject.getString(ZoneHVAC_IdealLoadsAirSystemFields::Name).get());
+  EXPECT_EQ(availabilitySchedule.nameString(), idfObject.getString(ZoneHVAC_IdealLoadsAirSystemFields::AvailabilityScheduleName).get());
+  EXPECT_EQ("Zone Air Inlet Node", idfObject.getString(ZoneHVAC_IdealLoadsAirSystemFields::ZoneSupplyAirNodeName).get());
+  EXPECT_EQ("Zone Air Exhaust Node", idfObject.getString(ZoneHVAC_IdealLoadsAirSystemFields::ZoneExhaustAirNodeName).get());
+  EXPECT_EQ("", idfObject.getString(ZoneHVAC_IdealLoadsAirSystemFields::SystemInletAirNodeName).get());
+  EXPECT_EQ(1.0, idfObject.getDouble(ZoneHVAC_IdealLoadsAirSystemFields::MaximumHeatingSupplyAirTemperature).get());
+  EXPECT_EQ(2.0, idfObject.getDouble(ZoneHVAC_IdealLoadsAirSystemFields::MinimumCoolingSupplyAirTemperature).get());
+  EXPECT_EQ(3.0, idfObject.getDouble(ZoneHVAC_IdealLoadsAirSystemFields::MaximumHeatingSupplyAirHumidityRatio).get());
+  EXPECT_EQ(4.0, idfObject.getDouble(ZoneHVAC_IdealLoadsAirSystemFields::MinimumCoolingSupplyAirHumidityRatio).get());
+  EXPECT_EQ("LimitFlowRate", idfObject.getString(ZoneHVAC_IdealLoadsAirSystemFields::HeatingLimit).get());
+  EXPECT_EQ(5.0, idfObject.getDouble(ZoneHVAC_IdealLoadsAirSystemFields::MaximumHeatingAirFlowRate).get());
+  EXPECT_EQ(6.0, idfObject.getDouble(ZoneHVAC_IdealLoadsAirSystemFields::MaximumSensibleHeatingCapacity).get());
+  EXPECT_EQ("LimitFlowRate", idfObject.getString(ZoneHVAC_IdealLoadsAirSystemFields::CoolingLimit).get());
+  EXPECT_EQ(7.0, idfObject.getDouble(ZoneHVAC_IdealLoadsAirSystemFields::MaximumCoolingAirFlowRate).get());
+  EXPECT_EQ(8.0, idfObject.getDouble(ZoneHVAC_IdealLoadsAirSystemFields::MaximumTotalCoolingCapacity).get());
+  EXPECT_EQ(heatingAvailabilitySchedule.nameString(), idfObject.getString(ZoneHVAC_IdealLoadsAirSystemFields::HeatingAvailabilityScheduleName).get());
+  EXPECT_EQ(coolingAvailabilitySchedule.nameString(), idfObject.getString(ZoneHVAC_IdealLoadsAirSystemFields::CoolingAvailabilityScheduleName).get());
+  EXPECT_EQ("Humidistat", idfObject.getString(ZoneHVAC_IdealLoadsAirSystemFields::DehumidificationControlType).get());
+  EXPECT_EQ(0.1, idfObject.getDouble(ZoneHVAC_IdealLoadsAirSystemFields::CoolingSensibleHeatRatio).get());
+  EXPECT_EQ("Humidistat", idfObject.getString(ZoneHVAC_IdealLoadsAirSystemFields::HumidificationControlType).get());
+  EXPECT_EQ(dsoa.nameString(), idfObject.getString(ZoneHVAC_IdealLoadsAirSystemFields::DesignSpecificationOutdoorAirObjectName).get());
+  EXPECT_EQ("OccupancySchedule", idfObject.getString(ZoneHVAC_IdealLoadsAirSystemFields::DemandControlledVentilationType).get());
+  EXPECT_EQ("DifferentialDryBulb", idfObject.getString(ZoneHVAC_IdealLoadsAirSystemFields::OutdoorAirEconomizerType).get());
+  EXPECT_EQ("Sensible", idfObject.getString(ZoneHVAC_IdealLoadsAirSystemFields::HeatRecoveryType).get());
+  EXPECT_EQ(0.2, idfObject.getDouble(ZoneHVAC_IdealLoadsAirSystemFields::SensibleHeatRecoveryEffectiveness).get());
+  EXPECT_EQ(0.3, idfObject.getDouble(ZoneHVAC_IdealLoadsAirSystemFields::LatentHeatRecoveryEffectiveness).get());
+  EXPECT_EQ("", idfObject.getString(ZoneHVAC_IdealLoadsAirSystemFields::DesignSpecificationZoneHVACSizingObjectName).get());
+  EXPECT_EQ(heatingFuelEfficiencySchedule.nameString(),
+            idfObject.getString(ZoneHVAC_IdealLoadsAirSystemFields::HeatingFuelEfficiencyScheduleName).get());
+  EXPECT_EQ("DistrictHeatingWater", idfObject.getString(ZoneHVAC_IdealLoadsAirSystemFields::HeatingFuelType).get());
+  EXPECT_EQ(coolingFuelEfficiencySchedule.nameString(),
+            idfObject.getString(ZoneHVAC_IdealLoadsAirSystemFields::CoolingFuelEfficiencyScheduleName).get());
+  EXPECT_EQ("DistrictCooling", idfObject.getString(ZoneHVAC_IdealLoadsAirSystemFields::CoolingFuelType).get());
+}
+
+TEST_F(EnergyPlusFixture, ForwardTranslator_ZoneHVACIdealLoadsAirSystem_HardcodedDSOA) {
+
+  ForwardTranslator ft;
+
+  Model m;
+
+  ZoneHVACIdealLoadsAirSystem zoneHVACIdealLoadsAirSystem(m);
+
+  zoneHVACIdealLoadsAirSystem.setName("My ZoneHVACIdealLoadsAirSystem");
+  Schedule availabilitySchedule = m.alwaysOnDiscreteSchedule();
+  EXPECT_TRUE(zoneHVACIdealLoadsAirSystem.setAvailabilitySchedule(availabilitySchedule));
+  EXPECT_TRUE(zoneHVACIdealLoadsAirSystem.setMaximumHeatingSupplyAirTemperature(1.0));
+  EXPECT_TRUE(zoneHVACIdealLoadsAirSystem.setMinimumCoolingSupplyAirTemperature(2.0));
+  EXPECT_TRUE(zoneHVACIdealLoadsAirSystem.setMaximumHeatingSupplyAirHumidityRatio(3.0));
+  EXPECT_TRUE(zoneHVACIdealLoadsAirSystem.setMinimumCoolingSupplyAirHumidityRatio(4.0));
+  EXPECT_TRUE(zoneHVACIdealLoadsAirSystem.setHeatingLimit("LimitFlowRate"));
+  EXPECT_TRUE(zoneHVACIdealLoadsAirSystem.setMaximumHeatingAirFlowRate(5.0));
+  EXPECT_TRUE(zoneHVACIdealLoadsAirSystem.setMaximumSensibleHeatingCapacity(6.0));
+  EXPECT_TRUE(zoneHVACIdealLoadsAirSystem.setCoolingLimit("LimitFlowRate"));
+  EXPECT_TRUE(zoneHVACIdealLoadsAirSystem.setMaximumCoolingAirFlowRate(7.0));
+  EXPECT_TRUE(zoneHVACIdealLoadsAirSystem.setMaximumTotalCoolingCapacity(8.0));
+  ScheduleCompact heatingAvailabilitySchedule(m);
+  EXPECT_TRUE(zoneHVACIdealLoadsAirSystem.setHeatingAvailabilitySchedule(heatingAvailabilitySchedule));
+  ScheduleCompact coolingAvailabilitySchedule(m);
+  EXPECT_TRUE(zoneHVACIdealLoadsAirSystem.setCoolingAvailabilitySchedule(coolingAvailabilitySchedule));
+  EXPECT_TRUE(zoneHVACIdealLoadsAirSystem.setDehumidificationControlType("Humidistat"));
+  EXPECT_TRUE(zoneHVACIdealLoadsAirSystem.setCoolingSensibleHeatRatio(0.1));
+  EXPECT_TRUE(zoneHVACIdealLoadsAirSystem.setHumidificationControlType("Humidistat"));
   DesignSpecificationOutdoorAir dsoa(m);
   EXPECT_TRUE(zoneHVACIdealLoadsAirSystem.setDesignSpecificationOutdoorAirObject(dsoa));
   EXPECT_TRUE(zoneHVACIdealLoadsAirSystem.setDemandControlledVentilationType("OccupancySchedule"));
