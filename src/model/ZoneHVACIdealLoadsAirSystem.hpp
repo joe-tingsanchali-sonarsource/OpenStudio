@@ -122,6 +122,7 @@ namespace model {
 
     bool isHumidificationControlTypeDefaulted() const;
 
+    // TODO: should replace this with a "Control For Outdoor Air" field
     boost::optional<DesignSpecificationOutdoorAir> designSpecificationOutdoorAirObject() const;
 
     std::string demandControlledVentilationType() const;

@@ -206,8 +206,9 @@ namespace energyplus {
     }
 
     // design specification outdoor air object name
+    // TODO: this field and associated getter/setter should be replaced with a "Control For Outdoor Air" field (or nothing)
     if (auto designOA = modelObject.designSpecificationOutdoorAirObject()) {
-
+      LOG(Debug, "Translating hardcoded DesignSpecificationOutdoorAir for ZoneHVACIdealLoadsAirSystem: " << modelObject.nameString());
       auto translateAndMapDSOA = [this](DesignSpecificationOutdoorAir& dsoa) -> boost::optional<IdfObject> {
         auto objInMapIt = m_map.find(dsoa.handle());
         if (objInMapIt != m_map.end()) {
@@ -229,6 +230,12 @@ namespace energyplus {
 
       if (auto idf = translateAndMapDSOA(designOA.get())) {
         zoneHVACIdealLoadsAirSystem.setString(ZoneHVAC_IdealLoadsAirSystemFields::DesignSpecificationOutdoorAirObjectName, idf->name().get());
+      }
+    } else if (boost::optional<ThermalZone> zone_ = modelObject.thermalZone()) {
+      if (auto dsoaOrList_ = getOrCreateThermalZoneDSOA(zone_->cast<ThermalZone>())) {
+        LOG(Debug, "Translating ThermalZone DesignSpecificationOutdoorAir for ZoneHVACIdealLoadsAirSystem: " << modelObject.nameString());
+        // set the field to reference the design specification outdoor air
+        zoneHVACIdealLoadsAirSystem.setString(ZoneHVAC_IdealLoadsAirSystemFields::DesignSpecificationOutdoorAirObjectName, dsoaOrList_->nameString());
       }
     }
 
