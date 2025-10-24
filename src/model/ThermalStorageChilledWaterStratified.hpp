@@ -15,6 +15,7 @@ namespace model {
 
   class Schedule;
   class ThermalZone;
+  class WaterHeaterSizing;
 
   namespace detail {
 
@@ -250,6 +251,8 @@ namespace model {
     //@}
     /** @name Other */
     //@{
+
+    WaterHeaterSizing waterHeaterSizing() const;
 
     boost::optional<double> autosizedNominalCoolingCapacity() const;
 
