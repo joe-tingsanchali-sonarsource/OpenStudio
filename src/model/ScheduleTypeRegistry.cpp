@@ -17,7 +17,7 @@
 namespace openstudio {
 namespace model {
 
-  std::vector<std::string> ScheduleTypeRegistrySingleton::classNames() const {
+  std::vector<std::string> ScheduleTypeRegistry::classNames() const {
     StringVector result;
     for (const ClassNameToScheduleTypesMap::value_type& p : m_classNameToScheduleTypesMap) {
       result.push_back(p.first);
@@ -25,7 +25,7 @@ namespace model {
     return result;
   }
 
-  std::vector<ScheduleType> ScheduleTypeRegistrySingleton::getScheduleTypesByClassName(const std::string& className) const {
+  std::vector<ScheduleType> ScheduleTypeRegistry::getScheduleTypesByClassName(const std::string& className) const {
     ScheduleTypeVector result;
     auto it = m_classNameToScheduleTypesMap.find(className);
     if (it != m_classNameToScheduleTypesMap.end()) {
@@ -34,7 +34,7 @@ namespace model {
     return result;
   }
 
-  ScheduleType ScheduleTypeRegistrySingleton::getScheduleType(const std::string& className, const std::string& scheduleDisplayName) const {
+  ScheduleType ScheduleTypeRegistry::getScheduleType(const std::string& className, const std::string& scheduleDisplayName) const {
     ScheduleTypeVector scheduleTypes = getScheduleTypesByClassName(className);
     for (const ScheduleType& scheduleType : scheduleTypes) {
       if (scheduleType.scheduleDisplayName == scheduleDisplayName) {
@@ -45,7 +45,7 @@ namespace model {
     return {};
   }
 
-  ScheduleTypeLimits ScheduleTypeRegistrySingleton::getOrCreateScheduleTypeLimits(const ScheduleType& scheduleType, Model& model) const {
+  ScheduleTypeLimits ScheduleTypeRegistry::getOrCreateScheduleTypeLimits(const ScheduleType& scheduleType, Model& model) const {
     std::string defaultName = getDefaultName(scheduleType);
 
     // DLM: I do not understand why both upper and lower limit have to be set to reuse this?
@@ -83,7 +83,12 @@ namespace model {
     return scheduleTypeLimits;
   }
 
-  ScheduleTypeRegistrySingleton::ScheduleTypeRegistrySingleton() {
+  ScheduleTypeRegistry& ScheduleTypeRegistry::instance() {
+    static ScheduleTypeRegistry instance;
+    return instance;
+  }
+
+  ScheduleTypeRegistry::ScheduleTypeRegistry() {
     // className, scheduleDisplayName, scheduleRelationshipName, isContinuous, unitType, lowerLimitValue, upperLimitValue;
 
     const ScheduleType scheduleTypes[] = {
@@ -607,7 +612,7 @@ namespace model {
     }
   }
 
-  std::string ScheduleTypeRegistrySingleton::getDefaultName(const ScheduleType& scheduleType) const {
+  std::string ScheduleTypeRegistry::getDefaultName(const ScheduleType& scheduleType) const {
     std::string result = scheduleType.unitType;
     if (result.empty()) {
       if (scheduleType.isContinuous) {
