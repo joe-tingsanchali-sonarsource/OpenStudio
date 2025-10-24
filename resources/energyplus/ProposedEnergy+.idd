@@ -15399,7 +15399,7 @@ AirflowNetwork:Distribution:DuctSizing,
  N2 , \field Maximum Airflow Velocity
       \type real
       \units m/s
-      \minimum >0.0
+      \minimum> 0.0
       \maximum 25.0
       \default 5.0
       \note Used only if Duct Sizing Type = MaximumVelocity or PressureLossWithMaximumVelocity.
@@ -15412,7 +15412,7 @@ AirflowNetwork:Distribution:DuctSizing,
  N3 , \field Total Pressure Loss Across Supply Trunk
       \type real
       \units Pa
-      \minimum >0.0
+      \minimum> 0.0
       \note Used only if Duct Sizing Type = PressureLoss or PressureLossWithMaximumVelocity.
       \note When PressureLoss is entered, duct diameter is calculated using Colebrook's equation
       \note When PressureLossWithMaximumVelocity is entered, duct diameter is calculated based on
@@ -15422,19 +15422,19 @@ AirflowNetwork:Distribution:DuctSizing,
  N4 , \field Total Pressure Loss Across Supply Branch
       \type real
       \units Pa
-      \minimum >0.0
+      \minimum> 0.0
       \note Duct diameter is calculated using Colebrook's equation. When there is no solution,
       \note velocity = 5 m/s is used to calculate duct diameter.
  N5 , \field Total Pressure Loss Across Return Trunk
       \type real
       \units Pa
-      \minimum >0.0
+      \minimum> 0.0
       \note Duct diameter is calculated using Colebrook's equation. When there is no solution,
       \note velocity = 5 m/s is used to calculate duct diameter.
  N6 ; \field Total Pressure Loss Across Return Branch
       \type real
       \units Pa
-      \minimum >0.0
+      \minimum> 0.0
       \note Duct diameter is calculated using Colebrook's equation. When there is no solution,
       \note velocity = 5 m/s is used to calculate duct diameter.
 
@@ -26683,7 +26683,7 @@ ZoneHVAC:CoolingPanel:RadiantConvective:Water,
        \note CoolingDesignCapacity => selected when the design cooling capacity value is specified or
        \note auto-sized. CapacityPerFloorArea => selected when the design cooling capacity is determined
        \note from user specified cooling capacity per floor area and total floor area of cooled zone
-       \note served by the hydrolic unit. FractionOfAutosizedCoolingCapacity => is selected when the
+       \note served by the hydraulic unit. FractionOfAutosizedCoolingCapacity => is selected when the
        \note design cooling capacity is determined from a user specified fraction and the auto-sized
        \note design cooling capacity of the system.
   N4 , \field Cooling Design Capacity
@@ -27042,7 +27042,7 @@ ZoneHVAC:LowTemperatureRadiant:VariableFlow:Design,
         \note CoolingDesignCapacity => selected when the design cooling capacity value is specified or
         \note auto-sized. CapacityPerFloorArea => selected when the design cooling capacity is determined
         \note from user specified cooling capacity per floor area and total floor area of cooled zone
-        \note served by the hydrolic unit. FractionOfAutosizedCoolingCapacity => is selected when the
+        \note served by the hydraulic unit. FractionOfAutosizedCoolingCapacity => is selected when the
         \note design cooling capacity is determined from a user specified fraction and the auto-sized
         \note design cooling capacity of the system.
   N7, \field Cooling Design Capacity Per Floor Area
@@ -45981,7 +45981,7 @@ HeatPump:AirToWater:FuelFired:Heating,
        \required-field
        \type object-list
        \object-list BivariateFunctions
-       \note: CAPFT - Normalized Capacity Function of Temperature Curve Name,
+       \note CAPFT - Normalized Capacity Function of Temperature Curve Name,
        \note which is a biquadratic curve or a lookup table.
   A12, \field Fuel Energy Input Ratio Function of Temperature Curve Name
        \required-field
@@ -46165,7 +46165,7 @@ HeatPump:AirToWater:FuelFired:Cooling,
        \required-field
        \type object-list
        \object-list BivariateFunctions
-       \note: CAPFT - Normalized Capacity Function of Temperature Curve Name,
+       \note CAPFT - Normalized Capacity Function of Temperature Curve Name,
        \note which is a biquadratic curve or a lookup table.
   A12, \field Fuel Energy Input Ratio Function of Temperature Curve Name
        \required-field
@@ -46227,7 +46227,6 @@ HeatPump:AirToWater,
    A1 , \field Name
         \required-field
         \type alpha
-        \required-field
         \reference-class-name validPlantEquipmentTypes
         \reference validPlantEquipmentNames
         \reference-class-name validBranchEquipmentTypes
@@ -46494,7 +46493,7 @@ HeatPump:AirToWater,
    A22, \field Normalized Heating Capacity Function of Temperature Curve Name at Speed 1
         \type object-list
         \object-list BivariateFunctions
-        \note: CAPFT - Normalized Capacity Function of Temperature Curve Name,
+        \note CAPFT - Normalized Capacity Function of Temperature Curve Name,
         \note which is a biquadratic curve or a lookup table of air and water temperature.
    A23, \field Heating Energy Input Ratio Function of Temperature Curve Name at Speed 1
         \type object-list
@@ -46519,7 +46518,7 @@ HeatPump:AirToWater,
    A25, \field Normalized Heating Capacity Function of Temperature Curve Name at Speed 2
         \type object-list
         \object-list BivariateFunctions
-        \note: CAPFT - Normalized Capacity Function of Temperature Curve Name,
+        \note CAPFT - Normalized Capacity Function of Temperature Curve Name,
         \note which is a biquadratic curve or a lookup table of air and water temperature.
    A26, \field Heating Energy Input Ratio Function of Temperature Curve Name at Speed 2
         \type object-list
@@ -46544,7 +46543,7 @@ HeatPump:AirToWater,
    A28, \field Normalized Heating Capacity Function of Temperature Curve Name at Speed 3
         \type object-list
         \object-list BivariateFunctions
-        \note: CAPFT - Normalized Capacity Function of Temperature Curve Name,
+        \note CAPFT - Normalized Capacity Function of Temperature Curve Name,
         \note which is a biquadratic curve or a lookup table of air and water temperature.
    A29, \field Heating Energy Input Ratio Function of Temperature Curve Name at Speed 3
         \type object-list
@@ -46569,7 +46568,7 @@ HeatPump:AirToWater,
    A31, \field Normalized Heating Capacity Function of Temperature Curve Name at Speed 4
         \type object-list
         \object-list BivariateFunctions
-        \note: CAPFT - Normalized Capacity Function of Temperature Curve Name,
+        \note CAPFT - Normalized Capacity Function of Temperature Curve Name,
         \note which is a biquadratic curve or a lookup table of air and water temperature.
    A32, \field Heating Energy Input Ratio Function of Temperature Curve Name at Speed 4
         \type object-list
@@ -46594,7 +46593,7 @@ HeatPump:AirToWater,
    A34, \field Normalized Heating Capacity Function of Temperature Curve Name at Speed 5
         \type object-list
         \object-list BivariateFunctions
-        \note: CAPFT - Normalized Capacity Function of Temperature Curve Name,
+        \note CAPFT - Normalized Capacity Function of Temperature Curve Name,
         \note which is a biquadratic curve or a lookup table of air and water temperature.
    A35, \field Heating Energy Input Ratio Function of Temperature Curve Name at Speed 5
         \type object-list
@@ -46623,7 +46622,7 @@ HeatPump:AirToWater,
    A38, \field Normalized Heating Capacity Function of Temperature Curve Name in Booster Mode
         \type object-list
         \object-list BivariateFunctions
-        \note: CAPFT - Normalized Capacity Function of Temperature Curve Name,
+        \note CAPFT - Normalized Capacity Function of Temperature Curve Name,
         \note which is a biquadratic curve or a lookup table of air and water temperature.
    A39, \field Heating Energy Input Ratio Function of Temperature Curve Name in Booster Mode
         \type object-list
@@ -46656,7 +46655,7 @@ HeatPump:AirToWater,
    A41, \field Normalized Cooling Capacity Function of Temperature Curve Name at Speed 1
         \type object-list
         \object-list BivariateFunctions
-        \note: CAPFT - Normalized Capacity Function of Temperature Curve Name,
+        \note CAPFT - Normalized Capacity Function of Temperature Curve Name,
         \note which is a biquadratic curve or a lookup table of air and water temperature.
    A42, \field Cooling Energy Input Ratio Function of Temperature Curve Name at Speed 1
         \type object-list
@@ -46681,7 +46680,7 @@ HeatPump:AirToWater,
    A44, \field Normalized Cooling Capacity Function of Temperature Curve Name at Speed 2
         \type object-list
         \object-list BivariateFunctions
-        \note: CAPFT - Normalized Capacity Function of Temperature Curve Name,
+        \note CAPFT - Normalized Capacity Function of Temperature Curve Name,
         \note which is a biquadratic curve or a lookup table of air and water temperature.
    A45, \field Cooling Energy Input Ratio Function of Temperature Curve Name at Speed 2
         \type object-list
@@ -46706,7 +46705,7 @@ HeatPump:AirToWater,
    A47, \field Normalized Cooling Capacity Function of Temperature Curve Name at Speed 3
         \type object-list
         \object-list BivariateFunctions
-        \note: CAPFT - Normalized Capacity Function of Temperature Curve Name,
+        \note CAPFT - Normalized Capacity Function of Temperature Curve Name,
         \note which is a biquadratic curve or a lookup table of air and water temperature.
    A48, \field Cooling Energy Input Ratio Function of Temperature Curve Name at Speed 3
         \type object-list
@@ -46731,7 +46730,7 @@ HeatPump:AirToWater,
    A50, \field Normalized Cooling Capacity Function of Temperature Curve Name at Speed 4
         \type object-list
         \object-list BivariateFunctions
-        \note: CAPFT - Normalized Capacity Function of Temperature Curve Name,
+        \note CAPFT - Normalized Capacity Function of Temperature Curve Name,
         \note which is a biquadratic curve or a lookup table of air and water temperature.
    A51, \field Cooling Energy Input Ratio Function of Temperature Curve Name at Speed 4
         \type object-list
@@ -46756,7 +46755,7 @@ HeatPump:AirToWater,
    A53, \field Normalized Cooling Capacity Function of Temperature Curve Name at Speed 5
         \type object-list
         \object-list BivariateFunctions
-        \note: CAPFT - Normalized Capacity Function of Temperature Curve Name,
+        \note CAPFT - Normalized Capacity Function of Temperature Curve Name,
         \note which is a biquadratic curve or a lookup table of air and water temperature.
    A54, \field Cooling Energy Input Ratio Function of Temperature Curve Name at Speed 5
         \type object-list
@@ -46785,7 +46784,7 @@ HeatPump:AirToWater,
    A57, \field Normalized Cooling Capacity Function of Temperature Curve Name in Booster Mode
         \type object-list
         \object-list BivariateFunctions
-        \note: CAPFT - Normalized Capacity Function of Temperature Curve Name,
+        \note CAPFT - Normalized Capacity Function of Temperature Curve Name,
         \note which is a biquadratic curve or a lookup table of air and water temperature.
    A58, \field Cooling Energy Input Ratio Function of Temperature Curve Name in Booster Mode
         \type object-list
@@ -49678,7 +49677,7 @@ GroundHeatExchanger:Vertical:Sizing:Rectangle,
         \minimum> 0.0
         \default 135.0
         \units m
-        \note Maximum drilled depth fo the vertical borehole
+        \note Maximum drilled depth of the vertical borehole
   N9,   \field Minimum Exiting Fluid Temperature for Sizing
         \type real
         \minimum> 0.0
@@ -52235,7 +52234,7 @@ ThermalStorage:PCM,
   N1 , \field Tank Capacity
        \type real
        \units kg
-       \minimum > 0
+       \minimum> 0
        \autosizable
        \required-field
   N2 , \field Heat Loss Rate
@@ -52245,13 +52244,13 @@ ThermalStorage:PCM,
   N3 , \field Use Side Design Flow Rate
        \type real
        \units m3/s
-       \minimum > 0
+       \minimum> 0
        \autosizable
        \required-field
   N4 ; \field Plant Side Design Flow Rate
        \type real
        \units m3/s
-       \minimum > 0
+       \minimum> 0
        \autosizable
        \required-field
 
@@ -53390,7 +53389,7 @@ EnergyManagementSystem:Actuator,
        \required-field
        \type alpha
        \note This name becomes a variable for use in Erl programs
-       \note no spaces or other special characters allowed in name
+       \note no spaces or other special characters (minus, plus, slashes, etc) allowed in name
   A2 , \field Actuated Component Unique Name
        \required-field
        \type alpha
@@ -64501,8 +64500,8 @@ OutputControl:Table:Style,
        \key InchPoundExceptElectricity
        \default None
    A3; \field Format Numeric Values
-       \memo If No, all digits are shown after the decimal point without any rounding (23.238769213).
-       \memo If Yes, values are rounded for readability (23.24).
+       \note If No, all digits are shown after the decimal point without any rounding (23.238769213).
+       \note If Yes, values are rounded for readability (23.24).
        \type choice
        \key Yes
        \key No
@@ -64965,8 +64964,8 @@ Output:JSON,
        \key InchPoundExceptElectricity
        \default UseOutputControlTableStyle
   A6 ; \field Format Numeric Values for Tabular Data
-       \memo If No, all digits are shown after the decimal point without any rounding (23.238769213).
-       \memo If Yes, values are rounded for readability (23.24).
+       \note If No, all digits are shown after the decimal point without any rounding (23.238769213).
+       \note If Yes, values are rounded for readability (23.24).
        \type choice
        \key Yes
        \key No
@@ -64992,8 +64991,8 @@ Output:SQLite,
        \key InchPoundExceptElectricity
        \default UseOutputControlTableStyle
   A3 ; \field Format Numeric Values for Tabular Data
-       \memo If No, all digits are shown after the decimal point without any rounding (23.238769213).
-       \memo If Yes, values are rounded for readability (23.24).
+       \note If No, all digits are shown after the decimal point without any rounding (23.238769213).
+       \note If Yes, values are rounded for readability (23.24).
        \type choice
        \key Yes
        \key No
