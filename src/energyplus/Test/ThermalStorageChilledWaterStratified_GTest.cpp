@@ -14,6 +14,7 @@
 #include "../../model/PlantLoop.hpp"
 #include "../../model/Schedule.hpp"
 #include "../../model/ScheduleConstant.hpp"
+#include "../../model/Space.hpp"
 #include "../../model/ThermalZone.hpp"
 
 #include "../../utilities/idf/Workspace.hpp"
@@ -79,6 +80,9 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_ThermalStorageChilledWaterStratified
   EXPECT_TRUE(chw_storage.setAmbientTemperatureSchedule(ambientTemperatureSchedule));
 
   ThermalZone ambientTemperatureZone(m);
+  Space s(m);
+  s.setThermalZone(ambientTemperatureZone);
+
   ambientTemperatureZone.setName("Ambient Temp Zone");
   EXPECT_TRUE(chw_storage.setAmbientTemperatureThermalZone(ambientTemperatureZone));
 
@@ -175,11 +179,9 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_ThermalStorageChilledWaterStratified
   EXPECT_EQ(0.947, idfObject.getDouble(ThermalStorage_ChilledWater_StratifiedFields::UseSideHeatTransferEffectiveness).get());
   EXPECT_EQ(useSideAvailabilitySchedule.nameString(),
             idfObject.getString(ThermalStorage_ChilledWater_StratifiedFields::UseSideAvailabilityScheduleName).get());
-  // EXPECT_EQ("Autocalculate", idfObject.getString(ThermalStorage_ChilledWater_StratifiedFields::UseSideInletHeight).get());
-  EXPECT_EQ(2.0, idfObject.getDouble(ThermalStorage_ChilledWater_StratifiedFields::UseSideInletHeight).get());
+  EXPECT_EQ("Autocalculate", idfObject.getString(ThermalStorage_ChilledWater_StratifiedFields::UseSideInletHeight).get());
   EXPECT_EQ(2.1, idfObject.getDouble(ThermalStorage_ChilledWater_StratifiedFields::UseSideOutletHeight).get());
-  // EXPECT_EQ("Autosize", idfObject.getString(ThermalStorage_ChilledWater_StratifiedFields::UseSideDesignFlowRate).get());
-  EXPECT_EQ(2.2, idfObject.getDouble(ThermalStorage_ChilledWater_StratifiedFields::UseSideDesignFlowRate).get());
+  EXPECT_EQ("Autosize", idfObject.getString(ThermalStorage_ChilledWater_StratifiedFields::UseSideDesignFlowRate).get());
   EXPECT_EQ(sourceSideInletNodeName, idfObject.getString(ThermalStorage_ChilledWater_StratifiedFields::SourceSideInletNodeName).get());
   EXPECT_EQ(sourceSideOutletNodeName, idfObject.getString(ThermalStorage_ChilledWater_StratifiedFields::SourceSideOutletNodeName).get());
   EXPECT_EQ(0.962, idfObject.getDouble(ThermalStorage_ChilledWater_StratifiedFields::SourceSideHeatTransferEffectiveness).get());
@@ -192,7 +194,8 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_ThermalStorageChilledWaterStratified
   EXPECT_EQ(2.9, idfObject.getDouble(ThermalStorage_ChilledWater_StratifiedFields::SourceSideDesignFlowRate).get());
   EXPECT_EQ(3.0, idfObject.getDouble(ThermalStorage_ChilledWater_StratifiedFields::TankRecoveryTime).get());
   EXPECT_EQ("Fixed", idfObject.getString(ThermalStorage_ChilledWater_StratifiedFields::InletMode).get());
-  EXPECT_EQ(9, idfObject.getInt(ThermalStorage_ChilledWater_StratifiedFields::NumberofNodes).get());
+
+  EXPECT_EQ(6, idfObject.getInt(ThermalStorage_ChilledWater_StratifiedFields::NumberofNodes).get());
   EXPECT_EQ(3.3, idfObject.getDouble(ThermalStorage_ChilledWater_StratifiedFields::AdditionalDestratificationConductivity).get());
   EXPECT_EQ(3.4, idfObject.getDouble(ThermalStorage_ChilledWater_StratifiedFields::Node1AdditionalLossCoefficient).get());
   EXPECT_EQ(3.5, idfObject.getDouble(ThermalStorage_ChilledWater_StratifiedFields::Node2AdditionalLossCoefficient).get());
@@ -200,10 +203,12 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_ThermalStorageChilledWaterStratified
   EXPECT_EQ(3.7, idfObject.getDouble(ThermalStorage_ChilledWater_StratifiedFields::Node4AdditionalLossCoefficient).get());
   EXPECT_EQ(3.8, idfObject.getDouble(ThermalStorage_ChilledWater_StratifiedFields::Node5AdditionalLossCoefficient).get());
   EXPECT_EQ(3.9, idfObject.getDouble(ThermalStorage_ChilledWater_StratifiedFields::Node6AdditionalLossCoefficient).get());
-  EXPECT_EQ(4.0, idfObject.getDouble(ThermalStorage_ChilledWater_StratifiedFields::Node7AdditionalLossCoefficient).get());
-  EXPECT_EQ(4.1, idfObject.getDouble(ThermalStorage_ChilledWater_StratifiedFields::Node8AdditionalLossCoefficient).get());
-  EXPECT_EQ(4.2, idfObject.getDouble(ThermalStorage_ChilledWater_StratifiedFields::Node9AdditionalLossCoefficient).get());
-  EXPECT_EQ(4.3, idfObject.getDouble(ThermalStorage_ChilledWater_StratifiedFields::Node10AdditionalLossCoefficient).get());
+
+  // After num nodes, we don't write it, or E+ issues a warning
+  EXPECT_TRUE(idfObject.isEmpty(ThermalStorage_ChilledWater_StratifiedFields::Node7AdditionalLossCoefficient));
+  EXPECT_TRUE(idfObject.isEmpty(ThermalStorage_ChilledWater_StratifiedFields::Node8AdditionalLossCoefficient));
+  EXPECT_TRUE(idfObject.isEmpty(ThermalStorage_ChilledWater_StratifiedFields::Node9AdditionalLossCoefficient));
+  EXPECT_TRUE(idfObject.isEmpty(ThermalStorage_ChilledWater_StratifiedFields::Node10AdditionalLossCoefficient));
 
   // CHECK WaterHeater:Sizing
   const auto whSizings = w.getObjectsByType(IddObjectType::WaterHeater_Sizing);
