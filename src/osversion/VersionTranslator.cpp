@@ -187,7 +187,7 @@ namespace osversion {
       VersionString("3.6.0"),  VersionString("3.6.1"),  VersionString("3.7.0"),  VersionString("3.8.0"),  VersionString("3.9.0"),
       VersionString("3.10.0"),
       // Note: do **not** include the **current** version in m_startVersions, stop at the previous release
-      //VersionString("3.10.1"),
+      //VersionString("3.11.0"),
     };
   }
 
@@ -9820,7 +9820,7 @@ namespace osversion {
           || (iddname == "OS:Coil:Heating:WaterToAirHeatPump:VariableSpeedEquationFit") || (iddname == "OS:Coil:WaterHeating:AirToWaterHeatPump")
           || (iddname == "OS:Coil:WaterHeating:AirToWaterHeatPump:Wrapped") || (iddname == "OS:Coil:WaterHeating:AirToWaterHeatPump:VariableSpeed")) {
 
-        // 1 Field has been inserted from 3.10.0 to 3.10.1:
+        // 1 Field has been inserted from 3.10.0 to 3.11.0:
         // ------------------------------------------------
         // * Availability Schedule Name * 2
 
@@ -9845,7 +9845,7 @@ namespace osversion {
 
       } else if (iddname == "OS:Site:WaterMainsTemperature") {
 
-        // 2 Fields have been inserted from 3.10.0 to 3.10.1:
+        // 2 Fields have been inserted from 3.10.0 to 3.11.0:
         // ------------------------------------------------
         // * Temperature Multiplier * 5
         // * Temperature Offset * 6
@@ -9867,7 +9867,7 @@ namespace osversion {
 
       } else if (iddname == "OS:ThermalStorage:ChilledWater:Stratified") {
 
-        // 1 Field was made required from 3.10.0 to 3.10.1:
+        // 1 Field was made required from 3.10.0 to 3.11.0:
         // ------------------------------------------------
         // * Nominal Cooling Capacity * 10
 
@@ -9889,7 +9889,7 @@ namespace osversion {
 
       } else if (iddname == "OS:Sizing:Zone") {
 
-        // 2 Fields have been added from 3.10.0 to 3.10.1:
+        // 2 Fields have been added from 3.10.0 to 3.11.0:
         // ------------------------------------------------
         // * Heating Coil Sizing Method * 40
         // * Maximum Heating Capacity To Cooling Load Sizing Ratio * 41
@@ -9911,7 +9911,7 @@ namespace osversion {
 
       } else if (iddname == "OS:Sizing:System") {
 
-        // 2 Fields have been added from 3.10.0 to 3.10.1:
+        // 2 Fields have been added from 3.10.0 to 3.11.0:
         // ------------------------------------------------
         // * Heating Coil Sizing Method * 39
         // * Maximum Heating Capacity To Cooling Capacity Sizing Ratio * 40
@@ -9933,7 +9933,7 @@ namespace osversion {
 
       } else if (iddname == "OS:HeatPump:AirToWater:FuelFired:Heating") {
 
-        // 1 Field has been added from 3.10.0 to 3.10.1:
+        // 1 Field has been added from 3.10.0 to 3.11.0:
         // ------------------------------------------------
         // * Minimum Unloading Ratio * 32
 
@@ -9953,7 +9953,7 @@ namespace osversion {
 
       } else if (iddname == "OS:HeatPump:AirToWater:FuelFired:Cooling") {
 
-        // 1 Field has been added from 3.10.0 to 3.10.1:
+        // 1 Field has been added from 3.10.0 to 3.11.0:
         // ------------------------------------------------
         // * Minimum Unloading Ratio * 27
 
@@ -9973,7 +9973,7 @@ namespace osversion {
 
       } else if (iddname == "OS:ZoneHVAC:PackagedTerminalHeatPump") {
 
-        // 1 Field has been inserted from 3.10.0 to 3.10.1:
+        // 1 Field has been inserted from 3.10.0 to 3.11.0:
         // ------------------------------------------------
         // * DX Heating Coil Sizing Ratio * 25
 
@@ -9993,7 +9993,7 @@ namespace osversion {
 
       } else if (iddname == "OS:ZoneHVAC:WaterToAirHeatPump") {
 
-        // 1 Field has been inserted from 3.10.0 to 3.10.1:
+        // 1 Field has been inserted from 3.10.0 to 3.11.0:
         // ------------------------------------------------
         // * DX Heating Coil Sizing Ratio * 25
 
@@ -10013,7 +10013,7 @@ namespace osversion {
 
       } else if (iddname == "OS:AirLoopHVAC:UnitaryHeatPump:AirToAir") {
 
-        // 1 Field has been inserted from 3.10.0 to 3.10.1:
+        // 1 Field has been inserted from 3.10.0 to 3.11.0:
         // ------------------------------------------------
         // * DX Heating Coil Sizing Ratio * 18
 
@@ -10033,7 +10033,7 @@ namespace osversion {
 
       } else if (iddname == "OS:AirLoopHVAC:UnitaryHeatPump:AirToAir:MultiSpeed") {
 
-        // 1 Field has been inserted from 3.10.0 to 3.10.1:
+        // 1 Field has been inserted from 3.10.0 to 3.11.0:
         // ------------------------------------------------
         // * DX Heating Coil Sizing Ratio * 10
 
@@ -10053,7 +10053,7 @@ namespace osversion {
 
       } else if (iddname == "OS:Controller:MechanicalVentilation") {
 
-        // 1 Field has been modified from 3.10.0 to 3.10.1:
+        // 1 Field has been modified from 3.10.0 to 3.11.0:
         // ------------------------------------------------
         // * System Outdoor Air Method * 4 - Removed ProportionalControl as mapping to ProportionalControlBasedonOccupancySchedule
 
@@ -10079,7 +10079,7 @@ namespace osversion {
 
       } else if (iddname == "OS:People") {
 
-        // 2 Fields have been inserted from 3.10.0 to 3.10.1:
+        // 2 Fields have been inserted from 3.10.0 to 3.11.0:
         // ------------------------------------------------
         // * Clothing Insulation Calculation Method * 8
         // * Clothing Insulation Calculation Method Schedule Name * 9

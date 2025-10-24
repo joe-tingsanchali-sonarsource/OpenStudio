@@ -1,8 +1,8 @@
-# OpenStudio Version 3.10.1
+# OpenStudio Version 3.11.0
 
 _Release Notes_ -  _TBD_
 
-These release notes describe version 3.10.1 of the OpenStudio SDK developed by the National Renewable Energy Laboratory (NREL), Buildings and Thermal Sciences Center, Commercial Buildings Research Group, Tools Development Section, and associated collaborators. The notes are organized into the following sections:
+These release notes describe version 3.11.0 of the OpenStudio SDK developed by the National Renewable Energy Laboratory (NREL), Buildings and Thermal Sciences Center, Commercial Buildings Research Group, Tools Development Section, and associated collaborators. The notes are organized into the following sections:
 
 -  Overview
 -  Where to Find OpenStudio Documentation
@@ -15,7 +15,7 @@ As of April 2020, development and distribution of the OpenStudioApplication and 
 
 Below is the list of components that is included in this SDK installer:
 
-__**OpenStudio SDK 3.10.1**__
+__**OpenStudio SDK 3.11.0**__
 - EnergyPlus
 - Command Line Interface (CLI)
 - Radiance
@@ -34,15 +34,15 @@ __**OpenStudio SDK 3.10.1**__
 
 # Installation Notes
 
-OpenStudio SDK 3.10.1 is supported on:
+OpenStudio SDK 3.11.0 is supported on:
 
 * 64-bit Windows 7 – 11
 * macOS: 11.6+ x86_64, 12.1+ arm64
 * Ubuntu: 22.04 x86_64, 24.04 x86_64, 22.04 arm64
 
-OpenStudio SDK 3.10.1 supports [EnergyPlus Release 25.2.0, Bug Fix Edition](https://github.com/NREL/EnergyPlus/releases/tag/v25.2.0), which is bundled with the OpenStudio installer. It is no longer necessary to download and install EnergyPlus separately. Other builds of EnergyPlus are not supported by OpenStudio SDK 3.10.1.
+OpenStudio SDK 3.11.0 supports [EnergyPlus Release 25.2.0, Bug Fix Edition](https://github.com/NREL/EnergyPlus/releases/tag/v25.2.0), which is bundled with the OpenStudio installer. It is no longer necessary to download and install EnergyPlus separately. Other builds of EnergyPlus are not supported by OpenStudio SDK 3.11.0.
 
-OpenStudio SDK 3.10.1 supports Radiance 5.0.a.12, which is bundled with the OpenStudio installer; users no longer must install Radiance separately, and OpenStudio will use the included Radiance version regardless of any other versions that may be installed on the system. Other builds of Radiance are not supported by OpenStudio SDK 3.10.1.
+OpenStudio SDK 3.11.0 supports Radiance 5.0.a.12, which is bundled with the OpenStudio installer; users no longer must install Radiance separately, and OpenStudio will use the included Radiance version regardless of any other versions that may be installed on the system. Other builds of Radiance are not supported by OpenStudio SDK 3.11.0.
 
 As usual, you can refer to the **[OpenStudio SDK Compatibility Matrix](https://github.com/NREL/OpenStudio/wiki/OpenStudio-SDK-Version-Compatibility-Matrix)** for more information.
 
@@ -56,7 +56,7 @@ For help with common installation problems please visit [Getting Started](http:/
 
 # OpenStudio SDK: Changelog
 
-The 3.10.1 is a **major** release. This update includes several new features, performance improvements, and bug fixes.
+The 3.11.0 is a **major** release. This update includes several new features, performance improvements, and bug fixes.
 
 ## C++ Workflow code
 
@@ -66,7 +66,7 @@ As of OpenStudio SDK 3.7.0 a re-written workflow written in C++ is used by defau
 
 As of OpenStudio SDK 3.2.0, Python bindings are officially supported and distributed through Python Package Index (PyPI). To install, users will need to have Python3 installed along with pip and simply run the following command in a terminal window.
 
-`pip install openstudio==3.10.1`
+`pip install openstudio==3.11.0`
 
 Please see [openstudio on PyPi](https://pypi.org/project/openstudio/) for further instructions on how to install. Users can also visit the test channel at [openstudio on TestPyPi](https://test.pypi.org/project/openstudio/) to install development bindings.
 
@@ -104,10 +104,9 @@ You can also refer to the [OpenStudio SDK Python Binding Version Compatibility M
 
 
 
+Refer to the changelog on the release page at [v3.11.0](https://github.com/NREL/OpenStudio/releases/v3.11.0)
 
-Refer to the changelog on the release page at [v3.10.1](https://github.com/NREL/OpenStudio/releases/v3.10.1)
-
-**Full Changelog**: https://github.com/NREL/OpenStudio/compare/v3.10.0...v3.10.1
+**Full Changelog**: https://github.com/NREL/OpenStudio/compare/v3.10.0...v3.11.0
 
 **New Contributors**:
 
@@ -119,7 +118,7 @@ In addition to some refactoring, this release also included conversion of 90.1 d
 ---
 # This YAML header controls the pandoc (via TeX) to PDF settings
 # To convert the markdown to pdf, do `pandoc release_notes.md -o release_notes.pdf`
-title:  'OpenStudio Release Notes - 3.10.1'
+title:  'OpenStudio Release Notes - 3.11.0'
 author:
 - National Renewable Energy Laboratory
 colorlinks: true
