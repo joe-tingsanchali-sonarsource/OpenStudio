@@ -4629,13 +4629,13 @@ TEST_F(OSVersionFixture, can_still_load_older_components) {
   EXPECT_EQ(2, model.objects().size());
 }
 
-TEST_F(OSVersionFixture, update_3_10_0_to_3_10_1_SiteWaterMainsTemperature) {
-  openstudio::path path = resourcesPath() / toPath("osversion/3_10_1/test_vt_SiteWaterMainsTemperature.osm");
+TEST_F(OSVersionFixture, update_3_10_0_to_3_11_0_SiteWaterMainsTemperature) {
+  openstudio::path path = resourcesPath() / toPath("osversion/3_11_0/test_vt_SiteWaterMainsTemperature.osm");
   osversion::VersionTranslator vt;
   boost::optional<model::Model> model = vt.loadModel(path);
   ASSERT_TRUE(model) << "Failed to load " << path;
 
-  openstudio::path outPath = resourcesPath() / toPath("osversion/3_10_1/test_vt_SiteWaterMainsTemperature_updated.osm");
+  openstudio::path outPath = resourcesPath() / toPath("osversion/3_11_0/test_vt_SiteWaterMainsTemperature_updated.osm");
   model->save(outPath, true);
 
   std::vector<WorkspaceObject> swmts = model->getObjectsByType("OS:Site:WaterMainsTemperature");
@@ -4650,13 +4650,13 @@ TEST_F(OSVersionFixture, update_3_10_0_to_3_10_1_SiteWaterMainsTemperature) {
   EXPECT_EQ(0.0, swmt.getDouble(6).get());                           // Temperature Offset
 }
 
-TEST_F(OSVersionFixture, update_3_10_0_to_3_10_1_ThermalStorageChilledWaterStratified) {
-  openstudio::path path = resourcesPath() / toPath("osversion/3_10_1/test_vt_ThermalStorageChilledWaterStratified.osm");
+TEST_F(OSVersionFixture, update_3_10_0_to_3_11_0_ThermalStorageChilledWaterStratified) {
+  openstudio::path path = resourcesPath() / toPath("osversion/3_11_0/test_vt_ThermalStorageChilledWaterStratified.osm");
   osversion::VersionTranslator vt;
   boost::optional<model::Model> model = vt.loadModel(path);
   ASSERT_TRUE(model) << "Failed to load " << path;
 
-  openstudio::path outPath = resourcesPath() / toPath("osversion/3_10_1/test_vt_ThermalStorageChilledWaterStratified_updated.osm");
+  openstudio::path outPath = resourcesPath() / toPath("osversion/3_11_0/test_vt_ThermalStorageChilledWaterStratified_updated.osm");
   model->save(outPath, true);
 
   std::vector<WorkspaceObject> tss = model->getObjectsByType("OS:ThermalStorage:ChilledWater:Stratified");
@@ -4675,13 +4675,13 @@ TEST_F(OSVersionFixture, update_3_10_0_to_3_10_1_ThermalStorageChilledWaterStrat
   EXPECT_EQ("Outdoors", ts.getString(11).get());
 }
 
-TEST_F(OSVersionFixture, update_3_10_0_to_3_10_1_Sizing) {
-  openstudio::path path = resourcesPath() / toPath("osversion/3_10_1/test_vt_Sizing.osm");
+TEST_F(OSVersionFixture, update_3_10_0_to_3_11_0_Sizing) {
+  openstudio::path path = resourcesPath() / toPath("osversion/3_11_0/test_vt_Sizing.osm");
   osversion::VersionTranslator vt;
   boost::optional<model::Model> model = vt.loadModel(path);
   ASSERT_TRUE(model) << "Failed to load " << path;
 
-  openstudio::path outPath = resourcesPath() / toPath("osversion/3_10_1/test_vt_Sizing_updated.osm");
+  openstudio::path outPath = resourcesPath() / toPath("osversion/3_11_0/test_vt_Sizing_updated.osm");
   model->save(outPath, true);
 
   std::vector<WorkspaceObject> szs = model->getObjectsByType("OS:Sizing:Zone");
@@ -4701,13 +4701,13 @@ TEST_F(OSVersionFixture, update_3_10_0_to_3_10_1_Sizing) {
   EXPECT_EQ(1.0, ss.getDouble(40).get());         // Maximum Heating Capacity To Cooling Capacity Sizing Ratio
 }
 
-TEST_F(OSVersionFixture, update_3_10_0_to_3_10_1_HeatPumpAirToWaterFuelFired) {
-  openstudio::path path = resourcesPath() / toPath("osversion/3_10_1/test_vt_HeatPumpAirToWaterFuelFired.osm");
+TEST_F(OSVersionFixture, update_3_10_0_to_3_11_0_HeatPumpAirToWaterFuelFired) {
+  openstudio::path path = resourcesPath() / toPath("osversion/3_11_0/test_vt_HeatPumpAirToWaterFuelFired.osm");
   osversion::VersionTranslator vt;
   boost::optional<model::Model> model = vt.loadModel(path);
   ASSERT_TRUE(model) << "Failed to load " << path;
 
-  openstudio::path outPath = resourcesPath() / toPath("osversion/3_10_1/test_vt_HeatPumpAirToWaterFuelFired_updated.osm");
+  openstudio::path outPath = resourcesPath() / toPath("osversion/3_11_0/test_vt_HeatPumpAirToWaterFuelFired_updated.osm");
   model->save(outPath, true);
 
   std::vector<WorkspaceObject> htgs = model->getObjectsByType("OS:HeatPump:AirToWater:FuelFired:Heating");
@@ -4725,13 +4725,13 @@ TEST_F(OSVersionFixture, update_3_10_0_to_3_10_1_HeatPumpAirToWaterFuelFired) {
   EXPECT_EQ(0.25, clg.getDouble(27).get());  // Minimum Unloading Ratio
 }
 
-TEST_F(OSVersionFixture, update_3_10_0_to_3_10_1_DXHeatingCoilSizingRatio) {
-  openstudio::path path = resourcesPath() / toPath("osversion/3_10_1/test_vt_DXHeatingCoilSizingRatio.osm");
+TEST_F(OSVersionFixture, update_3_10_0_to_3_11_0_DXHeatingCoilSizingRatio) {
+  openstudio::path path = resourcesPath() / toPath("osversion/3_11_0/test_vt_DXHeatingCoilSizingRatio.osm");
   osversion::VersionTranslator vt;
   boost::optional<model::Model> model = vt.loadModel(path);
   ASSERT_TRUE(model) << "Failed to load " << path;
 
-  openstudio::path outPath = resourcesPath() / toPath("osversion/3_10_1/test_vt_DXHeatingCoilSizingRatio_updated.osm");
+  openstudio::path outPath = resourcesPath() / toPath("osversion/3_11_0/test_vt_DXHeatingCoilSizingRatio_updated.osm");
   model->save(outPath, true);
 
   std::vector<WorkspaceObject> pthps = model->getObjectsByType("OS:ZoneHVAC:PackagedTerminalHeatPump");
@@ -4767,13 +4767,13 @@ TEST_F(OSVersionFixture, update_3_10_0_to_3_10_1_DXHeatingCoilSizingRatio) {
   EXPECT_EQ("Coil Cooling DX Multi Speed 1", unitary2.getTarget(11)->nameString());  // Cooling Coil
 }
 
-TEST_F(OSVersionFixture, update_3_10_0_to_3_10_1_ControllerMechanicalVentilation) {
-  openstudio::path path = resourcesPath() / toPath("osversion/3_10_1/test_vt_ControllerMechanicalVentilation.osm");
+TEST_F(OSVersionFixture, update_3_10_0_to_3_11_0_ControllerMechanicalVentilation) {
+  openstudio::path path = resourcesPath() / toPath("osversion/3_11_0/test_vt_ControllerMechanicalVentilation.osm");
   osversion::VersionTranslator vt;
   boost::optional<model::Model> model = vt.loadModel(path);
   ASSERT_TRUE(model) << "Failed to load " << path;
 
-  openstudio::path outPath = resourcesPath() / toPath("osversion/3_10_1/test_vt_ControllerMechanicalVentilation_updated.osm");
+  openstudio::path outPath = resourcesPath() / toPath("osversion/3_11_0/test_vt_ControllerMechanicalVentilation_updated.osm");
   model->save(outPath, true);
 
   std::vector<WorkspaceObject> cntrls = model->getObjectsByType("OS:Controller:MechanicalVentilation");
@@ -4786,13 +4786,13 @@ TEST_F(OSVersionFixture, update_3_10_0_to_3_10_1_ControllerMechanicalVentilation
   EXPECT_EQ("ProportionalControlBasedonOccupancySchedule", cntrl.getString(4).get());  // System Outdoor Air Method
 }
 
-TEST_F(OSVersionFixture, update_3_10_0_to_3_10_1_CoilAvailabilitySchedules) {
-  openstudio::path path = resourcesPath() / toPath("osversion/3_10_1/test_vt_CoilAvailabilitySchedules.osm");
+TEST_F(OSVersionFixture, update_3_10_0_to_3_11_0_CoilAvailabilitySchedules) {
+  openstudio::path path = resourcesPath() / toPath("osversion/3_11_0/test_vt_CoilAvailabilitySchedules.osm");
   osversion::VersionTranslator vt;
   boost::optional<model::Model> model = vt.loadModel(path);
   ASSERT_TRUE(model) << "Failed to load " << path;
 
-  openstudio::path outPath = resourcesPath() / toPath("osversion/3_10_1/test_vt_CoilAvailabilitySchedules_updated.osm");
+  openstudio::path outPath = resourcesPath() / toPath("osversion/3_11_0/test_vt_CoilAvailabilitySchedules_updated.osm");
   model->save(outPath, true);
 
   {
@@ -4940,13 +4940,13 @@ TEST_F(OSVersionFixture, update_3_10_0_to_3_10_1_CoilAvailabilitySchedules) {
   }
 }
 
-TEST_F(OSVersionFixture, update_3_10_0_to_3_10_1_People) {
-  openstudio::path path = resourcesPath() / toPath("osversion/3_10_1/test_vt_People.osm");
+TEST_F(OSVersionFixture, update_3_10_0_to_3_11_0_People) {
+  openstudio::path path = resourcesPath() / toPath("osversion/3_11_0/test_vt_People.osm");
   osversion::VersionTranslator vt;
   boost::optional<model::Model> model = vt.loadModel(path);
   ASSERT_TRUE(model) << "Failed to load " << path;
 
-  openstudio::path outPath = resourcesPath() / toPath("osversion/3_10_1/test_vt_People_updated.osm");
+  openstudio::path outPath = resourcesPath() / toPath("osversion/3_11_0/test_vt_People_updated.osm");
   model->save(outPath, true);
 
   std::vector<WorkspaceObject> ps = model->getObjectsByType("OS:People");
@@ -4961,13 +4961,13 @@ TEST_F(OSVersionFixture, update_3_10_0_to_3_10_1_People) {
   EXPECT_EQ(1.0, p.getDouble(12).get());                                     // Multiplier
 }
 
-TEST_F(OSVersionFixture, update_3_10_0_to_3_10_1_EvaporativeFluidCooler) {
-  openstudio::path path = resourcesPath() / toPath("osversion/3_10_1/test_vt_EvaporativeFluidCooler.osm");
+TEST_F(OSVersionFixture, update_3_10_0_to_3_11_0_EvaporativeFluidCooler) {
+  openstudio::path path = resourcesPath() / toPath("osversion/3_11_0/test_vt_EvaporativeFluidCooler.osm");
   osversion::VersionTranslator vt;
   boost::optional<model::Model> model = vt.loadModel(path);
   ASSERT_TRUE(model) << "Failed to load " << path;
 
-  openstudio::path outPath = resourcesPath() / toPath("osversion/3_10_1/test_vt_EvaporativeFluidCooler_updated.osm");
+  openstudio::path outPath = resourcesPath() / toPath("osversion/3_11_0/test_vt_EvaporativeFluidCooler_updated.osm");
   model->save(outPath, true);
 
   std::vector<WorkspaceObject> efcsss = model->getObjectsByType("OS:EvaporativeFluidCooler:SingleSpeed");
