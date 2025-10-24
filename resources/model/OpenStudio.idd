@@ -2736,7 +2736,7 @@ OS:WindowMaterial:Gas,
   N12; \field Specific Heat Ratio
        \type real
        \note Used only if Gas Type = Custom
-       \minimum >1.0
+       \minimum> 1.0
 
 OS:WindowMaterial:GasMixture,
        \memo Gas mixtures that are used in Windows or Glass Doors
@@ -14630,7 +14630,7 @@ OS:HeatPump:AirToWater:FuelFired:Heating,
        \required-field
        \type object-list
        \object-list BivariateFunctions
-       \note: CAPFT - Normalized Capacity Function of Temperature Curve Name,
+       \note CAPFT - Normalized Capacity Function of Temperature Curve Name,
        \note which is a biquadratic curve or a lookup table.
    A13,\field Fuel Energy Input Ratio Function of Temperature Curve Name
        \required-field
@@ -14821,7 +14821,7 @@ OS:HeatPump:AirToWater:FuelFired:Cooling,
        \required-field
        \type object-list
        \object-list BivariateFunctions
-       \note: CAPFT - Normalized Capacity Function of Temperature Curve Name,
+       \note CAPFT - Normalized Capacity Function of Temperature Curve Name,
        \note which is a biquadratic curve or a lookup table.
    A13,\field Fuel Energy Input Ratio Function of Temperature Curve Name
        \required-field
@@ -20234,7 +20234,7 @@ OS:Coil:Cooling:LowTemperatureRadiant:VariableFlow,
         \note CoolingDesignCapacity => selected when the design cooling capacity value is specified or
         \note auto-sized. CapacityPerFloorArea => selected when the design cooling capacity is determined
         \note from user specified cooling capacity per floor area and total floor area of cooled zone
-        \note served by the hydrolic unit. FractionOfAutosizedCoolingCapacity => is selected when the
+        \note served by the hydraulic unit. FractionOfAutosizedCoolingCapacity => is selected when the
         \note design cooling capacity is determined from a user specified fraction and the auto-sized
         \note design cooling capacity of the system.
    N1 , \field Cooling Design Capacity
@@ -22543,7 +22543,7 @@ OS:Coil:Cooling:Water:Panel:Radiant,
        \note CoolingDesignCapacity => selected when the design cooling capacity value is specified or
        \note auto-sized. CapacityPerFloorArea => selected when the design cooling capacity is determined
        \note from user specified cooling capacity per floor area and total floor area of cooled zone
-       \note served by the hydrolic unit. FractionOfAutosizedCoolingCapacity => is selected when the
+       \note served by the hydraulic unit. FractionOfAutosizedCoolingCapacity => is selected when the
        \note design cooling capacity is determined from a user specified fraction and the auto-sized
        \note design cooling capacity of the system.
   N4 , \field Cooling Design Capacity
@@ -38889,7 +38889,7 @@ OS:EnergyManagementSystem:Actuator,
        \required-field
        \type alpha
        \note This name becomes a variable for use in Erl programs
-       \note No spaces allowed in names for ErlVariableNames
+       \note no spaces or other special characters (minus, plus, slashes, etc) allowed in name
        \reference ErlVariableNames
        \reference ErlActuatorNames
   A3, \field Actuated Component Name
