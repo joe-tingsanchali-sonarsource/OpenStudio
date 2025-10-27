@@ -64905,8 +64905,14 @@ OutputControl:Files,
        \key Yes
        \key No
        \default Yes
-  A32; \field Output Tarcog
+  A32, \field Output Tarcog
        \note Not Implemented Yet
+       \type choice
+       \key Yes
+       \key No
+       \default Yes
+  A33; \field Output Plant Component Sizing
+       \note epluspsz.csv
        \type choice
        \key Yes
        \key No
