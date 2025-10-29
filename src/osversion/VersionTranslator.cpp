@@ -10102,6 +10102,80 @@ namespace osversion {
         ss << newObject;
         m_refactored.emplace_back(std::move(object), std::move(newObject));
 
+      } else if (iddname == "OS:EvaporativeFluidCooler:SingleSpeed") {
+
+        // 1 Field has been inserted from 3.10.0 to 3.10.1:
+        // ------------------------------------------------
+        // * Heat Rejection Capacity and Nominal Capacity Sizing Ratio * 9
+
+        // 3 Fields were made required from 3.10.0 to 3.10.1:
+        // ------------------------------------------------
+        // * Design Entering Water Temperature * 14
+        // * Design Entering Air Temperature * 15
+        // * Design Entering Air Wet-bulb Temperature * 16
+
+        auto iddObject = idd_3_11_0.getObject(iddname);
+        IdfObject newObject(iddObject.get());
+
+        for (size_t i = 0; i < object.numFields(); ++i) {
+          if ((value = object.getString(i))) {
+            if (i < 9) {
+              newObject.setString(i, value.get());
+            } else {
+              newObject.setString(i + 1, value.get());
+            }
+          }
+        }
+
+        newObject.setDouble(9, 1.25);
+
+        if (!object.getDouble(13)) {
+          newObject.setString(14, "Autosize");
+        }
+
+        if (!object.getDouble(14)) {
+          newObject.setDouble(15, 35.0);
+        }
+
+        if (!object.getDouble(15)) {
+          newObject.setDouble(16, 25.6);
+        }
+
+        ss << newObject;
+        m_refactored.emplace_back(std::move(object), std::move(newObject));
+
+      } else if (iddname == "OS:EvaporativeFluidCooler:TwoSpeed") {
+
+        // 3 Fields were made required from 3.10.0 to 3.10.1:
+        // ------------------------------------------------
+        // * Design Entering Water Temperature * 24
+        // * Design Entering Air Temperature * 25
+        // * Design Entering Air Wet-bulb Temperature * 26
+
+        auto iddObject = idd_3_11_0.getObject(iddname);
+        IdfObject newObject(iddObject.get());
+
+        for (size_t i = 0; i < object.numFields(); ++i) {
+          if ((value = object.getString(i))) {
+            newObject.setString(i, value.get());
+          }
+        }
+
+        if (!object.getDouble(24)) {
+          newObject.setString(24, "Autosize");
+        }
+
+        if (!object.getDouble(25)) {
+          newObject.setDouble(25, 35.0);
+        }
+
+        if (!object.getDouble(26)) {
+          newObject.setDouble(26, 25.6);
+        }
+
+        ss << newObject;
+        m_refactored.emplace_back(std::move(object), std::move(newObject));
+
         // No-op
       } else {
         ss << object;
