@@ -90,6 +90,16 @@ You can also refer to the [OpenStudio SDK Python Binding Version Compatibility M
         * `minimumOutdoorDryBulbTemperatureforCompressorOperation`
         * `setMinimumOutdoorDryBulbTemperatureforCompressorOperation`
 
+* [#5486](https://github.com/NREL/OpenStudio/pull/5486) - New EvaporativeFluidCooler defaults
+    * Adds `Heat Rejection Capacity and Nominal Capacity Sizing Ratio` for `EvaporativeFluidCooler:SingleSpeed`
+    * Fields are made required for `EvaporativeFluidCooler:SingleSpeed` and `EvaporativeFluidCooler:TwoSpeed`:
+        * `Design Entering Water Temperature` (also made autosizable)
+        * `Design Entering Air Temperature`
+        * `Design Entering Air Wet-bulb Temperature`
+    * API-breaking changes for `EvaporativeFluidCooler:SingleSpeed` and `EvaporativeFluidCooler:TwoSpeed`:
+        * `designEnteringAirTemperature` and `designEnteringAirWetbulbTemperature` (`boost::optional<double>` to `double`)
+        * `resetDesignEnteringWaterTemperature`, `resetDesignEnteringAirTemperature`, and `resetDesignEnteringAirWetbulbTemperature` are removed
+
 ## Minor changes and bug fixes
 
 

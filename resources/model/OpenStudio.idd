@@ -25015,7 +25015,10 @@ OS:EvaporativeFluidCooler:SingleSpeed,
        \type object-list
        \object-list ConnectionNames
        \note Enter the name of an outdoor air node
-  N4 , \field Standard Design Capacity
+  N4 , \field Heat Rejection Capacity and Nominal Capacity Sizing Ratio
+       \required-field
+       \type real
+  N5 , \field Standard Design Capacity
        \type real
        \units W
        \minimum> 0.0
@@ -25032,7 +25035,7 @@ OS:EvaporativeFluidCooler:SingleSpeed,
        \note provided in the input, will be ignored for the StandardDesignCapacity performance input
        \note method. Also, the standard conditions are for water as a fluid type so this performance input
        \note method can only be used with water as a fluid type (as specified in CondenserLoop object).
-  N5 , \field U-factor Times Area Value at Design Air Flow Rate
+  N6 , \field U-factor Times Area Value at Design Air Flow Rate
        \type real
        \units W/K
        \minimum> 0.0
@@ -25040,39 +25043,43 @@ OS:EvaporativeFluidCooler:SingleSpeed,
        \autosizable
        \note Only used for Performance Input Method = UFactorTimesAreaAndDesignWaterFlowRate;
        \note for other Performance Input Methods, this field is ignored.
-  N6 , \field Design Water Flow Rate
+  N7 , \field Design Water Flow Rate
        \type real
        \units m3/s
        \minimum> 0.0
        \autosizable
        \ip-units gal/min
        \note Input value is ignored if fluid cooler Performance Input Method= StandardDesignCapacity.
-  N7 , \field User Specified Design Capacity
+  N8 , \field User Specified Design Capacity
        \type real
        \units W
        \minimum> 0.0
        \note Only used for Performance Input Method = UserSpecifiedDesignCapacity;
        \note for other Performance Input Methods, this field is ignored.
-  N8 , \field Design Entering Water Temperature
+  N9 , \field Design Entering Water Temperature
        \type real
        \units C
        \minimum> 0.0
+       \required-field
+       \autosizable
        \ip-units F
        \note Only used for Performance Input Method = UserSpecifiedDesignCapacity;
        \note for other Performance Input Methods, this field is ignored.
        \note Design Entering Water Temperature must be greater than Design Entering Air Temperature.
-  N9 , \field Design Entering Air Temperature
+  N10, \field Design Entering Air Temperature
        \type real
        \units C
+       \required-field
        \minimum> 0.0
        \ip-units F
        \note Only used for Performance Input Method = UserSpecifiedDesignCapacity;
        \note for other Performance Input Methods, this field is ignored.
        \note Design Entering Air Temperature must be greater than Design Entering Air Wet-bulb
        \note Temperature.
-  N10, \field Design Entering Air Wet-bulb Temperature
+  N11, \field Design Entering Air Wet-bulb Temperature
        \type real
        \units C
+       \required-field
        \minimum> 0.0
        \ip-units F
        \note Only used for Performance Input Method = UserSpecifiedDesignCapacity;
@@ -25084,7 +25091,7 @@ OS:EvaporativeFluidCooler:SingleSpeed,
        \key FanCycling
        \key FluidBypass
        \default FanCycling
-  N11, \field Sizing Factor
+  N12, \field Sizing Factor
        \note Multiplies the autosized capacity and flow rates
        \type real
        \minimum> 0.0
@@ -25094,12 +25101,12 @@ OS:EvaporativeFluidCooler:SingleSpeed,
        \key LossFactor
        \key SaturatedExit
        \default SaturatedExit
-  N12, \field Evaporation Loss Factor
+  N13, \field Evaporation Loss Factor
        \type real
        \units percent/K
        \note Rate of water evaporation from the Fluid Cooler and lost to the outdoor air [%/K]
        \note Empirical correlation is used to calculate default loss factor if it not explicitly provided.
-  N13, \field Drift Loss Percent
+  N14, \field Drift Loss Percent
        \type real
        \default 0.008
        \units percent
@@ -25111,7 +25118,7 @@ OS:EvaporativeFluidCooler:SingleSpeed,
        \key ConcentrationRatio
        \key ScheduledRate
        \default ConcentrationRatio
-  N14, \field Blowdown Concentration Ratio
+  N15, \field Blowdown Concentration Ratio
        \type real
        \minimum 2.0
        \default 3.0
@@ -25270,15 +25277,19 @@ OS:EvaporativeFluidCooler:TwoSpeed,
        \type real
        \units C
        \minimum> 0.0
+       \required-field
+       \autosizable
        \ip-units F
   N20, \field Design Entering Air Temperature
        \type real
        \units C
+       \required-field
        \minimum> 0.0
        \ip-units F
   N21, \field Design Entering Air Wet-bulb Temperature
        \type real
        \units C
+       \required-field
        \minimum> 0.0
        \ip-units F
        \note Temperature.
