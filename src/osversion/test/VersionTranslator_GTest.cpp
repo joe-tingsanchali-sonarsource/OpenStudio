@@ -5004,3 +5004,21 @@ TEST_F(OSVersionFixture, update_3_10_0_to_3_11_0_EvaporativeFluidCooler) {
   EXPECT_EQ(35.0, efcts.getDouble(25).get());   // Design Entering Air Temperature
   EXPECT_EQ(25.6, efcts.getDouble(26).get());   // Design Entering Air Wet-bulb Temperature
 }
+
+TEST_F(OSVersionFixture, update_3_10_0_to_3_11_0_OutputControlFiles) {
+  openstudio::path path = resourcesPath() / toPath("osversion/3_11_0/test_vt_OutputControlFiles.osm");
+  osversion::VersionTranslator vt;
+  boost::optional<model::Model> model = vt.loadModel(path);
+  ASSERT_TRUE(model) << "Failed to load " << path;
+
+  openstudio::path outPath = resourcesPath() / toPath("osversion/3_11_0/test_vt_OutputControlFiles_updated.osm");
+  model->save(outPath, true);
+
+  std::vector<WorkspaceObject> ocfs = model->getObjectsByType("OS:OutputControl:Files");
+  ASSERT_EQ(1u, ocfs.size());
+  const auto& ocf = ocfs.front();
+
+  EXPECT_EQ("No", ocf.getString(1).get());  // Output CSV
+  EXPECT_EQ("Yes", ocf.getString(31).get());   // Output Tarcog
+  EXPECT_EQ("Yes", ocf.getString(32).get());   // Output Plant Component Sizing
+}
