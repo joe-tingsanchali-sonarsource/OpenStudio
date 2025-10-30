@@ -5018,7 +5018,7 @@ TEST_F(OSVersionFixture, update_3_10_0_to_3_11_0_OutputControlFiles) {
   ASSERT_EQ(1u, ocfs.size());
   const auto& ocf = ocfs.front();
 
-  EXPECT_EQ("No", ocf.getString(1).get());  // Output CSV
-  EXPECT_EQ("Yes", ocf.getString(31).get());   // Output Tarcog
-  EXPECT_EQ("Yes", ocf.getString(32).get());   // Output Plant Component Sizing
+  EXPECT_EQ("No", ocf.getString(1).get());    // Output CSV
+  EXPECT_EQ("Yes", ocf.getString(31).get());  // Output Tarcog
+  EXPECT_EQ("Yes", ocf.getString(32).get());  // Output Plant Component Sizing
 }
