@@ -10176,6 +10176,26 @@ namespace osversion {
         ss << newObject;
         m_refactored.emplace_back(std::move(object), std::move(newObject));
 
+      } else if (iddname == "OS:OutputControl:Files") {
+
+        // 1 Field has been added from 3.10.0 to 3.11.0:
+        // ----------------------------------------------
+        // * Output Plant Component Sizing * 32
+
+        auto iddObject = idd_3_11_0.getObject(iddname);
+        IdfObject newObject(iddObject.get());
+
+        for (size_t i = 0; i < object.numFields(); ++i) {
+          if ((value = object.getString(i))) {
+            newObject.setString(i, value.get());
+          }
+        }
+
+        newObject.setString(32, "Yes");
+
+        ss << newObject;
+        m_refactored.emplace_back(std::move(object), std::move(newObject));
+
         // No-op
       } else {
         ss << object;

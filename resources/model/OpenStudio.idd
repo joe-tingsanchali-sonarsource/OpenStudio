@@ -38050,8 +38050,14 @@ OS:OutputControl:Files,
        \key Yes
        \key No
        \required-field
-  A32; \field Output Tarcog
+  A32, \field Output Tarcog
        \note Not Implemented Yet
+       \type choice
+       \key Yes
+       \key No
+       \required-field
+  A33; \field Output Plant Component Sizing
+       \note epluspsz.csv
        \type choice
        \key Yes
        \key No
