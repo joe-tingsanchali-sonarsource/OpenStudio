@@ -760,6 +760,8 @@ set(${target_name}_test_src
   Test/EMS_GTest.cpp
   Test/EnvironmentalImpactFactors_GTest.cpp
   Test/EvaporativeCoolerDirectResearchSpecial_GTest.cpp
+  Test/EvaporativeFluidCoolerSingleSpeed_GTest.cpp
+  Test/EvaporativeFluidCoolerTwoSpeed_GTest.cpp
   Test/ExteriorLights_GTest.cpp
   Test/ExteriorFuelEquipment_GTest.cpp
   Test/ExteriorWaterEquipment_GTest.cpp
@@ -867,6 +869,7 @@ set(${target_name}_test_src
   Test/ZoneHVACBaseboardRadiantConvectiveWater_GTest.cpp
   Test/ZoneHVACBaseboardRadiantConvectiveSteam_GTest.cpp
   Test/ZoneHVACEvaporativeCoolerUnit_GTest.cpp
+  Test/ZoneHVACIdealLoadsAirSystem_GTest.cpp
   Test/ZoneHVACLowTemperatureRadiantElectric_GTest.cpp
   Test/ZoneHVACLowTempRadiantConstFlow_GTest.cpp
   Test/ZoneHVACLowTempRadiantVarFlow_GTest.cpp

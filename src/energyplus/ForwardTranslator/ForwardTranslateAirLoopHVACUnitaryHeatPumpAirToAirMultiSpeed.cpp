@@ -81,9 +81,9 @@ namespace energyplus {
       }
     }
 
-    // MinimumOutdoorDryBulbTemperatureforCompressorOperation
-    if ((value = modelObject.minimumOutdoorDryBulbTemperatureforCompressorOperation())) {
-      idfObject.setDouble(AirLoopHVAC_UnitaryHeatPump_AirToAir_MultiSpeedFields::MinimumOutdoorDryBulbTemperatureforCompressorOperation, value.get());
+    // DXHeatingCoilSizingRatio
+    if ((value = modelObject.dXHeatingCoilSizingRatio())) {
+      idfObject.setDouble(AirLoopHVAC_UnitaryHeatPump_AirToAir_MultiSpeedFields::DXHeatingCoilSizingRatio, value.get());
     }
 
     HVACComponent coolingCoil = modelObject.coolingCoil();
@@ -329,6 +329,12 @@ namespace energyplus {
       } else if (_heatingCoil->iddObject().type() == IddObjectType::Coil_Heating_DX_MultiSpeed) {
         _heatingCoil->setString(Coil_Heating_DX_MultiSpeedFields::AirInletNodeName, heatingCoilInletNodeName);
         _heatingCoil->setString(Coil_Heating_DX_MultiSpeedFields::AirOutletNodeName, heatingCoilOutletNodeName);
+      } else if (_heatingCoil->iddObject().type() == IddObjectType::Coil_Heating_Water) {
+        _heatingCoil->setString(Coil_Heating_WaterFields::AirInletNodeName, heatingCoilInletNodeName);
+        _heatingCoil->setString(Coil_Heating_WaterFields::AirOutletNodeName, heatingCoilOutletNodeName);
+      } else if (_heatingCoil->iddObject().type() == IddObjectType::Coil_Heating_Steam) {
+        _heatingCoil->setString(Coil_Heating_SteamFields::AirInletNodeName, heatingCoilInletNodeName);
+        _heatingCoil->setString(Coil_Heating_SteamFields::AirOutletNodeName, heatingCoilOutletNodeName);
       }
     }
 

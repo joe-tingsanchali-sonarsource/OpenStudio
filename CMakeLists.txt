@@ -18,7 +18,7 @@ if(CCACHE_PROGRAM)
 endif()
 
 # Project macro can only take digits in the version, it splits these out to specific variables
-project(OpenStudio VERSION 3.10.0)
+project(OpenStudio VERSION 3.11.0)
 
 include(CMake/compiler_flags.cmake)
 
@@ -164,7 +164,7 @@ get_directory_property(hasParent PARENT_DIRECTORY)
 
 # TODO: Modify the more specific variables as needed to indicate prerelease, etc
 # Keep in beta in-between release cycles. Set to empty string (or comment out) for official)
-set(PROJECT_VERSION_PRERELEASE "")
+set(PROJECT_VERSION_PRERELEASE "alpha")
 
 # OpenStudio version: Only include Major.Minor.Patch, eg "3.0.0", even if you have a prerelease tag
 set(OPENSTUDIO_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
@@ -195,15 +195,15 @@ endif()
 
 # EnergyPlus Idd version
 set(ENERGYPLUS_VERSION_MAJOR 25)
-set(ENERGYPLUS_VERSION_MINOR 1)
+set(ENERGYPLUS_VERSION_MINOR 2)
 set(ENERGYPLUS_VERSION_PATCH 0)
 set(ENERGYPLUS_VERSION "${ENERGYPLUS_VERSION_MAJOR}.${ENERGYPLUS_VERSION_MINOR}.${ENERGYPLUS_VERSION_PATCH}")
 # Build SHA is not required to have a value, but if it does OpenStudio will require this build.
-set(ENERGYPLUS_BUILD_SHA "1c11a3d85f")
+set(ENERGYPLUS_BUILD_SHA "004e1072c6")
 
 # ENERGYPLUS_RELEASE_NAME is used to locate the E+ download
 # from the github releases
-set(ENERGYPLUS_RELEASE_NAME "v25.1.0-WithDSOASpaceListFixes")
+set(ENERGYPLUS_RELEASE_NAME "v25.2.0-RC1")
 
 set(ENERGYPLUS_REPO "NREL")
 
@@ -648,30 +648,30 @@ endif()
 if(UNIX)
   if(APPLE)
     if (ARCH MATCHES "arm64")
-      set(ENERGYPLUS_EXPECTED_HASH f2fce0c8883d057dae498d1a0a717a80)
+      set(ENERGYPLUS_EXPECTED_HASH TDB_TODO_TBD_CODESIGN_FAILURE_DUE_TO_OUTDATED_APPLE_LICENSE_AGREEMENT)
       set(ENERGYPLUS_PLATFORM "Darwin-macOS13-arm64")
     else()
-      set(ENERGYPLUS_EXPECTED_HASH f3bd66b9555d86e7330f6bb86f18eb89)
+      set(ENERGYPLUS_EXPECTED_HASH TDB_TODO_TBD_CODESIGN_FAILURE_DUE_TO_OUTDATED_APPLE_LICENSE_AGREEMENT)
       set(ENERGYPLUS_PLATFORM "Darwin-macOS12.1-x86_64")
     endif()
   elseif(LSB_RELEASE_ID_SHORT MATCHES "CentOS")
-    set(ENERGYPLUS_EXPECTED_HASH 6fb9360c50ca797d16f74e167dd8b7ce)
+    set(ENERGYPLUS_EXPECTED_HASH 8053daa0c8e40c71e091ce77e05d66f7)
     set(ENERGYPLUS_PLATFORM "Linux-CentOS7.9.2009-x86_64")
   elseif(LSB_RELEASE_ID_SHORT MATCHES "AlmaLinux")
-    set(ENERGYPLUS_EXPECTED_HASH 67f00826449aad725a5a5b56fe0ec76a)
+    set(ENERGYPLUS_EXPECTED_HASH 68bf43a020797170af73f4d5f12d4d4e)
     set(ENERGYPLUS_PLATFORM "Linux-AlmaLinux9.6-x86_64")
   else()
     if(LSB_RELEASE_VERSION_SHORT MATCHES "24.04")
       if (ARCH MATCHES "arm64")
-        set(ENERGYPLUS_EXPECTED_HASH dbe28aebdbfc28ee8538cabb2dd15305)
+        set(ENERGYPLUS_EXPECTED_HASH e1ab7d96d86f357b5269b2a3cb1054dc)
       else()
-        set(ENERGYPLUS_EXPECTED_HASH af8ee54182777923fa4154b122c39447)
+        set(ENERGYPLUS_EXPECTED_HASH e88e1827bb8057fc6c9e4be297b0a281)
       endif()
     elseif(LSB_RELEASE_VERSION_SHORT MATCHES "22.04")
       if (ARCH MATCHES "arm64")
-        set(ENERGYPLUS_EXPECTED_HASH 2ddd6ddb854cc3957943a9dd396c2dce)
+        set(ENERGYPLUS_EXPECTED_HASH 752e1b1b5ba03e7d4d89f7701a55e764)
       else()
-        set(ENERGYPLUS_EXPECTED_HASH 7700f3f7865e36e442b7d171c2e2f96a)
+        set(ENERGYPLUS_EXPECTED_HASH e6e287d23b4e42251fdf383ca1e13cd9)
       endif()
     else() # e.g., 18.04, 20.04
       message(FATAL_ERROR "EnergyPlus no longer provides packages for Ubuntu < 22.04")
@@ -708,11 +708,11 @@ elseif(WIN32)
   if(CMAKE_SIZEOF_VOID_P EQUAL 8) # 64 bit
     set(ENERGYPLUS_PATH "EnergyPlus-${ENERGYPLUS_VERSION}-${ENERGYPLUS_BUILD_SHA}-Windows-x86_64")
     set(ENERGYPLUS_ARCH 64)
-    set(ENERGYPLUS_EXPECTED_HASH 630e0b8de20dea68185224072c079d90)
+    set(ENERGYPLUS_EXPECTED_HASH bb2e8dac218c8afbb1909489e32a609e)
   else()
     set(ENERGYPLUS_PATH "EnergyPlus-${ENERGYPLUS_VERSION}-${ENERGYPLUS_BUILD_SHA}-Windows-i386")
     set(ENERGYPLUS_ARCH 32)
-    set(ENERGYPLUS_EXPECTED_HASH e26ed12ee4df8dafa3d34a3340a9b780)
+    set(ENERGYPLUS_EXPECTED_HASH 5494ef0dc760faf532074f3c754a602b)
   endif()
   if(EXISTS "${PROJECT_BINARY_DIR}/${ENERGYPLUS_PATH}.zip")
     file(MD5 "${PROJECT_BINARY_DIR}/${ENERGYPLUS_PATH}.zip" ENERGYPLUS_HASH)
@@ -1030,7 +1030,7 @@ include_directories("${PROJECT_BINARY_DIR}/src/")
 if(MSVC)
   # treat warnings as errors
   add_definitions(/WX)
-elseif()
+else()
   add_definitions(-Werror)
 endif()
 

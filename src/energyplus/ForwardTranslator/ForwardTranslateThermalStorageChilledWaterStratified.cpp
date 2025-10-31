@@ -88,6 +88,8 @@ namespace energyplus {
     value = modelObject.nominalCoolingCapacity();
     if (value) {
       idfObject.setDouble(ThermalStorage_ChilledWater_StratifiedFields::NominalCoolingCapacity, value.get());
+    } else if (modelObject.isNominalCoolingCapacityAutosized()) {
+      idfObject.setString(openstudio::ThermalStorage_ChilledWater_StratifiedFields::NominalCoolingCapacity, "Autosize");
     }
 
     // Ambient Temperature Indicator

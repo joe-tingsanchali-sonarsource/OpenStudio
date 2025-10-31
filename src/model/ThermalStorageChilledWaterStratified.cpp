@@ -47,23 +47,23 @@ namespace model {
     const std::vector<std::string>& ThermalStorageChilledWaterStratified_Impl::outputVariableNames() const {
       static const std::vector<std::string> result = []() {
         std::vector<std::string> val = {"Chilled Water Thermal Storage Tank Temperature",
-                                        "Chilled Water Thermal Storage Final Tank Temperature",
+                                        "Chilled Water Thermal Storage Tank Final Tank Temperature",
                                         "Chilled Water Thermal Storage Tank Heat Gain Rate",
                                         "Chilled Water Thermal Storage Tank Heat Gain Energy",
-                                        "Chilled Water Thermal Storage Use Side Mass Flow Rate",
-                                        "Chilled Water Thermal Storage Use Side Inlet Temperature",
-                                        "Chilled Water Thermal Storage Use Side Outlet Temperature",
-                                        "Chilled Water Thermal Storage Use Side Heat Transfer Rate",
-                                        "Chilled Water Thermal Storage Use Side Heat Transfer Energy",
-                                        "Chilled Water Thermal Storage Source Side Mass Flow Rate",
-                                        "Chilled Water Thermal Storage Source Side Inlet Temperature",
-                                        "Chilled Water Thermal Storage Source Side Outlet Temperature",
-                                        "Chilled Water Thermal Storage Source Side Heat Transfer Rate",
-                                        "Chilled Water Thermal Storage Source Side Heat Transfer Energy"};
+                                        "Chilled Water Thermal Storage Tank Use Side Mass Flow Rate",
+                                        "Chilled Water Thermal Storage Tank Use Side Inlet Temperature",
+                                        "Chilled Water Thermal Storage Tank Use Side Outlet Temperature",
+                                        "Chilled Water Thermal Storage Tank Use Side Heat Transfer Rate",
+                                        "Chilled Water Thermal Storage Tank Use Side Heat Transfer Energy",
+                                        "Chilled Water Thermal Storage Tank Source Side Mass Flow Rate",
+                                        "Chilled Water Thermal Storage Tank Source Side Inlet Temperature",
+                                        "Chilled Water Thermal Storage Tank Source Side Outlet Temperature",
+                                        "Chilled Water Thermal Storage Tank Source Side Heat Transfer Rate",
+                                        "Chilled Water Thermal Storage Tank Source Side Heat Transfer Energy"};
         // TODO: This should really be a check on whether the node is defined...
         for (int i = 1; i <= 12; ++i) {
-          val.push_back("Chilled Water Thermal Storage Temperature Node " + std::to_string(i));
-          val.push_back("Chilled Water Thermal Storage Final Temperature Node " + std::to_string(i));
+          val.push_back("Chilled Water Thermal Storage Tank Temperature Node " + std::to_string(i));
+          val.push_back("Chilled Water Thermal Storage Tank Final Temperature Node " + std::to_string(i));
         }
         return val;
       }();
@@ -155,6 +155,15 @@ namespace model {
 
     boost::optional<double> ThermalStorageChilledWaterStratified_Impl::nominalCoolingCapacity() const {
       return getDouble(OS_ThermalStorage_ChilledWater_StratifiedFields::NominalCoolingCapacity, true);
+    }
+
+    bool ThermalStorageChilledWaterStratified_Impl::isNominalCoolingCapacityAutosized() const {
+      bool result = false;
+      boost::optional<std::string> value = getString(OS_ThermalStorage_ChilledWater_StratifiedFields::NominalCoolingCapacity, true);
+      if (value) {
+        result = openstudio::istringEqual(value.get(), "autosize");
+      }
+      return result;
     }
 
     std::string ThermalStorageChilledWaterStratified_Impl::ambientTemperatureIndicator() const {
@@ -434,16 +443,12 @@ namespace model {
       bool result(false);
       if (nominalCoolingCapacity) {
         result = setDouble(OS_ThermalStorage_ChilledWater_StratifiedFields::NominalCoolingCapacity, nominalCoolingCapacity.get());
-      } else {
-        resetNominalCoolingCapacity();
-        result = true;
       }
-      OS_ASSERT(result);
       return result;
     }
 
-    void ThermalStorageChilledWaterStratified_Impl::resetNominalCoolingCapacity() {
-      bool result = setString(OS_ThermalStorage_ChilledWater_StratifiedFields::NominalCoolingCapacity, "");
+    void ThermalStorageChilledWaterStratified_Impl::autosizeNominalCoolingCapacity() {
+      bool result = setString(OS_ThermalStorage_ChilledWater_StratifiedFields::NominalCoolingCapacity, "autosize");
       OS_ASSERT(result);
     }
 
@@ -692,6 +697,10 @@ namespace model {
       return result;
     }
 
+    boost::optional<double> ThermalStorageChilledWaterStratified_Impl::autosizedNominalCoolingCapacity() const {
+      return getAutosizedValue("Nominal Cooling Capacity", "W");
+    }
+
     boost::optional<double> ThermalStorageChilledWaterStratified_Impl::autosizedUseSideDesignFlowRate() const {
       return getAutosizedValue("Use Side Design Flow Rate", "m3/s");
     }
@@ -701,12 +710,18 @@ namespace model {
     }
 
     void ThermalStorageChilledWaterStratified_Impl::autosize() {
+      autosizeNominalCoolingCapacity();
       autosizeUseSideDesignFlowRate();
       autosizeSourceSideDesignFlowRate();
     }
 
     void ThermalStorageChilledWaterStratified_Impl::applySizingValues() {
       boost::optional<double> val;
+      val = autosizedNominalCoolingCapacity();
+      if (val) {
+        setNominalCoolingCapacity(val.get());
+      }
+
       val = autosizedUseSideDesignFlowRate();
       if (val) {
         setUseSideDesignFlowRate(val.get());
@@ -752,6 +767,7 @@ namespace model {
     OS_ASSERT(ok);
     ok = setDeadbandTemperatureDifference(2.5);
     OS_ASSERT(ok);
+    autosizeNominalCoolingCapacity();
     ok = setAmbientTemperatureIndicator("Outdoors");
     OS_ASSERT(ok);
 
@@ -842,6 +858,10 @@ namespace model {
 
   boost::optional<double> ThermalStorageChilledWaterStratified::nominalCoolingCapacity() const {
     return getImpl<detail::ThermalStorageChilledWaterStratified_Impl>()->nominalCoolingCapacity();
+  }
+
+  bool ThermalStorageChilledWaterStratified::isNominalCoolingCapacityAutosized() const {
+    return getImpl<detail::ThermalStorageChilledWaterStratified_Impl>()->isNominalCoolingCapacityAutosized();
   }
 
   std::string ThermalStorageChilledWaterStratified::ambientTemperatureIndicator() const {
@@ -1028,8 +1048,8 @@ namespace model {
     return getImpl<detail::ThermalStorageChilledWaterStratified_Impl>()->setNominalCoolingCapacity(nominalCoolingCapacity);
   }
 
-  void ThermalStorageChilledWaterStratified::resetNominalCoolingCapacity() {
-    getImpl<detail::ThermalStorageChilledWaterStratified_Impl>()->resetNominalCoolingCapacity();
+  void ThermalStorageChilledWaterStratified::autosizeNominalCoolingCapacity() {
+    getImpl<detail::ThermalStorageChilledWaterStratified_Impl>()->autosizeNominalCoolingCapacity();
   }
 
   bool ThermalStorageChilledWaterStratified::setAmbientTemperatureIndicator(const std::string& ambientTemperatureIndicator) {
@@ -1196,6 +1216,10 @@ namespace model {
   ThermalStorageChilledWaterStratified::ThermalStorageChilledWaterStratified(std::shared_ptr<detail::ThermalStorageChilledWaterStratified_Impl> impl)
     : WaterToWaterComponent(std::move(impl)) {}
   /// @endcond
+
+  boost::optional<double> ThermalStorageChilledWaterStratified::autosizedNominalCoolingCapacity() const {
+    return getImpl<detail::ThermalStorageChilledWaterStratified_Impl>()->autosizedNominalCoolingCapacity();
+  }
 
   boost::optional<double> ThermalStorageChilledWaterStratified::autosizedUseSideDesignFlowRate() const {
     return getImpl<detail::ThermalStorageChilledWaterStratified_Impl>()->autosizedUseSideDesignFlowRate();

@@ -1685,7 +1685,7 @@ class ModelClassGenerator < SubProjectClassGenerator
   def aux()
     result = String.new
     if @hasScheduleFields
-      result << "// TODO: Copy-paste this starter text into ScheduleTypeRegistry.cpp, in the ScheduleTypeRegistrySingleton\n"
+      result << "// TODO: Copy-paste this starter text into ScheduleTypeRegistry.cpp\n"
       result << "// constructor. Read the EnergyPlus Input-Output reference and fill out the ScheduleTypeLimits information\n"
       result << "// accordingly.\n"
       @nonextensibleFields.each { |field|
