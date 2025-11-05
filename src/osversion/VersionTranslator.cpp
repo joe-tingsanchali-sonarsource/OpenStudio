@@ -9881,7 +9881,7 @@ namespace osversion {
         }
 
         if (!object.getDouble(10)) {
-          newObject.setString(10, "Autosize");
+          newObject.setDouble(10, 0.0);
         }
 
         ss << newObject;

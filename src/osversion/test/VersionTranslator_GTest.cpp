@@ -4669,7 +4669,7 @@ TEST_F(OSVersionFixture, update_3_10_0_to_3_11_0_ThermalStorageChilledWaterStrat
   EXPECT_TRUE(ts.isEmpty(9));
 
   // New Field: Nominal Cooling Capacity
-  EXPECT_EQ("Autosize", ts.getString(10).get());
+  EXPECT_EQ(0.0, ts.getDouble(10).get());
 
   // After insertion and also last field: Ambient Temperature Indicator
   EXPECT_EQ("Outdoors", ts.getString(11).get());
