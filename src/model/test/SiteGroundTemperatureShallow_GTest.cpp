@@ -33,7 +33,7 @@ TEST_F(ModelFixture, SiteGroundTemperatureShallow_SiteGroundTemperatureShallow) 
   Model m;
 
   // create a SiteGroundTemperatureShallow object
-  SiteGroundTemperatureShallow groundTemp(m);
+  SiteGroundTemperatureShallow groundTemp = m.getUniqueModelObject<SiteGroundTemperatureShallow>();
 
   // Check to make sure all the fields are defaulted as expected
   EXPECT_TRUE(groundTemp.isJanuarySurfaceGroundTemperatureDefaulted());
