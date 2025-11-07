@@ -1042,7 +1042,7 @@ std::string EpwDataPoint::getUnits(EpwComputedField field) {
   return string;
 }
 
-boost::optional<double> EpwDataPoint::getFieldByName(const std::string& name) {
+boost::optional<double> EpwDataPoint::getFieldByName(const std::string& name) const {
   EpwDataField id;
   try {
     id = EpwDataField(name);
@@ -1053,7 +1053,7 @@ boost::optional<double> EpwDataPoint::getFieldByName(const std::string& name) {
   return getField(id);
 }
 
-boost::optional<double> EpwDataPoint::getField(EpwDataField id) {
+boost::optional<double> EpwDataPoint::getField(EpwDataField id) const {
   boost::optional<int> ivalue;
   switch (id.value()) {
     case EpwDataField::DryBulbTemperature:
@@ -1163,7 +1163,7 @@ boost::optional<double> EpwDataPoint::getField(EpwDataField id) {
   return boost::none;
 }
 
-boost::optional<double> EpwDesignCondition::getFieldByName(const std::string& name) {
+boost::optional<double> EpwDesignCondition::getFieldByName(const std::string& name) const {
   EpwDesignField id;
   try {
     id = EpwDesignField(name);
@@ -1174,7 +1174,7 @@ boost::optional<double> EpwDesignCondition::getFieldByName(const std::string& na
   return getField(id);
 }
 
-boost::optional<double> EpwDesignCondition::getField(EpwDesignField id) {
+boost::optional<double> EpwDesignCondition::getField(EpwDesignField id) const {
   auto optionaIntToOptionalDouble = [](boost::optional<int> val_) -> boost::optional<double> {
     if (val_) {
       return *val_;
@@ -3915,7 +3915,7 @@ std::string EpwGroundTemperatureDepth::getUnits(EpwDepthField field) {
   return "";
 }
 
-boost::optional<double> EpwGroundTemperatureDepth::getFieldByName(const std::string& name) {
+boost::optional<double> EpwGroundTemperatureDepth::getFieldByName(const std::string& name) const {
   EpwDepthField id;
   try {
     id = EpwDepthField(name);
@@ -3926,7 +3926,7 @@ boost::optional<double> EpwGroundTemperatureDepth::getFieldByName(const std::str
   return getField(id);
 }
 
-boost::optional<double> EpwGroundTemperatureDepth::getField(EpwDepthField id) {
+boost::optional<double> EpwGroundTemperatureDepth::getField(EpwDepthField id) const {
   switch (id.value()) {
     case EpwDepthField::GroundTemperatureDepth:
       return groundTemperatureDepth();

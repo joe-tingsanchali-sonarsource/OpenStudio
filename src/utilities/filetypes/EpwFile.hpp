@@ -245,9 +245,9 @@ class UTILITIES_API EpwDataPoint
   static std::string getUnits(EpwComputedField field);
   // Data retrieval
   /** Returns the double value of the named field if possible */
-  boost::optional<double> getFieldByName(const std::string& name);
+  boost::optional<double> getFieldByName(const std::string& name) const;
   /** Returns the dobule value of the field specified by enumeration value */
-  boost::optional<double> getField(EpwDataField id);
+  boost::optional<double> getField(EpwDataField id) const;
   /** Returns the air state specified by the EPW data. If dry bulb, pressure, and relative humidity are available,
       then those values will be used to compute the air state. Otherwise, unless dry bulb, pressure, and dew point are
       available, then an empty optional will be returned. Note that the air state may not be consistend with the EPW
@@ -522,6 +522,7 @@ class UTILITIES_API EpwDesignCondition
     double extremeStdDevMaxDryBulb, double extremeN5YearsMinDryBulb, double extremeN5YearsMaxDryBulb, double extremeN10YearsMinDryBulb,
     double extremeN10YearsMaxDryBulb, double extremeN20YearsMinDryBulb, double extremeN20YearsMaxDryBulb, double extremeN50YearsMinDryBulb,
     double extremeN50YearsMaxDryBulb);
+
   // Static
   /** Returns the units of the named field */
   static boost::optional<std::string> getUnitsByName(const std::string& name);
@@ -529,14 +530,14 @@ class UTILITIES_API EpwDesignCondition
   static std::string getUnits(EpwDesignField field);
   // Data retrieval
   /** Returns the double value of the named field if possible */
-  boost::optional<double> getFieldByName(const std::string& name);
+  boost::optional<double> getFieldByName(const std::string& name) const;
   /** Returns the dobule value of the field specified by enumeration value */
-  boost::optional<double> getField(EpwDesignField id);
+  boost::optional<double> getField(EpwDesignField id) const;
   // Conversion
   /** Create an EpwDesignCondition from an EPW-formatted string */
   static boost::optional<EpwDesignCondition> fromDesignConditionsString(const std::string& line);
   /** Create an EpwDesignCondition from a list of EPW designs as strings */
-  static boost::optional<EpwDesignCondition> fromDesignConditionsStrings(const std::vector<std::string>& list);
+  static boost::optional<EpwDesignCondition> fromDesignConditionsStrings(const std::vector<std::string>& strings);
   // Getters
   /** Returns the title of design condition */
   std::string titleOfDesignCondition() const;
@@ -886,9 +887,9 @@ class UTILITIES_API EpwGroundTemperatureDepth
   static std::string getUnits(EpwDepthField field);
   // Data retrieval
   /** Returns the double value of the named field if possible */
-  boost::optional<double> getFieldByName(const std::string& name);
+  boost::optional<double> getFieldByName(const std::string& name) const;
   /** Returns the dobule value of the field specified by enumeration value */
-  boost::optional<double> getField(EpwDepthField id);
+  boost::optional<double> getField(EpwDepthField id) const;
   // Conversion
   /** Create an EpwGroundTemperatureDepth from an EPW-formatted string */
   static boost::optional<EpwGroundTemperatureDepth> fromGroundTemperatureDepthsString(const std::string& line);
