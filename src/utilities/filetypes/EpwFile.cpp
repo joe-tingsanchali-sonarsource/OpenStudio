@@ -5020,21 +5020,28 @@ bool EpwFile::parseDesignConditions(const std::string& line) {
 
   int nDesignConditions = std::stoi(split[1]);
 
-  double expected_split_size = 70;
-  expected_split_size += (nDesignConditions - 1) * 68;
-
+  size_t num_design_cond_fields = 68;
+  size_t expected_split_size = 2 + nDesignConditions * num_design_cond_fields;
   if (split.size() != expected_split_size) {
-    LOG(Warn, "Expected " << expected_split_size << " design condition fields rather than the " << split.size() << " fields in the EPW file '"
-                          << m_path << "'. Design conditions will not be parsed.");
-    nDesignConditions = 0;
-  } else if (nDesignConditions > 1) {
+    // Could technically happen if EPW was prepared with HoF 2017, but never seen a file like that
+    num_design_cond_fields = 67;
+    expected_split_size = 2 + nDesignConditions * num_design_cond_fields;
+
+    if (split.size() != expected_split_size) {
+      LOG(Warn, "Expected " << expected_split_size << " design condition fields rather than the " << split.size() << " fields in the EPW file '"
+                            << m_path << "'. Design conditions will not be parsed.");
+      nDesignConditions = 0;
+    }
+  }
+
+  if (nDesignConditions > 1) {
     LOG(Warn, "Found " << nDesignConditions << " in the EPW file '" << m_path << "'");
   }
 
   for (int j = 0; j < nDesignConditions; j++) {
-    std::vector<std::string> design_condition(68);
-    for (int k = 0; k < 68; k++) {
-      design_condition[k] = split[k + 2 + (68 * j)];
+    std::vector<std::string> design_condition(num_design_cond_fields);
+    for (size_t k = 0; k < num_design_cond_fields; k++) {
+      design_condition[k] = split[k + 2 + (num_design_cond_fields * j)];
     }
     boost::optional<EpwDesignCondition> dc = EpwDesignCondition::fromDesignConditionsStrings(design_condition);
     if (dc) {
