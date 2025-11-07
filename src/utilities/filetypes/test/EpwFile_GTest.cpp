@@ -1120,3 +1120,493 @@ DATA PERIODS,1,1,Data,Sunday, 1/ 1,1/1
     ++i;
   }
 }
+
+TEST(Filetypes, EpwDesignCondition_HoF_2009) {
+
+  const std::string line = "Climate Design Data 2009 ASHRAE Handbook,,"
+                           "Heating,12,-18.8,-15.5,-21.6,0.7,-10.9,-18.8,0.9,-7.5,12.2,3.9,10.9,3.8,3,340,"
+                           "Cooling,7,15.2,33,15.7,32,15.5,30.2,15.3,18.4,27.3,17.5,26.4,16.8,25.6,4.9,0,16.1,14.3,20.2,14.9,13.2,19.9,13.9,12.3,"
+                           "19.6,59.7,27.3,56.6,26.6,54,25.7,760,"
+                           "Extremes,11.1,9.5,8.4,22.9,-22.9,36.1,3.8,1.2,-25.7,37,-27.9,37.7,-30.1,38.3,-32.8,39.2";
+  auto dc_ = EpwDesignCondition::fromDesignConditionsString(line);
+  ASSERT_TRUE(dc_);
+  const auto dc = std::move(*dc_);
+
+  EXPECT_EQ(dc.ashraeHoFVersion(), ASHRAEHoFVintage::ASHRAE_2009);
+
+  EXPECT_EQ("Climate Design Data 2009 ASHRAE Handbook", dc.titleOfDesignCondition());
+  EXPECT_EQ(12, dc.heatingColdestMonth().get());
+  EXPECT_EQ(-18.8, dc.heatingDryBulb99pt6().get());
+  EXPECT_EQ(-18.8, dc.getFieldByName("Heating Dry Bulb Temperature 99.6%").get());
+  EXPECT_EQ(-18.8, dc.getField(EpwDesignField("Heating Dry Bulb Temperature 99.6%")).get());
+  EXPECT_EQ("C", dc.getUnitsByName("Heating Dry Bulb Temperature 99.6%").get());
+  EXPECT_EQ("C", dc.getUnits(EpwDesignField("Heating Dry Bulb Temperature 99.6%")));
+  EXPECT_EQ(-15.5, dc.heatingDryBulb99().get());
+  EXPECT_EQ(-21.6, dc.heatingHumidificationDewPoint99pt6().get());
+  EXPECT_EQ(0.7, dc.heatingHumidificationHumidityRatio99pt6().get());
+  EXPECT_EQ(-10.9, dc.heatingHumidificationMeanCoincidentDryBulb99pt6().get());
+  EXPECT_EQ(-18.8, dc.heatingHumidificationDewPoint99().get());
+  EXPECT_EQ(0.9, dc.heatingHumidificationHumidityRatio99().get());
+  EXPECT_EQ(-7.5, dc.heatingHumidificationMeanCoincidentDryBulb99().get());
+  EXPECT_EQ(12.2, dc.heatingColdestMonthWindSpeed0pt4().get());
+  EXPECT_EQ(3.9, dc.heatingColdestMonthMeanCoincidentDryBulb0pt4().get());
+  EXPECT_EQ(10.9, dc.heatingColdestMonthWindSpeed1().get());
+  EXPECT_EQ(3.8, dc.heatingColdestMonthMeanCoincidentDryBulb1().get());
+  EXPECT_EQ(3.0, dc.heatingMeanCoincidentWindSpeed99pt6().get());
+  EXPECT_EQ(340, dc.heatingPrevailingCoincidentWindDirection99pt6().get());
+  EXPECT_FALSE(dc.heatingWindShelterFactor());
+
+  EXPECT_EQ(7, dc.coolingHottestMonth().get());
+  EXPECT_EQ(15.2, dc.coolingDryBulbRange().get());
+  EXPECT_EQ(33.0, dc.coolingDryBulb0pt4().get());
+  EXPECT_EQ(15.7, dc.coolingMeanCoincidentWetBulb0pt4().get());
+  EXPECT_EQ(32.0, dc.coolingDryBulb1().get());
+  EXPECT_EQ(15.5, dc.coolingMeanCoincidentWetBulb1().get());
+  EXPECT_EQ(30.2, dc.coolingDryBulb2().get());
+  EXPECT_EQ(15.3, dc.coolingMeanCoincidentWetBulb2().get());
+  EXPECT_EQ(18.4, dc.coolingEvaporationWetBulb0pt4().get());
+  EXPECT_EQ(27.3, dc.coolingEvaporationMeanCoincidentDryBulb0pt4().get());
+  EXPECT_EQ(17.5, dc.coolingEvaporationWetBulb1().get());
+  EXPECT_EQ(26.4, dc.coolingEvaporationMeanCoincidentDryBulb1().get());
+  EXPECT_EQ(16.8, dc.coolingEvaporationWetBulb2().get());
+  EXPECT_EQ(25.6, dc.coolingEvaporationMeanCoincidentDryBulb2().get());
+  EXPECT_EQ(4.9, dc.coolingMeanCoincidentWindSpeed0pt4().get());
+  EXPECT_EQ(0, dc.coolingPrevailingCoincidentWindDirection0pt4().get());
+  EXPECT_EQ(16.1, dc.coolingDehumidificationDewPoint0pt4().get());
+  EXPECT_EQ(14.3, dc.coolingDehumidificationHumidityRatio0pt4().get());
+  EXPECT_EQ(20.2, dc.coolingDehumidificationMeanCoincidentDryBulb0pt4().get());
+  EXPECT_EQ(14.9, dc.coolingDehumidificationDewPoint1().get());
+  EXPECT_EQ(13.2, dc.coolingDehumidificationHumidityRatio1().get());
+  EXPECT_EQ(19.9, dc.coolingDehumidificationMeanCoincidentDryBulb1().get());
+  EXPECT_EQ(13.9, dc.coolingDehumidificationDewPoint2().get());
+  EXPECT_EQ(12.3, dc.coolingDehumidificationHumidityRatio2().get());
+  EXPECT_EQ(19.6, dc.coolingDehumidificationMeanCoincidentDryBulb2().get());
+  EXPECT_EQ(59.7, dc.coolingEnthalpy0pt4().get());
+  EXPECT_EQ(27.3, dc.coolingEnthalpyMeanCoincidentDryBulb0pt4().get());
+  EXPECT_EQ(56.6, dc.coolingEnthalpy1().get());
+  EXPECT_EQ(26.6, dc.coolingEnthalpyMeanCoincidentDryBulb1().get());
+  EXPECT_EQ(54.0, dc.coolingEnthalpy2().get());
+  EXPECT_EQ(25.7, dc.coolingEnthalpyMeanCoincidentDryBulb2().get());
+
+  ASSERT_TRUE(dc.coolingHours8To4AndDryBulb12pt8To20pt6());
+  EXPECT_EQ(760, dc.coolingHours8To4AndDryBulb12pt8To20pt6().get());
+  EXPECT_FALSE(dc.coolingExtremeMaxWetBulb());
+
+  EXPECT_EQ(11.1, dc.extremeWindSpeed1().get());
+  EXPECT_EQ(9.5, dc.extremeWindSpeed2pt5().get());
+  EXPECT_EQ(8.4, dc.extremeWindSpeed5().get());
+
+  ASSERT_TRUE(dc.extremeMaxWetBulb());
+  EXPECT_EQ(22.9, dc.extremeMaxWetBulb().get());
+
+  EXPECT_EQ(-22.9, dc.extremeMeanMinDryBulb().get());
+  EXPECT_EQ(36.1, dc.extremeMeanMaxDryBulb().get());
+  EXPECT_EQ(3.8, dc.extremeStdDevMinDryBulb().get());
+  EXPECT_EQ(1.2, dc.extremeStdDevMaxDryBulb().get());
+  EXPECT_EQ(-25.7, dc.extremeN5YearsMinDryBulb().get());
+  EXPECT_EQ(37.0, dc.extremeN5YearsMaxDryBulb().get());
+  EXPECT_EQ(-27.9, dc.extremeN10YearsMinDryBulb().get());
+  EXPECT_EQ(37.7, dc.extremeN10YearsMaxDryBulb().get());
+  EXPECT_EQ(-30.1, dc.extremeN20YearsMinDryBulb().get());
+  EXPECT_EQ(38.3, dc.extremeN20YearsMaxDryBulb().get());
+  EXPECT_EQ(-32.8, dc.extremeN50YearsMinDryBulb().get());
+  EXPECT_EQ(39.2, dc.extremeN50YearsMaxDryBulb().get());
+}
+
+TEST(Filetypes, EpwDesignCondition_HoF_2009_Heuristics) {
+
+  const std::string line = "This title does not include the version,,"
+                           "Heating,12,-18.8,-15.5,-21.6,0.7,-10.9,-18.8,0.9,-7.5,12.2,3.9,10.9,3.8,3,340,"
+                           "Cooling,7,15.2,33,15.7,32,15.5,30.2,15.3,18.4,27.3,17.5,26.4,16.8,25.6,4.9,0,16.1,14.3,20.2,14.9,13.2,19.9,13.9,12.3,"
+                           "19.6,59.7,27.3,56.6,26.6,54,25.7,760,"
+                           "Extremes,11.1,9.5,8.4,22.9,-22.9,36.1,3.8,1.2,-25.7,37,-27.9,37.7,-30.1,38.3,-32.8,39.2";
+  auto dc_ = EpwDesignCondition::fromDesignConditionsString(line);
+  ASSERT_TRUE(dc_);
+  const auto dc = std::move(*dc_);
+
+  EXPECT_EQ(dc.ashraeHoFVersion(), ASHRAEHoFVintage::ASHRAE_2009);
+
+  EXPECT_EQ("This title does not include the version", dc.titleOfDesignCondition());
+  EXPECT_EQ(12, dc.heatingColdestMonth().get());
+  EXPECT_EQ(-18.8, dc.heatingDryBulb99pt6().get());
+  EXPECT_EQ(-18.8, dc.getFieldByName("Heating Dry Bulb Temperature 99.6%").get());
+  EXPECT_EQ(-18.8, dc.getField(EpwDesignField("Heating Dry Bulb Temperature 99.6%")).get());
+  EXPECT_EQ("C", dc.getUnitsByName("Heating Dry Bulb Temperature 99.6%").get());
+  EXPECT_EQ("C", dc.getUnits(EpwDesignField("Heating Dry Bulb Temperature 99.6%")));
+  EXPECT_EQ(-15.5, dc.heatingDryBulb99().get());
+  EXPECT_EQ(-21.6, dc.heatingHumidificationDewPoint99pt6().get());
+  EXPECT_EQ(0.7, dc.heatingHumidificationHumidityRatio99pt6().get());
+  EXPECT_EQ(-10.9, dc.heatingHumidificationMeanCoincidentDryBulb99pt6().get());
+  EXPECT_EQ(-18.8, dc.heatingHumidificationDewPoint99().get());
+  EXPECT_EQ(0.9, dc.heatingHumidificationHumidityRatio99().get());
+  EXPECT_EQ(-7.5, dc.heatingHumidificationMeanCoincidentDryBulb99().get());
+  EXPECT_EQ(12.2, dc.heatingColdestMonthWindSpeed0pt4().get());
+  EXPECT_EQ(3.9, dc.heatingColdestMonthMeanCoincidentDryBulb0pt4().get());
+  EXPECT_EQ(10.9, dc.heatingColdestMonthWindSpeed1().get());
+  EXPECT_EQ(3.8, dc.heatingColdestMonthMeanCoincidentDryBulb1().get());
+  EXPECT_EQ(3.0, dc.heatingMeanCoincidentWindSpeed99pt6().get());
+  EXPECT_EQ(340, dc.heatingPrevailingCoincidentWindDirection99pt6().get());
+  EXPECT_FALSE(dc.heatingWindShelterFactor());
+
+  EXPECT_EQ(7, dc.coolingHottestMonth().get());
+  EXPECT_EQ(15.2, dc.coolingDryBulbRange().get());
+  EXPECT_EQ(33.0, dc.coolingDryBulb0pt4().get());
+  EXPECT_EQ(15.7, dc.coolingMeanCoincidentWetBulb0pt4().get());
+  EXPECT_EQ(32.0, dc.coolingDryBulb1().get());
+  EXPECT_EQ(15.5, dc.coolingMeanCoincidentWetBulb1().get());
+  EXPECT_EQ(30.2, dc.coolingDryBulb2().get());
+  EXPECT_EQ(15.3, dc.coolingMeanCoincidentWetBulb2().get());
+  EXPECT_EQ(18.4, dc.coolingEvaporationWetBulb0pt4().get());
+  EXPECT_EQ(27.3, dc.coolingEvaporationMeanCoincidentDryBulb0pt4().get());
+  EXPECT_EQ(17.5, dc.coolingEvaporationWetBulb1().get());
+  EXPECT_EQ(26.4, dc.coolingEvaporationMeanCoincidentDryBulb1().get());
+  EXPECT_EQ(16.8, dc.coolingEvaporationWetBulb2().get());
+  EXPECT_EQ(25.6, dc.coolingEvaporationMeanCoincidentDryBulb2().get());
+  EXPECT_EQ(4.9, dc.coolingMeanCoincidentWindSpeed0pt4().get());
+  EXPECT_EQ(0, dc.coolingPrevailingCoincidentWindDirection0pt4().get());
+  EXPECT_EQ(16.1, dc.coolingDehumidificationDewPoint0pt4().get());
+  EXPECT_EQ(14.3, dc.coolingDehumidificationHumidityRatio0pt4().get());
+  EXPECT_EQ(20.2, dc.coolingDehumidificationMeanCoincidentDryBulb0pt4().get());
+  EXPECT_EQ(14.9, dc.coolingDehumidificationDewPoint1().get());
+  EXPECT_EQ(13.2, dc.coolingDehumidificationHumidityRatio1().get());
+  EXPECT_EQ(19.9, dc.coolingDehumidificationMeanCoincidentDryBulb1().get());
+  EXPECT_EQ(13.9, dc.coolingDehumidificationDewPoint2().get());
+  EXPECT_EQ(12.3, dc.coolingDehumidificationHumidityRatio2().get());
+  EXPECT_EQ(19.6, dc.coolingDehumidificationMeanCoincidentDryBulb2().get());
+  EXPECT_EQ(59.7, dc.coolingEnthalpy0pt4().get());
+  EXPECT_EQ(27.3, dc.coolingEnthalpyMeanCoincidentDryBulb0pt4().get());
+  EXPECT_EQ(56.6, dc.coolingEnthalpy1().get());
+  EXPECT_EQ(26.6, dc.coolingEnthalpyMeanCoincidentDryBulb1().get());
+  EXPECT_EQ(54.0, dc.coolingEnthalpy2().get());
+  EXPECT_EQ(25.7, dc.coolingEnthalpyMeanCoincidentDryBulb2().get());
+
+  ASSERT_TRUE(dc.coolingHours8To4AndDryBulb12pt8To20pt6());
+  EXPECT_EQ(760, dc.coolingHours8To4AndDryBulb12pt8To20pt6().get());
+  EXPECT_FALSE(dc.coolingExtremeMaxWetBulb());
+
+  EXPECT_EQ(11.1, dc.extremeWindSpeed1().get());
+  EXPECT_EQ(9.5, dc.extremeWindSpeed2pt5().get());
+  EXPECT_EQ(8.4, dc.extremeWindSpeed5().get());
+
+  ASSERT_TRUE(dc.extremeMaxWetBulb());
+  EXPECT_EQ(22.9, dc.extremeMaxWetBulb().get());
+
+  EXPECT_EQ(-22.9, dc.extremeMeanMinDryBulb().get());
+  EXPECT_EQ(36.1, dc.extremeMeanMaxDryBulb().get());
+  EXPECT_EQ(3.8, dc.extremeStdDevMinDryBulb().get());
+  EXPECT_EQ(1.2, dc.extremeStdDevMaxDryBulb().get());
+  EXPECT_EQ(-25.7, dc.extremeN5YearsMinDryBulb().get());
+  EXPECT_EQ(37.0, dc.extremeN5YearsMaxDryBulb().get());
+  EXPECT_EQ(-27.9, dc.extremeN10YearsMinDryBulb().get());
+  EXPECT_EQ(37.7, dc.extremeN10YearsMaxDryBulb().get());
+  EXPECT_EQ(-30.1, dc.extremeN20YearsMinDryBulb().get());
+  EXPECT_EQ(38.3, dc.extremeN20YearsMaxDryBulb().get());
+  EXPECT_EQ(-32.8, dc.extremeN50YearsMinDryBulb().get());
+  EXPECT_EQ(39.2, dc.extremeN50YearsMaxDryBulb().get());
+}
+
+TEST(Filetypes, EpwDesignCondition_HoF_2021) {
+
+  const std::string line = "2021 ASHRAE Handbook -- Fundamentals - Chapter 14 Climatic Design Information,,"
+                           "Heating,12,-18.8,-15.5,-21.6,0.7,-10.9,-18.8,0.9,-7.5,12.2,3.9,10.9,3.8,3,340,0.635,"
+                           "Cooling,7,15.2,33,15.7,32,15.5,30.2,15.3,18.4,27.3,17.5,26.4,16.8,25.6,4.9,0,16.1,14.3,20.2,14.9,13.2,19.9,13.9,12.3,"
+                           "19.6,59.7,27.3,56.6,26.6,54,25.7,22.9,"
+                           "Extremes,11.1,9.5,8.4,-22.9,36.1,3.8,1.2,-25.7,37,-27.9,37.7,-30.1,38.3,-32.8,39.2";
+  auto dc_ = EpwDesignCondition::fromDesignConditionsString(line);
+  ASSERT_TRUE(dc_);
+  const auto dc = std::move(*dc_);
+
+  EXPECT_EQ(dc.ashraeHoFVersion(), ASHRAEHoFVintage::ASHRAE_2021);
+
+  EXPECT_EQ("2021 ASHRAE Handbook -- Fundamentals - Chapter 14 Climatic Design Information", dc.titleOfDesignCondition());
+  EXPECT_EQ(12, dc.heatingColdestMonth().get());
+  EXPECT_EQ(-18.8, dc.heatingDryBulb99pt6().get());
+  EXPECT_EQ(-18.8, dc.getFieldByName("Heating Dry Bulb Temperature 99.6%").get());
+  EXPECT_EQ(-18.8, dc.getField(EpwDesignField("Heating Dry Bulb Temperature 99.6%")).get());
+  EXPECT_EQ("C", dc.getUnitsByName("Heating Dry Bulb Temperature 99.6%").get());
+  EXPECT_EQ("C", dc.getUnits(EpwDesignField("Heating Dry Bulb Temperature 99.6%")));
+  EXPECT_EQ(-15.5, dc.heatingDryBulb99().get());
+  EXPECT_EQ(-21.6, dc.heatingHumidificationDewPoint99pt6().get());
+  EXPECT_EQ(0.7, dc.heatingHumidificationHumidityRatio99pt6().get());
+  EXPECT_EQ(-10.9, dc.heatingHumidificationMeanCoincidentDryBulb99pt6().get());
+  EXPECT_EQ(-18.8, dc.heatingHumidificationDewPoint99().get());
+  EXPECT_EQ(0.9, dc.heatingHumidificationHumidityRatio99().get());
+  EXPECT_EQ(-7.5, dc.heatingHumidificationMeanCoincidentDryBulb99().get());
+  EXPECT_EQ(12.2, dc.heatingColdestMonthWindSpeed0pt4().get());
+  EXPECT_EQ(3.9, dc.heatingColdestMonthMeanCoincidentDryBulb0pt4().get());
+  EXPECT_EQ(10.9, dc.heatingColdestMonthWindSpeed1().get());
+  EXPECT_EQ(3.8, dc.heatingColdestMonthMeanCoincidentDryBulb1().get());
+  EXPECT_EQ(3.0, dc.heatingMeanCoincidentWindSpeed99pt6().get());
+  EXPECT_EQ(340, dc.heatingPrevailingCoincidentWindDirection99pt6().get());
+  ASSERT_TRUE(dc.heatingWindShelterFactor());
+  EXPECT_EQ(0.635, dc.heatingWindShelterFactor().get());
+
+  EXPECT_EQ(7, dc.coolingHottestMonth().get());
+  EXPECT_EQ(15.2, dc.coolingDryBulbRange().get());
+  EXPECT_EQ(33.0, dc.coolingDryBulb0pt4().get());
+  EXPECT_EQ(15.7, dc.coolingMeanCoincidentWetBulb0pt4().get());
+  EXPECT_EQ(32.0, dc.coolingDryBulb1().get());
+  EXPECT_EQ(15.5, dc.coolingMeanCoincidentWetBulb1().get());
+  EXPECT_EQ(30.2, dc.coolingDryBulb2().get());
+  EXPECT_EQ(15.3, dc.coolingMeanCoincidentWetBulb2().get());
+  EXPECT_EQ(18.4, dc.coolingEvaporationWetBulb0pt4().get());
+  EXPECT_EQ(27.3, dc.coolingEvaporationMeanCoincidentDryBulb0pt4().get());
+  EXPECT_EQ(17.5, dc.coolingEvaporationWetBulb1().get());
+  EXPECT_EQ(26.4, dc.coolingEvaporationMeanCoincidentDryBulb1().get());
+  EXPECT_EQ(16.8, dc.coolingEvaporationWetBulb2().get());
+  EXPECT_EQ(25.6, dc.coolingEvaporationMeanCoincidentDryBulb2().get());
+  EXPECT_EQ(4.9, dc.coolingMeanCoincidentWindSpeed0pt4().get());
+  EXPECT_EQ(0, dc.coolingPrevailingCoincidentWindDirection0pt4().get());
+  EXPECT_EQ(16.1, dc.coolingDehumidificationDewPoint0pt4().get());
+  EXPECT_EQ(14.3, dc.coolingDehumidificationHumidityRatio0pt4().get());
+  EXPECT_EQ(20.2, dc.coolingDehumidificationMeanCoincidentDryBulb0pt4().get());
+  EXPECT_EQ(14.9, dc.coolingDehumidificationDewPoint1().get());
+  EXPECT_EQ(13.2, dc.coolingDehumidificationHumidityRatio1().get());
+  EXPECT_EQ(19.9, dc.coolingDehumidificationMeanCoincidentDryBulb1().get());
+  EXPECT_EQ(13.9, dc.coolingDehumidificationDewPoint2().get());
+  EXPECT_EQ(12.3, dc.coolingDehumidificationHumidityRatio2().get());
+  EXPECT_EQ(19.6, dc.coolingDehumidificationMeanCoincidentDryBulb2().get());
+  EXPECT_EQ(59.7, dc.coolingEnthalpy0pt4().get());
+  EXPECT_EQ(27.3, dc.coolingEnthalpyMeanCoincidentDryBulb0pt4().get());
+  EXPECT_EQ(56.6, dc.coolingEnthalpy1().get());
+  EXPECT_EQ(26.6, dc.coolingEnthalpyMeanCoincidentDryBulb1().get());
+  EXPECT_EQ(54.0, dc.coolingEnthalpy2().get());
+  EXPECT_EQ(25.7, dc.coolingEnthalpyMeanCoincidentDryBulb2().get());
+
+  EXPECT_FALSE(dc.coolingHours8To4AndDryBulb12pt8To20pt6());
+  ASSERT_TRUE(dc.coolingExtremeMaxWetBulb());
+  EXPECT_EQ(22.9, dc.coolingExtremeMaxWetBulb().get());
+
+  EXPECT_EQ(11.1, dc.extremeWindSpeed1().get());
+  EXPECT_EQ(9.5, dc.extremeWindSpeed2pt5().get());
+  EXPECT_EQ(8.4, dc.extremeWindSpeed5().get());
+
+  EXPECT_FALSE(dc.extremeMaxWetBulb());
+
+  EXPECT_EQ(-22.9, dc.extremeMeanMinDryBulb().get());
+  EXPECT_EQ(36.1, dc.extremeMeanMaxDryBulb().get());
+  EXPECT_EQ(3.8, dc.extremeStdDevMinDryBulb().get());
+  EXPECT_EQ(1.2, dc.extremeStdDevMaxDryBulb().get());
+  EXPECT_EQ(-25.7, dc.extremeN5YearsMinDryBulb().get());
+  EXPECT_EQ(37.0, dc.extremeN5YearsMaxDryBulb().get());
+  EXPECT_EQ(-27.9, dc.extremeN10YearsMinDryBulb().get());
+  EXPECT_EQ(37.7, dc.extremeN10YearsMaxDryBulb().get());
+  EXPECT_EQ(-30.1, dc.extremeN20YearsMinDryBulb().get());
+  EXPECT_EQ(38.3, dc.extremeN20YearsMaxDryBulb().get());
+  EXPECT_EQ(-32.8, dc.extremeN50YearsMinDryBulb().get());
+  EXPECT_EQ(39.2, dc.extremeN50YearsMaxDryBulb().get());
+}
+
+TEST(Filetypes, EpwDesignCondition_HoF_2021_Heuristics) {
+
+  const std::string line = "This title does not include the version,,"
+                           "Heating,12,-18.8,-15.5,-21.6,0.7,-10.9,-18.8,0.9,-7.5,12.2,3.9,10.9,3.8,3,340,0.635,"
+                           "Cooling,7,15.2,33,15.7,32,15.5,30.2,15.3,18.4,27.3,17.5,26.4,16.8,25.6,4.9,0,16.1,14.3,20.2,14.9,13.2,19.9,13.9,12.3,"
+                           "19.6,59.7,27.3,56.6,26.6,54,25.7,22.9,"
+                           "Extremes,11.1,9.5,8.4,-22.9,36.1,3.8,1.2,-25.7,37,-27.9,37.7,-30.1,38.3,-32.8,39.2";
+  auto dc_ = EpwDesignCondition::fromDesignConditionsString(line);
+  ASSERT_TRUE(dc_);
+  const auto dc = std::move(*dc_);
+
+  EXPECT_EQ(dc.ashraeHoFVersion(), ASHRAEHoFVintage::ASHRAE_2021);
+
+  EXPECT_EQ("This title does not include the version", dc.titleOfDesignCondition());
+  EXPECT_EQ(12, dc.heatingColdestMonth().get());
+  EXPECT_EQ(-18.8, dc.heatingDryBulb99pt6().get());
+  EXPECT_EQ(-18.8, dc.getFieldByName("Heating Dry Bulb Temperature 99.6%").get());
+  EXPECT_EQ(-18.8, dc.getField(EpwDesignField("Heating Dry Bulb Temperature 99.6%")).get());
+  EXPECT_EQ("C", dc.getUnitsByName("Heating Dry Bulb Temperature 99.6%").get());
+  EXPECT_EQ("C", dc.getUnits(EpwDesignField("Heating Dry Bulb Temperature 99.6%")));
+  EXPECT_EQ(-15.5, dc.heatingDryBulb99().get());
+  EXPECT_EQ(-21.6, dc.heatingHumidificationDewPoint99pt6().get());
+  EXPECT_EQ(0.7, dc.heatingHumidificationHumidityRatio99pt6().get());
+  EXPECT_EQ(-10.9, dc.heatingHumidificationMeanCoincidentDryBulb99pt6().get());
+  EXPECT_EQ(-18.8, dc.heatingHumidificationDewPoint99().get());
+  EXPECT_EQ(0.9, dc.heatingHumidificationHumidityRatio99().get());
+  EXPECT_EQ(-7.5, dc.heatingHumidificationMeanCoincidentDryBulb99().get());
+  EXPECT_EQ(12.2, dc.heatingColdestMonthWindSpeed0pt4().get());
+  EXPECT_EQ(3.9, dc.heatingColdestMonthMeanCoincidentDryBulb0pt4().get());
+  EXPECT_EQ(10.9, dc.heatingColdestMonthWindSpeed1().get());
+  EXPECT_EQ(3.8, dc.heatingColdestMonthMeanCoincidentDryBulb1().get());
+  EXPECT_EQ(3.0, dc.heatingMeanCoincidentWindSpeed99pt6().get());
+  EXPECT_EQ(340, dc.heatingPrevailingCoincidentWindDirection99pt6().get());
+  ASSERT_TRUE(dc.heatingWindShelterFactor());
+  EXPECT_EQ(0.635, dc.heatingWindShelterFactor().get());
+
+  EXPECT_EQ(7, dc.coolingHottestMonth().get());
+  EXPECT_EQ(15.2, dc.coolingDryBulbRange().get());
+  EXPECT_EQ(33.0, dc.coolingDryBulb0pt4().get());
+  EXPECT_EQ(15.7, dc.coolingMeanCoincidentWetBulb0pt4().get());
+  EXPECT_EQ(32.0, dc.coolingDryBulb1().get());
+  EXPECT_EQ(15.5, dc.coolingMeanCoincidentWetBulb1().get());
+  EXPECT_EQ(30.2, dc.coolingDryBulb2().get());
+  EXPECT_EQ(15.3, dc.coolingMeanCoincidentWetBulb2().get());
+  EXPECT_EQ(18.4, dc.coolingEvaporationWetBulb0pt4().get());
+  EXPECT_EQ(27.3, dc.coolingEvaporationMeanCoincidentDryBulb0pt4().get());
+  EXPECT_EQ(17.5, dc.coolingEvaporationWetBulb1().get());
+  EXPECT_EQ(26.4, dc.coolingEvaporationMeanCoincidentDryBulb1().get());
+  EXPECT_EQ(16.8, dc.coolingEvaporationWetBulb2().get());
+  EXPECT_EQ(25.6, dc.coolingEvaporationMeanCoincidentDryBulb2().get());
+  EXPECT_EQ(4.9, dc.coolingMeanCoincidentWindSpeed0pt4().get());
+  EXPECT_EQ(0, dc.coolingPrevailingCoincidentWindDirection0pt4().get());
+  EXPECT_EQ(16.1, dc.coolingDehumidificationDewPoint0pt4().get());
+  EXPECT_EQ(14.3, dc.coolingDehumidificationHumidityRatio0pt4().get());
+  EXPECT_EQ(20.2, dc.coolingDehumidificationMeanCoincidentDryBulb0pt4().get());
+  EXPECT_EQ(14.9, dc.coolingDehumidificationDewPoint1().get());
+  EXPECT_EQ(13.2, dc.coolingDehumidificationHumidityRatio1().get());
+  EXPECT_EQ(19.9, dc.coolingDehumidificationMeanCoincidentDryBulb1().get());
+  EXPECT_EQ(13.9, dc.coolingDehumidificationDewPoint2().get());
+  EXPECT_EQ(12.3, dc.coolingDehumidificationHumidityRatio2().get());
+  EXPECT_EQ(19.6, dc.coolingDehumidificationMeanCoincidentDryBulb2().get());
+  EXPECT_EQ(59.7, dc.coolingEnthalpy0pt4().get());
+  EXPECT_EQ(27.3, dc.coolingEnthalpyMeanCoincidentDryBulb0pt4().get());
+  EXPECT_EQ(56.6, dc.coolingEnthalpy1().get());
+  EXPECT_EQ(26.6, dc.coolingEnthalpyMeanCoincidentDryBulb1().get());
+  EXPECT_EQ(54.0, dc.coolingEnthalpy2().get());
+  EXPECT_EQ(25.7, dc.coolingEnthalpyMeanCoincidentDryBulb2().get());
+
+  EXPECT_FALSE(dc.coolingHours8To4AndDryBulb12pt8To20pt6());
+  ASSERT_TRUE(dc.coolingExtremeMaxWetBulb());
+  EXPECT_EQ(22.9, dc.coolingExtremeMaxWetBulb().get());
+
+  EXPECT_EQ(11.1, dc.extremeWindSpeed1().get());
+  EXPECT_EQ(9.5, dc.extremeWindSpeed2pt5().get());
+  EXPECT_EQ(8.4, dc.extremeWindSpeed5().get());
+
+  EXPECT_FALSE(dc.extremeMaxWetBulb());
+
+  EXPECT_EQ(-22.9, dc.extremeMeanMinDryBulb().get());
+  EXPECT_EQ(36.1, dc.extremeMeanMaxDryBulb().get());
+  EXPECT_EQ(3.8, dc.extremeStdDevMinDryBulb().get());
+  EXPECT_EQ(1.2, dc.extremeStdDevMaxDryBulb().get());
+  EXPECT_EQ(-25.7, dc.extremeN5YearsMinDryBulb().get());
+  EXPECT_EQ(37.0, dc.extremeN5YearsMaxDryBulb().get());
+  EXPECT_EQ(-27.9, dc.extremeN10YearsMinDryBulb().get());
+  EXPECT_EQ(37.7, dc.extremeN10YearsMaxDryBulb().get());
+  EXPECT_EQ(-30.1, dc.extremeN20YearsMinDryBulb().get());
+  EXPECT_EQ(38.3, dc.extremeN20YearsMaxDryBulb().get());
+  EXPECT_EQ(-32.8, dc.extremeN50YearsMinDryBulb().get());
+  EXPECT_EQ(39.2, dc.extremeN50YearsMaxDryBulb().get());
+}
+
+TEST(Filetypes, EpwDesignCondition_HoF_2021_Heuristics_OverrideVersion) {
+
+  const std::string line = "This title includes the 2009 version when it's not actually it,,"
+                           "Heating,12,-18.8,-15.5,-21.6,0.7,-10.9,-18.8,0.9,-7.5,12.2,3.9,10.9,3.8,3,340,0.635,"
+                           "Cooling,7,15.2,33,15.7,32,15.5,30.2,15.3,18.4,27.3,17.5,26.4,16.8,25.6,4.9,0,16.1,14.3,20.2,14.9,13.2,19.9,13.9,12.3,"
+                           "19.6,59.7,27.3,56.6,26.6,54,25.7,22.9,"
+                           "Extremes,11.1,9.5,8.4,-22.9,36.1,3.8,1.2,-25.7,37,-27.9,37.7,-30.1,38.3,-32.8,39.2";
+  auto dc_ = EpwDesignCondition::fromDesignConditionsString(line);
+  ASSERT_TRUE(dc_);
+  const auto dc = std::move(*dc_);
+
+  EXPECT_EQ(dc.ashraeHoFVersion(), ASHRAEHoFVintage::ASHRAE_2021);
+
+  EXPECT_EQ("This title includes the 2009 version when it's not actually it", dc.titleOfDesignCondition());
+  EXPECT_EQ(12, dc.heatingColdestMonth().get());
+  EXPECT_EQ(-18.8, dc.heatingDryBulb99pt6().get());
+  EXPECT_EQ(-18.8, dc.getFieldByName("Heating Dry Bulb Temperature 99.6%").get());
+  EXPECT_EQ(-18.8, dc.getField(EpwDesignField("Heating Dry Bulb Temperature 99.6%")).get());
+  EXPECT_EQ("C", dc.getUnitsByName("Heating Dry Bulb Temperature 99.6%").get());
+  EXPECT_EQ("C", dc.getUnits(EpwDesignField("Heating Dry Bulb Temperature 99.6%")));
+  EXPECT_EQ(-15.5, dc.heatingDryBulb99().get());
+  EXPECT_EQ(-21.6, dc.heatingHumidificationDewPoint99pt6().get());
+  EXPECT_EQ(0.7, dc.heatingHumidificationHumidityRatio99pt6().get());
+  EXPECT_EQ(-10.9, dc.heatingHumidificationMeanCoincidentDryBulb99pt6().get());
+  EXPECT_EQ(-18.8, dc.heatingHumidificationDewPoint99().get());
+  EXPECT_EQ(0.9, dc.heatingHumidificationHumidityRatio99().get());
+  EXPECT_EQ(-7.5, dc.heatingHumidificationMeanCoincidentDryBulb99().get());
+  EXPECT_EQ(12.2, dc.heatingColdestMonthWindSpeed0pt4().get());
+  EXPECT_EQ(3.9, dc.heatingColdestMonthMeanCoincidentDryBulb0pt4().get());
+  EXPECT_EQ(10.9, dc.heatingColdestMonthWindSpeed1().get());
+  EXPECT_EQ(3.8, dc.heatingColdestMonthMeanCoincidentDryBulb1().get());
+  EXPECT_EQ(3.0, dc.heatingMeanCoincidentWindSpeed99pt6().get());
+  EXPECT_EQ(340, dc.heatingPrevailingCoincidentWindDirection99pt6().get());
+  ASSERT_TRUE(dc.heatingWindShelterFactor());
+  EXPECT_EQ(0.635, dc.heatingWindShelterFactor().get());
+
+  EXPECT_EQ(7, dc.coolingHottestMonth().get());
+  EXPECT_EQ(15.2, dc.coolingDryBulbRange().get());
+  EXPECT_EQ(33.0, dc.coolingDryBulb0pt4().get());
+  EXPECT_EQ(15.7, dc.coolingMeanCoincidentWetBulb0pt4().get());
+  EXPECT_EQ(32.0, dc.coolingDryBulb1().get());
+  EXPECT_EQ(15.5, dc.coolingMeanCoincidentWetBulb1().get());
+  EXPECT_EQ(30.2, dc.coolingDryBulb2().get());
+  EXPECT_EQ(15.3, dc.coolingMeanCoincidentWetBulb2().get());
+  EXPECT_EQ(18.4, dc.coolingEvaporationWetBulb0pt4().get());
+  EXPECT_EQ(27.3, dc.coolingEvaporationMeanCoincidentDryBulb0pt4().get());
+  EXPECT_EQ(17.5, dc.coolingEvaporationWetBulb1().get());
+  EXPECT_EQ(26.4, dc.coolingEvaporationMeanCoincidentDryBulb1().get());
+  EXPECT_EQ(16.8, dc.coolingEvaporationWetBulb2().get());
+  EXPECT_EQ(25.6, dc.coolingEvaporationMeanCoincidentDryBulb2().get());
+  EXPECT_EQ(4.9, dc.coolingMeanCoincidentWindSpeed0pt4().get());
+  EXPECT_EQ(0, dc.coolingPrevailingCoincidentWindDirection0pt4().get());
+  EXPECT_EQ(16.1, dc.coolingDehumidificationDewPoint0pt4().get());
+  EXPECT_EQ(14.3, dc.coolingDehumidificationHumidityRatio0pt4().get());
+  EXPECT_EQ(20.2, dc.coolingDehumidificationMeanCoincidentDryBulb0pt4().get());
+  EXPECT_EQ(14.9, dc.coolingDehumidificationDewPoint1().get());
+  EXPECT_EQ(13.2, dc.coolingDehumidificationHumidityRatio1().get());
+  EXPECT_EQ(19.9, dc.coolingDehumidificationMeanCoincidentDryBulb1().get());
+  EXPECT_EQ(13.9, dc.coolingDehumidificationDewPoint2().get());
+  EXPECT_EQ(12.3, dc.coolingDehumidificationHumidityRatio2().get());
+  EXPECT_EQ(19.6, dc.coolingDehumidificationMeanCoincidentDryBulb2().get());
+  EXPECT_EQ(59.7, dc.coolingEnthalpy0pt4().get());
+  EXPECT_EQ(27.3, dc.coolingEnthalpyMeanCoincidentDryBulb0pt4().get());
+  EXPECT_EQ(56.6, dc.coolingEnthalpy1().get());
+  EXPECT_EQ(26.6, dc.coolingEnthalpyMeanCoincidentDryBulb1().get());
+  EXPECT_EQ(54.0, dc.coolingEnthalpy2().get());
+  EXPECT_EQ(25.7, dc.coolingEnthalpyMeanCoincidentDryBulb2().get());
+
+  EXPECT_FALSE(dc.coolingHours8To4AndDryBulb12pt8To20pt6());
+  ASSERT_TRUE(dc.coolingExtremeMaxWetBulb());
+  EXPECT_EQ(22.9, dc.coolingExtremeMaxWetBulb().get());
+
+  EXPECT_EQ(11.1, dc.extremeWindSpeed1().get());
+  EXPECT_EQ(9.5, dc.extremeWindSpeed2pt5().get());
+  EXPECT_EQ(8.4, dc.extremeWindSpeed5().get());
+
+  EXPECT_FALSE(dc.extremeMaxWetBulb());
+
+  EXPECT_EQ(-22.9, dc.extremeMeanMinDryBulb().get());
+  EXPECT_EQ(36.1, dc.extremeMeanMaxDryBulb().get());
+  EXPECT_EQ(3.8, dc.extremeStdDevMinDryBulb().get());
+  EXPECT_EQ(1.2, dc.extremeStdDevMaxDryBulb().get());
+  EXPECT_EQ(-25.7, dc.extremeN5YearsMinDryBulb().get());
+  EXPECT_EQ(37.0, dc.extremeN5YearsMaxDryBulb().get());
+  EXPECT_EQ(-27.9, dc.extremeN10YearsMinDryBulb().get());
+  EXPECT_EQ(37.7, dc.extremeN10YearsMaxDryBulb().get());
+  EXPECT_EQ(-30.1, dc.extremeN20YearsMinDryBulb().get());
+  EXPECT_EQ(38.3, dc.extremeN20YearsMaxDryBulb().get());
+  EXPECT_EQ(-32.8, dc.extremeN50YearsMinDryBulb().get());
+  EXPECT_EQ(39.2, dc.extremeN50YearsMaxDryBulb().get());
+}
+
+TEST(Filetypes, EpwDesignCondition_WrongNumberOfSubFields_TooManyTotal) {
+  const std::string line = "This 2021 version has too many fields total,,"
+                           "Heating,12,-18.8,-15.5,-21.6,0.7,-10.9,-18.8,0.9,-7.5,12.2,3.9,10.9,3.8,3,340,0.635,0.936,"
+                           "Cooling,7,15.2,33,15.7,32,15.5,30.2,15.3,18.4,27.3,17.5,26.4,16.8,25.6,4.9,0,16.1,14.3,20.2,14.9,13.2,19.9,13.9,12.3,"
+                           "19.6,59.7,27.3,56.6,26.6,54,25.7,22.9,"
+                           "Extremes,11.1,9.5,8.4,-22.9,36.1,3.8,1.2,-25.7,37,-27.9,37.7,-30.1,38.3,-32.8,39.2";
+  auto dc_ = EpwDesignCondition::fromDesignConditionsString(line);
+  EXPECT_FALSE(dc_);
+}
+
+TEST(Filetypes, EpwDesignCondition_WrongNumberOfSubFields_UnbalancedFields) {
+  const std::string line = "This 2021 version has one too many fields in heating and one too few in extremes,,"
+                           "Heating,12,-18.8,-15.5,-21.6,0.7,-10.9,-18.8,0.9,-7.5,12.2,3.9,10.9,3.8,3,340,0.635,0.936,"
+                           "Cooling,7,15.2,33,15.7,32,15.5,30.2,15.3,18.4,27.3,17.5,26.4,16.8,25.6,4.9,0,16.1,14.3,20.2,14.9,13.2,19.9,13.9,12.3,"
+                           "19.6,59.7,27.3,56.6,26.6,54,25.7,22.9,"
+                           "Extremes,11.1,9.5,8.4,-22.9,36.1,3.8,1.2,-25.7,37,-27.9,37.7,-30.1,38.3,-32.8";
+  auto dc_ = EpwDesignCondition::fromDesignConditionsString(line);
+  EXPECT_FALSE(dc_);
+}
+
+TEST(Filetypes, EpwDesignCondition_WrongNumberOfSubFields_UnbalancedFields2) {
+  const std::string line = "This 2021 version has one too many fields in cooling and one too few in heating,,"
+                           "Heating,12,-18.8,-15.5,-21.6,0.7,-10.9,-18.8,0.9,-7.5,12.2,3.9,10.9,3.8,3,340,"
+                           "Cooling,7,15.2,33,15.7,32,15.5,30.2,15.3,18.4,27.3,17.5,26.4,16.8,25.6,4.9,0,16.1,14.3,20.2,14.9,13.2,19.9,13.9,12.3,"
+                           "19.6,59.7,27.3,56.6,26.6,54,25.7,22.9,700,"
+                           "Extremes,11.1,9.5,8.4,-22.9,36.1,3.8,1.2,-25.7,37,-27.9,37.7,-30.1,38.3,-32.8,39.2";
+  auto dc_ = EpwDesignCondition::fromDesignConditionsString(line);
+  EXPECT_FALSE(dc_);
+}
