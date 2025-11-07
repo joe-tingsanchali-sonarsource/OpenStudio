@@ -493,7 +493,7 @@ class UTILITIES_API EpwHoliday
 
  public:
   EpwHoliday(const std::string& holidayName, const std::string& holidayDateString)
-    : m_holidayName(holidayName), m_holidayDateString(holidayDateString){};
+    : m_holidayName(holidayName), m_holidayDateString(holidayDateString) {};
 
   std::string holidayName() const {
     return m_holidayName;
@@ -657,7 +657,8 @@ class UTILITIES_API EpwDesignCondition
    **/
   boost::optional<int> coolingHours8To4AndDryBulb12pt8To20pt6() const;
   /** Returns the cooling maximum wet bulb temperature in degrees C.
-   * This is only available for Design Conditions taken from the ASHRAE Handbook of Fundamentals starting at the 2017 edition
+   *  Prior to the 2017 edition of the ASHRAE Handbook of Fundamentals, this is stored in the Extreme section, and starting at 2017
+   *  it is stored in the Cooling Section. This is an alias for extremeMaxWetBulb() (pre-existing method) for clarity.
    **/
   boost::optional<double> coolingExtremeMaxWetBulb() const;
 
@@ -667,8 +668,9 @@ class UTILITIES_API EpwDesignCondition
   boost::optional<double> extremeWindSpeed2pt5() const;
   /** Returns the extreme wind speed 5% in m/s */
   boost::optional<double> extremeWindSpeed5() const;
-  /** Returns the extreme maximum wet bulb temperature in degrees C
-   *  This is only available for Design Conditions taken from the ASHRAE Handbook of Fundamentals up to 2013 (included) editions
+  /** Returns the (cooling) extreme maximum wet bulb temperature in degrees C
+   *  Prior to the 2017 edition of the ASHRAE Handbook of Fundamentals, this is stored in the Extreme section, and starting at 2017
+   *  it is stored in the Cooling Section.
    **/
   boost::optional<double> extremeMaxWetBulb() const;
   /** Returns the extreme mean minimum dry bulb temperature in degrees C */
@@ -802,8 +804,6 @@ class UTILITIES_API EpwDesignCondition
   void setCoolingEnthalpyMeanCoincidentDryBulb2(double coolingEnthalpyMeanCoincidentDryBulb2);
   bool setCoolingHours8To4AndDryBulb12pt8To20pt6(const std::string& coolingHours8To4AndDryBulb12pt8To20pt6);
   void setCoolingHours8To4AndDryBulb12pt8To20pt6(int coolingHours8To4AndDryBulb12pt8To20pt6);
-  bool setCoolingExtremeMaxWetBulb(const std::string& coolingExtremeMaxWetBulb);
-  void setCoolingExtremeMaxWetBulb(double coolingExtremeMaxWetBulb);
 
   bool setExtremeWindSpeed1(const std::string& extremeWindSpeed1);
   void setExtremeWindSpeed1(double extremeWindSpeed1);
@@ -891,12 +891,11 @@ class UTILITIES_API EpwDesignCondition
   boost::optional<double> m_coolingEnthalpy2;
   boost::optional<double> m_coolingEnthalpyMeanCoincidentDryBulb2;
   boost::optional<int> m_coolingHours8To4AndDryBulb12pt8To20pt6;
-  boost::optional<double> m_coolingExtremeMaxWetBulb;
 
   boost::optional<double> m_extremeWindSpeed1;
   boost::optional<double> m_extremeWindSpeed2pt5;
   boost::optional<double> m_extremeWindSpeed5;
-  boost::optional<double> m_extremeMaxWetBulb;
+  boost::optional<double> m_extremeMaxWetBulb;  // This also stores CoolingExtremeMaxWetBulb for versions starting at 2017
   boost::optional<double> m_extremeMeanMinDryBulb;
   boost::optional<double> m_extremeMeanMaxDryBulb;
   boost::optional<double> m_extremeStdDevMinDryBulb;

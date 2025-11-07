@@ -1190,12 +1190,13 @@ TEST(Filetypes, EpwDesignCondition_HoF_2009) {
 
   ASSERT_TRUE(dc.coolingHours8To4AndDryBulb12pt8To20pt6());
   EXPECT_EQ(760, dc.coolingHours8To4AndDryBulb12pt8To20pt6().get());
-  EXPECT_FALSE(dc.coolingExtremeMaxWetBulb());
 
   EXPECT_EQ(11.1, dc.extremeWindSpeed1().get());
   EXPECT_EQ(9.5, dc.extremeWindSpeed2pt5().get());
   EXPECT_EQ(8.4, dc.extremeWindSpeed5().get());
 
+  ASSERT_TRUE(dc.coolingExtremeMaxWetBulb());
+  EXPECT_EQ(22.9, dc.coolingExtremeMaxWetBulb().get());
   ASSERT_TRUE(dc.extremeMaxWetBulb());
   EXPECT_EQ(22.9, dc.extremeMaxWetBulb().get());
 
@@ -1282,12 +1283,13 @@ TEST(Filetypes, EpwDesignCondition_HoF_2009_Heuristics) {
 
   ASSERT_TRUE(dc.coolingHours8To4AndDryBulb12pt8To20pt6());
   EXPECT_EQ(760, dc.coolingHours8To4AndDryBulb12pt8To20pt6().get());
-  EXPECT_FALSE(dc.coolingExtremeMaxWetBulb());
 
   EXPECT_EQ(11.1, dc.extremeWindSpeed1().get());
   EXPECT_EQ(9.5, dc.extremeWindSpeed2pt5().get());
   EXPECT_EQ(8.4, dc.extremeWindSpeed5().get());
 
+  ASSERT_TRUE(dc.coolingExtremeMaxWetBulb());
+  EXPECT_EQ(22.9, dc.coolingExtremeMaxWetBulb().get());
   ASSERT_TRUE(dc.extremeMaxWetBulb());
   EXPECT_EQ(22.9, dc.extremeMaxWetBulb().get());
 
@@ -1374,14 +1376,15 @@ TEST(Filetypes, EpwDesignCondition_HoF_2021) {
   EXPECT_EQ(25.7, dc.coolingEnthalpyMeanCoincidentDryBulb2().get());
 
   EXPECT_FALSE(dc.coolingHours8To4AndDryBulb12pt8To20pt6());
-  ASSERT_TRUE(dc.coolingExtremeMaxWetBulb());
-  EXPECT_EQ(22.9, dc.coolingExtremeMaxWetBulb().get());
 
   EXPECT_EQ(11.1, dc.extremeWindSpeed1().get());
   EXPECT_EQ(9.5, dc.extremeWindSpeed2pt5().get());
   EXPECT_EQ(8.4, dc.extremeWindSpeed5().get());
 
-  EXPECT_FALSE(dc.extremeMaxWetBulb());
+  ASSERT_TRUE(dc.coolingExtremeMaxWetBulb());
+  EXPECT_EQ(22.9, dc.coolingExtremeMaxWetBulb().get());
+  ASSERT_TRUE(dc.extremeMaxWetBulb());
+  EXPECT_EQ(22.9, dc.extremeMaxWetBulb().get());
 
   EXPECT_EQ(-22.9, dc.extremeMeanMinDryBulb().get());
   EXPECT_EQ(36.1, dc.extremeMeanMaxDryBulb().get());
@@ -1466,14 +1469,15 @@ TEST(Filetypes, EpwDesignCondition_HoF_2021_Heuristics) {
   EXPECT_EQ(25.7, dc.coolingEnthalpyMeanCoincidentDryBulb2().get());
 
   EXPECT_FALSE(dc.coolingHours8To4AndDryBulb12pt8To20pt6());
-  ASSERT_TRUE(dc.coolingExtremeMaxWetBulb());
-  EXPECT_EQ(22.9, dc.coolingExtremeMaxWetBulb().get());
 
   EXPECT_EQ(11.1, dc.extremeWindSpeed1().get());
   EXPECT_EQ(9.5, dc.extremeWindSpeed2pt5().get());
   EXPECT_EQ(8.4, dc.extremeWindSpeed5().get());
 
-  EXPECT_FALSE(dc.extremeMaxWetBulb());
+  ASSERT_TRUE(dc.coolingExtremeMaxWetBulb());
+  EXPECT_EQ(22.9, dc.coolingExtremeMaxWetBulb().get());
+  ASSERT_TRUE(dc.extremeMaxWetBulb());
+  EXPECT_EQ(22.9, dc.extremeMaxWetBulb().get());
 
   EXPECT_EQ(-22.9, dc.extremeMeanMinDryBulb().get());
   EXPECT_EQ(36.1, dc.extremeMeanMaxDryBulb().get());
@@ -1558,14 +1562,15 @@ TEST(Filetypes, EpwDesignCondition_HoF_2021_Heuristics_OverrideVersion) {
   EXPECT_EQ(25.7, dc.coolingEnthalpyMeanCoincidentDryBulb2().get());
 
   EXPECT_FALSE(dc.coolingHours8To4AndDryBulb12pt8To20pt6());
-  ASSERT_TRUE(dc.coolingExtremeMaxWetBulb());
-  EXPECT_EQ(22.9, dc.coolingExtremeMaxWetBulb().get());
 
   EXPECT_EQ(11.1, dc.extremeWindSpeed1().get());
   EXPECT_EQ(9.5, dc.extremeWindSpeed2pt5().get());
   EXPECT_EQ(8.4, dc.extremeWindSpeed5().get());
 
-  EXPECT_FALSE(dc.extremeMaxWetBulb());
+  ASSERT_TRUE(dc.coolingExtremeMaxWetBulb());
+  EXPECT_EQ(22.9, dc.coolingExtremeMaxWetBulb().get());
+  ASSERT_TRUE(dc.extremeMaxWetBulb());
+  EXPECT_EQ(22.9, dc.extremeMaxWetBulb().get());
 
   EXPECT_EQ(-22.9, dc.extremeMeanMinDryBulb().get());
   EXPECT_EQ(36.1, dc.extremeMeanMaxDryBulb().get());

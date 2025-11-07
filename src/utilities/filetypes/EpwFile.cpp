@@ -637,7 +637,7 @@ void EpwDesignCondition::assignCoolingData(std::span<const std::string> stringVa
   if (m_ashraeHoFVersion <= ASHRAEHoFVintage::ASHRAE_2013) {
     setCoolingHours8To4AndDryBulb12pt8To20pt6(stringValues[index(EpwDesignField::CoolingHours8To4AndDryBulb12pt8To20pt6)]);
   } else {
-    setCoolingExtremeMaxWetBulb(stringValues[index(EpwDesignField::CoolingExtremeMaxWetBulb) - 1]);
+    setExtremeMaxWetBulb(stringValues[index(EpwDesignField::CoolingExtremeMaxWetBulb) - 1]);
   }
 }
 
@@ -2954,7 +2954,7 @@ boost::optional<int> EpwDesignCondition::coolingHours8To4AndDryBulb12pt8To20pt6(
 }
 
 boost::optional<double> EpwDesignCondition::coolingExtremeMaxWetBulb() const {
-  return m_coolingExtremeMaxWetBulb;
+  return m_extremeMaxWetBulb;
 }
 
 boost::optional<double> EpwDesignCondition::extremeWindSpeed1() const {
@@ -3743,21 +3743,6 @@ bool EpwDesignCondition::setCoolingHours8To4AndDryBulb12pt8To20pt6(const std::st
 
 void EpwDesignCondition::setCoolingHours8To4AndDryBulb12pt8To20pt6(int coolingHours8To4AndDryBulb12pt8To20pt6) {
   m_coolingHours8To4AndDryBulb12pt8To20pt6 = coolingHours8To4AndDryBulb12pt8To20pt6;
-}
-
-bool EpwDesignCondition::setCoolingExtremeMaxWetBulb(const std::string& coolingExtremeMaxWetBulb) {
-  bool ok;
-  double value = stringToDouble(coolingExtremeMaxWetBulb, &ok);
-  if (!ok) {
-    m_coolingExtremeMaxWetBulb = boost::none;
-  } else {
-    setCoolingExtremeMaxWetBulb(value);
-  }
-  return ok;
-}
-
-void EpwDesignCondition::setCoolingExtremeMaxWetBulb(double coolingExtremeMaxWetBulb) {
-  m_coolingExtremeMaxWetBulb = coolingExtremeMaxWetBulb;
 }
 
 bool EpwDesignCondition::setExtremeWindSpeed1(const std::string& extremeWindSpeed1) {
