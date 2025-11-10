@@ -52,6 +52,10 @@
       os << *self; \
       return os.str(); \
     } \
+    \
+    int __hash__() const { \
+      return self->value(); \
+    } \
   };
 
 
