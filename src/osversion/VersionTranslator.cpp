@@ -9880,12 +9880,32 @@ namespace osversion {
           }
         }
 
+        // Default to 0.0 and not Autosize to preserve old behavior
         if (!object.getDouble(10)) {
           newObject.setDouble(10, 0.0);
         }
 
         ss << newObject;
         m_refactored.emplace_back(std::move(object), std::move(newObject));
+
+        // But we also add a WaterHeater:Sizing object
+        auto whIddObject = idd_3_11_0.getObject("OS:WaterHeater:Sizing");
+        IdfObject whSizingObj(whIddObject.get());
+
+        // WaterHeaterName
+        whSizingObj.setString(1, toString(object.handle()));
+        // Design Mode
+        whSizingObj.setString(2, "PeakDraw");
+        // Time Storage Can Meet Peak Draw {hr}
+        whSizingObj.setDouble(3, 0.538503);
+        // Time for Tank Recovery {hr}
+        whSizingObj.setDouble(4, 0.0);
+        // Nominal Tank Volume for Autosizing Plant Connections {m3}
+        whSizingObj.setDouble(5, 1.0);
+
+        // Register new WaterHeater:Sizing objects
+        ss << whSizingObj;
+        m_new.emplace_back(std::move(whSizingObj));
 
       } else if (iddname == "OS:Sizing:Zone") {
 
