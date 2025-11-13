@@ -348,6 +348,14 @@ namespace model {
       return result;
     }
 
+    boost::optional<double> HeatPumpAirToWaterHeating_Impl::autosizedRatedHeatingCapacity() const {
+      boost::optional<double> result;
+      if (auto awhp_ = heatPumpAirToWater()) {
+        result = awhp_->autosizedRatedHeatingCapacity();
+      }
+      return result;
+    }
+
     void HeatPumpAirToWaterHeating_Impl::autosize() {
       autosizeRatedAirFlowRate();
       autosizeRatedWaterFlowRate();
@@ -713,6 +721,10 @@ namespace model {
 
   boost::optional<HeatPumpAirToWater> HeatPumpAirToWaterHeating::heatPumpAirToWater() const {
     return getImpl<detail::HeatPumpAirToWaterHeating_Impl>()->heatPumpAirToWater();
+  }
+
+  boost::optional<double> HeatPumpAirToWaterHeating::autosizedRatedHeatingCapacity() const {
+    return getImpl<detail::HeatPumpAirToWaterHeating_Impl>()->autosizedRatedHeatingCapacity();
   }
 
   /// @cond

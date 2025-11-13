@@ -165,6 +165,8 @@ namespace model {
 
       boost::optional<double> autosizedRatedAirFlowRate() const;
       boost::optional<double> autosizedRatedWaterFlowRate() const;
+      boost::optional<double> autosizedRatedHeatingCapacity() const;  // Convenience method
+
       //@}
      protected:
      private:

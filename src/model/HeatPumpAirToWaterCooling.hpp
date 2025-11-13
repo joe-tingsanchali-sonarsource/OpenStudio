@@ -172,6 +172,7 @@ namespace model {
     // Autosize methods
     boost::optional<double> autosizedRatedAirFlowRate() const;
     boost::optional<double> autosizedRatedWaterFlowRate() const;
+    boost::optional<double> autosizedRatedCoolingCapacity() const;  // Convenience method
 
     //@}
    protected:
