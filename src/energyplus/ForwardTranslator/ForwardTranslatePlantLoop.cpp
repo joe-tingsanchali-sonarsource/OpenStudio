@@ -98,7 +98,10 @@
 #include "../../model/SetpointManagerScheduledDualSetpoint.hpp"
 #include "../../model/SetpointManagerScheduledDualSetpoint_Impl.hpp"
 #include "../../model/LifeCycleCost.hpp"
+
 #include "../../utilities/idf/IdfExtensibleGroup.hpp"
+#include "../../utilities/data/DataEnums.hpp"
+
 #include <utilities/idd/IddEnums.hxx>
 #include <utilities/idd/IddFactory.hxx>
 #include <utilities/idd/PlantLoop_FieldEnums.hxx>
@@ -580,6 +583,24 @@ namespace energyplus {
 
     if ((s = plantLoop.commonPipeSimulation())) {
       idfObject.setString(PlantLoopFields::CommonPipeSimulation, s.get());
+    }
+
+    // Water Loop Type
+    // TODO JM 2025-11-13: This field should never have been added to 25.2.0, so it is purposefully NOT wrapped in the model namespace
+    // MJW is looking into removing it today, will assess later
+    ComponentType waterLoopType = plantLoop.componentType();
+    if (waterLoopType == ComponentType::Heating) {
+      idfObject.setString(PlantLoopFields::WaterLoopType, "HotWater");
+    } else if (waterLoopType == ComponentType::Cooling) {
+      idfObject.setString(PlantLoopFields::WaterLoopType, "ChilledWater");
+    } else if (waterLoopType == ComponentType::None) {
+      idfObject.setString(PlantLoopFields::WaterLoopType, "None");
+    } else if (waterLoopType == ComponentType::Both) {
+      if (!plantLoop.supplyComponents(IddObjectType::OS_HeatPump_AirToWater_Cooling).empty()) {
+        idfObject.setString(PlantLoopFields::WaterLoopType, "ChilledWater");
+      } else if (!plantLoop.supplyComponents(IddObjectType::OS_HeatPump_AirToWater_Heating).empty()) {
+        idfObject.setString(PlantLoopFields::WaterLoopType, "HotWater");
+      }
     }
 
     // Inlet/Outlet Nodes
