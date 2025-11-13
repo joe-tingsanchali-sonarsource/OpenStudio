@@ -1958,6 +1958,16 @@ namespace energyplus {
         retVal = translateHeatPumpAirToWater(mo);
         break;
       }
+      case openstudio::IddObjectType::OS_HeatPump_AirToWater_Cooling: {
+        // no-op, just Log a Trace message
+        LOG(Trace, "HeatPumpAirToWaterCooling is not translated by itself but in the parent HeatPumpAirToWater");
+        break;
+      }
+      case openstudio::IddObjectType::OS_HeatPump_AirToWater_Heating: {
+        // no-op, just Log a Trace message
+        LOG(Trace, "HeatPumpAirToWaterHeating is not translated by itself but in the parent HeatPumpAirToWater");
+        break;
+      }
       case openstudio::IddObjectType::OS_HeatPump_AirToWater_FuelFired_Heating: {
         auto mo = modelObject.cast<HeatPumpAirToWaterFuelFiredHeating>();
         retVal = translateHeatPumpAirToWaterFuelFiredHeating(mo);
