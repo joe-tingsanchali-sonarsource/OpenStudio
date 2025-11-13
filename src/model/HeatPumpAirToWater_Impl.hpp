@@ -177,6 +177,8 @@ namespace model {
       boost::optional<double> autosizedRatedWaterFlowRateinHeatingMode() const;
       boost::optional<double> autosizedRatedAirFlowRateinCoolingMode() const;
       boost::optional<double> autosizedRatedWaterFlowRateinCoolingMode() const;
+      boost::optional<double> autosizedRatedHeatingCapacity() const;
+      boost::optional<double> autosizedRatedCoolingCapacity() const;
 
       //@}
      protected:

@@ -485,6 +485,14 @@ namespace model {
       return getAutosizedValue("Design Size Rated Water Volume Flow Rate in Cooling Mode", "m3/s");
     }
 
+    boost::optional<double> HeatPumpAirToWater_Impl::autosizedRatedHeatingCapacity() const {
+      return getAutosizedValue("Design Size Rated Heating Capacity", "W");
+    }
+
+    boost::optional<double> HeatPumpAirToWater_Impl::autosizedRatedCoolingCapacity() const {
+      return getAutosizedValue("Design Size Rated Cooling Capacity", "W");
+    }
+
     void HeatPumpAirToWater_Impl::autosize() {}
 
     void HeatPumpAirToWater_Impl::applySizingValues() {}
@@ -758,6 +766,14 @@ namespace model {
 
   boost::optional<double> HeatPumpAirToWater::autosizedRatedWaterFlowRateinHeatingMode() const {
     return getImpl<detail::HeatPumpAirToWater_Impl>()->autosizedRatedWaterFlowRateinHeatingMode();
+  }
+
+  boost::optional<double> HeatPumpAirToWater::autosizedRatedHeatingCapacity() const {
+    return getImpl<detail::HeatPumpAirToWater_Impl>()->autosizedRatedHeatingCapacity();
+  }
+
+  boost::optional<double> HeatPumpAirToWater::autosizedRatedCoolingCapacity() const {
+    return getImpl<detail::HeatPumpAirToWater_Impl>()->autosizedRatedCoolingCapacity();
   }
 
   /// @cond
