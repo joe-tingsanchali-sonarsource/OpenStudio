@@ -470,19 +470,19 @@ namespace model {
     }
 
     boost::optional<double> HeatPumpAirToWater_Impl::autosizedRatedAirFlowRateinHeatingMode() const {
-      return getAutosizedValue("Design Size Source Side Volume Flow Rate", "m3/s", "HeatPump:AirToWater:Heating");
+      return getAutosizedValue("Design Size Rated Air Volume Flow Rate in Heating Mode", "m3/s");
     }
 
     boost::optional<double> HeatPumpAirToWater_Impl::autosizedRatedWaterFlowRateinHeatingMode() const {
-      return getAutosizedValue("Design Size Load Side Volume Flow Rate", "m3/s", "HeatPump:AirToWater:Heating");
+      return getAutosizedValue("Design Size Rated Water Volume Flow Rate in Heating Mode", "m3/s");
     }
 
     boost::optional<double> HeatPumpAirToWater_Impl::autosizedRatedAirFlowRateinCoolingMode() const {
-      return getAutosizedValue("Design Size Source Side Volume Flow Rate", "m3/s", "HeatPump:AirToWater:Cooling");
+      return getAutosizedValue("Design Size Rated Air Volume Flow Rate in Cooling Mode", "m3/s");
     }
 
     boost::optional<double> HeatPumpAirToWater_Impl::autosizedRatedWaterFlowRateinCoolingMode() const {
-      return getAutosizedValue("Design Size Load Side Volume Flow Rate", "m3/s", "HeatPump:AirToWater:Cooling");
+      return getAutosizedValue("Design Size Rated Water Volume Flow Rate in Cooling Mode", "m3/s");
     }
 
     void HeatPumpAirToWater_Impl::autosize() {}
