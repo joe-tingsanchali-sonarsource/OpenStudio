@@ -15,6 +15,7 @@ namespace model {
 
   class Schedule;
   class ThermalZone;
+  class WaterHeaterSizing;
 
   namespace detail {
 
@@ -50,6 +51,10 @@ namespace model {
       virtual unsigned demandInletPort() const override;
 
       virtual unsigned demandOutletPort() const override;
+
+      virtual std::vector<ModelObject> children() const override;
+
+      virtual ModelObject clone(Model model) const override;
 
       virtual void autosize() override;
 
@@ -270,6 +275,8 @@ namespace model {
       //@}
       /** @name Other */
       //@{
+
+      WaterHeaterSizing waterHeaterSizing() const;
 
       //@}
      protected:
