@@ -88,7 +88,33 @@ namespace model {
     }
 
     boost::optional<double> HeatPumpAirToWaterCoolingSpeedData_Impl::autosizedRatedCoolingCapacity() {
-      return getAutosizedValue("TODO_CHECK_SQL Rated Cooling Capacity", "W");
+      boost::optional<double> result;
+      auto awhp_ccs = heatPumpAirToWaterCoolings();
+      if (awhp_ccs.empty()) {
+        return result;
+      }
+      size_t n_found = 0;
+      for (const auto& awhp_cc : awhp_ccs) {
+        // Check needed because could be the booster speed
+        if (awhp_cc.speeds().empty()) {
+          continue;
+        }
+        // It has to be the last speed
+        if (awhp_cc.speeds().back().handle() != this->handle()) {
+          continue;
+        }
+        if (n_found == 0) {
+          // Setting the first one only
+          result = awhp_cc.autosizedRatedCoolingCapacity();
+        }
+        ++n_found;
+      }
+      if (n_found > 1) {
+        LOG(Warn, briefDescription() << " is used as the highest speed in multiple HeatPumpAirToWaterCooling objects, "
+                                        "returning the autosized value from the first one only.");
+      }
+
+      return result;
     }
 
     double HeatPumpAirToWaterCoolingSpeedData_Impl::ratedCOPforCooling() const {
