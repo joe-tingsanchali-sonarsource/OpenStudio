@@ -359,6 +359,10 @@ namespace model {
     void HeatPumpAirToWaterCooling_Impl::autosize() {
       autosizeRatedAirFlowRate();
       autosizeRatedWaterFlowRate();
+      auto speeds = this->speeds();
+      if (!speeds.empty()) {
+        speeds.back().autosize();  // Only need/can autosize the last (highest) speed
+      }
     }
 
     void HeatPumpAirToWaterCooling_Impl::applySizingValues() {
@@ -368,6 +372,13 @@ namespace model {
 
       if (boost::optional<double> val_ = autosizedRatedWaterFlowRate()) {
         setRatedWaterFlowRate(*val_);
+      }
+
+      if (boost::optional<double> val_ = autosizedRatedCoolingCapacity()) {
+        auto speeds = this->speeds();
+        if (!speeds.empty()) {
+          speeds.back().setRatedCoolingCapacity(*val_);  // Only need/can autosize the last (highest) speed
+        }
       }
     }
 
