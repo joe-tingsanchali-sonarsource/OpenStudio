@@ -33817,6 +33817,7 @@ OS:WaterHeater:Sizing,
        \required-field
        \type object-list
        \object-list WaterHeaterNames
+       \object-list ThermalStorageWaterNames
   A3 , \field Design Mode
        \type choice
        \key PeakDraw
@@ -34092,6 +34093,7 @@ OS:ThermalStorage:ChilledWater:Stratified,
   A2 , \field Name
        \required-field
        \type alpha
+       \reference ThermalStorageWaterNames
        \reference ConnectionObject
   N1 , \field Tank Volume
        \required-field
