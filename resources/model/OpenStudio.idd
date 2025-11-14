@@ -14878,6 +14878,400 @@ OS:HeatPump:AirToWater:FuelFired:Cooling,
        \required-field
        \note Minimum modulation level of the gas-fired heat pump. Typically less than 1.0 and slightly higher than the minimum part load ratio.
 
+OS:HeatPump:AirToWater,
+        \memo air-to-water heat pump system which provides either chilled or hot water with single- or variable speed compressors.
+        \min-fields 20
+   A1,  \field Handle
+        \required-field
+        \type handle
+   A2,  \field Name
+        \required-field
+        \type alpha
+        \note Enter a unique name for this air-to-water heat pump
+   A3,  \field Operating Mode Control Method
+        \required-field
+        \type choice
+        \key ScheduledModes
+        \key EMSControlled
+        \key Load
+   A4,  \field Operating Mode Control Option for Multiple Unit
+        \required-field
+        \note this determines how the operation mode is assigned when the load
+        \note is too large to be met by multiple heat pump units
+        \type choice
+        \key SingleMode
+        \key CoolingPriority
+        \key HeatingPriority
+        \key Balanced
+        \note SingleMode: all units will operate in the same mode (either all
+        \note cooling or all heating). If the heating load is larger, then all unit
+        \note operates in heating mode; otherwise, all operate in cooling mode.
+        \note CoolingPriority: each unit will be staged one by one based on
+        \note cooling demand first, after all cooling demand is met, if there are
+        \note remaining heat pumps, they will be used to fulfill the remaining heating
+        \note demand.
+        \note HeatingPriority: similar to the previous cooling priority one,
+        \note but will prioritize to meet the heating demand first
+        \note Balanced: balance the percent satisfied heating or cooling load
+   A5,  \field Operating Mode Control Schedule Name
+        \note This field is used if the control method is set to ScheduledModes
+        \note Schedule values control operating mode: 0=off, 1=cooling, 2=heating
+        \type object-list
+        \object-list ScheduleNames
+   N1,  \field Minimum Part Load Ratio
+        \required-field
+        \note Below this operating limit compressor cycling will occur
+        \type real
+        \minimum 0.0
+   A6,  \field Air Inlet Node Name
+        \type alpha
+        \note The node from which the heat pump draws its inlet air.
+   A7,  \field Air Outlet Node Name
+        \type alpha
+        \note The node to which the heat pump sends its outlet air.
+   N2, \field Maximum Outdoor Dry Bulb Temperature For Defrost Operation
+        \required-field
+        \note defrost operation will not be active above this outdoor temperature
+   A8,  \field Heat Pump Defrost Control
+        \required-field
+        \type choice
+        \key None
+        \key Timed
+        \key OnDemand
+        \key TimedEmpirical
+   N3,  \field Heat Pump Defrost Time Period Fraction
+        \required-field
+        \type real
+        \minimum 0.0
+        \note Fraction of time in defrost mode
+        \note only applicable if timed defrost control is specified
+   N4,  \field Resistive Defrost Heater Capacity
+        \required-field
+        \type real
+        \minimum 0.0
+        \units W
+        \note only applicable if resistive defrost strategy is specified
+        \ip-units W
+   A9,  \field Defrost Energy Input Ratio Function of Temperature Curve Name
+        \type object-list
+        \object-list BivariateFunctions
+        \note univariate curve = a + b*OAT is typical, other univariate curves may be used
+        \note bivariate curve = a + b*WB + c*WB**2 + d*OAT + e*OAT**2 + f*WB*OAT
+        \note OAT = outdoor air dry-bulb temperature (C)
+        \note WB = wet-bulb temperature (C) of air entering the indoor coil
+        \note only required if Timed or OnDemand defrost strategy is specified
+   N5,  \field Heat Pump Multiplier
+        \required-field
+        \type integer
+        \note intend to model modular heat pumps
+   A10, \field Control Type
+        \required-field
+        \type choice
+        \key FixedSpeed
+        \key VariableSpeed
+   N6,  \field Crankcase Heater Capacity
+        \required-field
+        \type real
+        \minimum 0.0
+        \units W
+        \note The compressor crankcase heater only operates when the dry-bulb temperature of air
+        \note surrounding the compressor is below the Maximum Ambient Temperature for Crankcase
+        \note Heater Operation and the heat pump is off. The ambient temperature uses the outdoor air temperature.
+   A11, \field Crankcase Heater Capacity Function of Temperature Curve Name
+        \note A Curve:* or Table:Lookup object encoding the relationship between
+        \note the crankcase heater capacity and the outdoor air temperature. When this field is
+        \note missing or empty, constant crankcase heater capacity will be assumed.
+        \type object-list
+        \object-list UnivariateFunctions
+   N7,  \field Maximum Ambient Temperature for Crankcase Heater Operation
+        \required-field
+        \type real
+        \minimum 0.0
+        \units C
+        \note The compressor crankcase heater only operates when the dry-bulb temperature of air
+        \note surrounding the compressor is below the Maximum Outdoor Temperature for Crankcase
+        \note Heater Operation and the unit is off.
+   A12, \field Heating Operation Mode
+        \type object-list
+        \object-list HeatPumpAirToWaterHeating
+        \note A HeatPump:AirToWater:Heating object. If not specified, heating is disabled.
+   A13; \field Cooling Operation Mode
+        \type object-list
+        \object-list HeatPumpAirToWaterCooling
+        \note A HeatPump:AirToWater:Cooling object. If not specified, cooling is disabled.
+
+OS:HeatPump:AirToWater:Heating,
+        \memo air-to-water heat pump system which provides hot water with single or variable speed compressors.
+        \min-fields 16
+   A1,  \field Handle
+        \required-field
+        \type handle
+   A2,  \field Name
+        \required-field
+        \type alpha
+        \note Enter a unique name for this air-to-water heat pump
+        \reference HeatPumpAirToWaterHeating
+        \reference ConnectionObject
+   A3,  \field Availability Schedule Name
+        \required-field
+        \type object-list
+        \object-list ScheduleNames
+        \note Enter the name of a schedule that defines the availability of the unit in heating mode
+        \note Schedule values of 0 denote the unit is off. All other values denote the unit is available
+        \note If this field is left blank, the unit is available the entire simulation
+   N1,  \field Rated Inlet Air Temperature
+        \required-field
+        \type real
+        \units C
+        \note inlet air dry-bulb temperature corresponding to rated heat pump performance
+        \note (capacity, COP).
+   N2,  \field Rated Air Flow Rate
+        \required-field
+        \type real
+        \units m3/s
+        \minimum> 0.0
+        \autosizable
+        \note air flow rate corresponding to rated heat pump performance
+        \note (capacity, COP).
+   N3,  \field Rated Leaving Water Temperature
+        \required-field
+        \type real
+        \units C
+        \note outlet water temperature corresponding to rated heat pump performance
+        \note (heating capacity, COP).
+   N4 , \field Rated Water Flow Rate
+        \required-field
+        \type real
+        \units m3/s
+        \ip-units gal/min
+        \minimum> 0.0
+        \autosizable
+        \note Condenser water flow rate corresponding to rated heat pump performance
+        \note (capacity, COP).
+   N5,  \field Minimum Outdoor Air Temperature
+        \required-field
+        \type real
+        \units C
+        \note Enter the minimum outdoor temperature allowed for heating operation
+        \note Heating is disabled below this temperature
+   N6,  \field Maximum Outdoor Air Temperature
+        \required-field
+        \type real
+        \units C
+        \note Enter the maximum outdoor temperature allowed for heating operation
+        \note Heating is disabled above this temperature
+   A4,  \field Minimum Leaving Water Temperature Curve Name
+        \type object-list
+        \object-list UnivariateFunctions
+        \note quadratic curve = a + b*OAT is typical, other univariate curves may be used
+        \note OAT = Outdoor Dry-Bulb Temperature
+   A5,  \field Maximum Leaving Water Temperature Curve Name
+        \type object-list
+        \object-list UnivariateFunctions
+        \note quadratic curve = a + b*OAT is typical, other univariate curves may be used
+        \note OAT = Outdoor Dry-Bulb Temperature
+   N7,  \field Sizing Factor
+        \required-field
+        \note Multiplies the autosized capacity and flow rates
+        \type real
+        \minimum> 0.0
+   A6,  \field Hot Water Inlet Node Name
+        \required-field
+        \type object-list
+        \object-list ConnectionNames
+        \note The node connects to the hot water loop
+   A7,  \field Hot Water Outlet Node Name
+        \required-field
+        \type object-list
+        \object-list ConnectionNames
+        \note The node connects to the hot water loop
+   A8,  \field Speed Data List
+        \required-field
+        \type object-list
+        \object-list ModelObjectLists
+        \note The minimum number of speeds is 0 (no heating) and the maximum is 5.
+   A9;  \field Booster Mode On Speed
+        \note This field indicates that the heat pump has a booster mode enabled for heating operation.
+        \note The heat pump will operate at a higher capacity during heating operation.
+        \note If omitted the booster mode is not enabled.
+        \type object-list
+        \object-list HeatPumpAirToWaterHeatingSpeedData
+
+OS:HeatPump:AirToWater:Cooling,
+        \memo air-to-water heat pump system which provides hot water with single or variable speed compressors.
+        \min-fields 16
+   A1,  \field Handle
+        \required-field
+        \type handle
+   A2,  \field Name
+        \required-field
+        \type alpha
+        \note Enter a unique name for this air-to-water heat pump
+        \reference HeatPumpAirToWaterCooling
+        \reference ConnectionObject
+   A3,  \field Availability Schedule Name
+        \required-field
+        \type object-list
+        \object-list ScheduleNames
+        \note Enter the name of a schedule that defines the availability of the unit in cooling mode
+        \note Schedule values of 0 denote the unit is off. All other values denote the unit is available
+        \note If this field is left blank, the unit is available the entire simulation
+   N1,  \field Rated Inlet Air Temperature
+        \required-field
+        \type real
+        \units C
+        \note inlet air dry-bulb temperature corresponding to rated heat pump performance
+        \note (capacity, COP).
+   N2,  \field Rated Air Flow Rate
+        \required-field
+        \type real
+        \units m3/s
+        \minimum> 0.0
+        \autosizable
+        \note air flow rate corresponding to rated heat pump performance
+        \note (capacity, COP).
+   N3,  \field Rated Leaving Water Temperature
+        \required-field
+        \type real
+        \units C
+        \note outlet water temperature corresponding to rated heat pump performance
+        \note (cooling capacity, COP).
+   N4,  \field Rated Water Flow Rate
+        \required-field
+        \type real
+        \units m3/s
+        \ip-units gal/min
+        \minimum> 0.0
+        \autosizable
+        \note Condenser water flow rate corresponding to rated heat pump performance
+        \note (capacity, COP).
+   N5,  \field Minimum Outdoor Air Temperature
+        \required-field
+        \type real
+        \units C
+        \note Enter the minimum outdoor temperature allowed for cooling operation
+        \note Cooling is disabled below this temperature
+   N6,  \field Maximum Outdoor Air Temperature
+        \required-field
+        \type real
+        \units C
+        \note Enter the maximum outdoor temperature allowed for cooling operation
+        \note Cooling is disabled above this temperature
+   A4,  \field Minimum Leaving Water Temperature Curve Name
+        \type object-list
+        \object-list UnivariateFunctions
+        \note quadratic curve = a + b*OAT is typical, other univariate curves may be used
+        \note OAT = Outdoor Dry-Bulb Temperature
+   A5,  \field Maximum Leaving Water Temperature Curve Name
+        \type object-list
+        \object-list UnivariateFunctions
+        \note quadratic curve = a + b*OAT is typical, other univariate curves may be used
+        \note OAT = Outdoor Dry-Bulb Temperature
+   N7,  \field Sizing Factor
+        \required-field
+        \note Multiplies the autosized capacity and flow rates
+        \type real
+        \minimum> 0.0
+   A6,  \field Chilled Water Inlet Node Name
+        \required-field
+        \type object-list
+        \object-list ConnectionNames
+        \note The node connects to the hot water loop
+   A7,  \field Chilled Water Outlet Node Name
+        \required-field
+        \type object-list
+        \object-list ConnectionNames
+        \note The node connects to the hot water loop
+   A8,  \field Speed Data List
+        \required-field
+        \type object-list
+        \object-list ModelObjectLists
+        \note The minimum number of speeds is 0 (no cooling) and the maximum is 5.
+   A9;  \field Booster Mode On Speed
+        \note This field indicates that the heat pump has a booster mode enabled for cooling operation.
+        \note The heat pump will operate at a higher capacity during cooling operation.
+        \note If omitted the booster mode is not enabled.
+        \type object-list
+        \object-list HeatPumpAirToWaterCoolingSpeedData
+
+OS:HeatPump:AirToWater:Heating:SpeedData,
+        \min-fields 7
+   A1,  \field Handle
+        \required-field
+        \type handle
+   A2,  \field Name
+        \required-field
+        \type alpha
+        \reference HeatPumpAirToWaterHeatingSpeedData
+   N1,  \field Rated Heating Capacity
+        \required-field
+        \type real
+        \units W
+        \minimum> 0.0
+        \autosizable
+   N2,  \field Rated COP for Heating
+        \required-field
+        \type real
+        \minimum> 0.0
+        \units W/W
+   A3,  \field Normalized Heating Capacity Function of Temperature Curve Name
+        \required-field
+        \type object-list
+        \object-list BivariateFunctions
+        \note: CAPFT - Normalized Capacity Function of Temperature Curve Name,
+        \note which is a biquadratic curve or a lookup table of air and water temperature.
+   A4,  \field Heating Energy Input Ratio Function of Temperature Curve Name
+        \required-field
+        \type object-list
+        \object-list BivariateFunctions
+        \note EIRFT - Fuel Energy Input Ratio Function of Temperature Curve Name,
+        \note which is a biquadratic curve or a lookup table of air and water temperature.
+   A5;  \field Heating Energy Input Ratio Function of PLR Curve Name
+        \required-field
+        \type object-list
+        \object-list UnivariateFunctions
+        \note EIRFPLR - Fuel Energy Input Ratio Function of Part Load Ratio(PLR) Curve Name,
+        \note which is a cubic curve or a lookup table.
+
+OS:HeatPump:AirToWater:Cooling:SpeedData,
+        \min-fields 7
+   A1,  \field Handle
+        \required-field
+        \type handle
+   A2,  \field Name
+        \required-field
+        \type alpha
+        \reference HeatPumpAirToWaterCoolingSpeedData
+   N1,  \field Rated Cooling Capacity
+        \required-field
+        \type real
+        \units W
+        \minimum> 0.0
+        \autosizable
+   N2,  \field Rated COP for Cooling
+        \required-field
+        \type real
+        \minimum> 0.0
+        \units W/W
+   A3,  \field Normalized Cooling Capacity Function of Temperature Curve Name
+        \required-field
+        \type object-list
+        \object-list BivariateFunctions
+        \note: CAPFT - Normalized Capacity Function of Temperature Curve Name,
+        \note which is a biquadratic curve or a lookup table of air and water temperature.
+   A4,  \field Cooling Energy Input Ratio Function of Temperature Curve Name
+        \required-field
+        \type object-list
+        \object-list BivariateFunctions
+        \note EIRFT - Fuel Energy Input Ratio Function of Temperature Curve Name,
+        \note which is a biquadratic curve or a lookup table of air and water temperature.
+   A5;  \field Cooling Energy Input Ratio Function of PLR Curve Name
+        \required-field
+        \type object-list
+        \object-list UnivariateFunctions
+        \note EIRFPLR - Fuel Energy Input Ratio Function of Part Load Ratio(PLR) Curve Name,
+        \note which is a cubic curve or a lookup table.
+
 OS:Chiller:Electric:EIR,
        \memo This chiller model is the empirical model from the DOE-2 building Energy
        \memo simulation program. Chiller performance at off-reference conditions is modeled
