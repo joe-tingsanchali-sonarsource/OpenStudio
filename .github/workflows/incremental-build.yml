@@ -10,7 +10,7 @@ concurrency:
 jobs:
   build:
     if: contains(github.event.pull_request.labels.*.name, 'Pull Request - Ready for CI')
-    runs-on: [self-hosted, X64, Linux, 2204]
+    runs-on: [self-hosted, X64, Linux, "2204"]
 
     permissions:
       contents: read
