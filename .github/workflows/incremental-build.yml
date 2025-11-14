@@ -13,7 +13,7 @@ concurrency:
 jobs:
   build:
     if: github.event_name == 'push' || contains(github.event.pull_request.labels.*.name, 'Pull Request - Ready for CI')
-    runs-on: linux-openstudio-2
+    runs-on: [self-hosted, X64, Linux, 2204]
 
     permissions:
       contents: read
@@ -147,16 +147,16 @@ jobs:
         run: |
           set +e  # Don't exit on first failure
           mkdir -p Testing/run{1,2,3}
-          
+
           echo "Starting first test run..."
           ctest -j ${{ env.MAX_SAFE_THREADS }} --no-compress-output --output-on-failure --output-junit Testing/run1/results.xml
           RESULT1=$?
-          
+
           if [ $RESULT1 -ne 0 ]; then
             echo "First test run failed (exit code: $RESULT1), retrying failed tests..."
             ctest -j ${{ env.MAX_SAFE_THREADS }} --rerun-failed --no-compress-output --output-on-failure --output-junit Testing/run2/results.xml
             RESULT2=$?
-            
+
             if [ $RESULT2 -ne 0 ]; then
               echo "Second test run failed (exit code: $RESULT2), final attempt with verbose output..."
               ctest -j ${{ env.MAX_SAFE_THREADS }} --rerun-failed --no-compress-output -VV --output-junit Testing/run3/results.xml
@@ -169,10 +169,10 @@ jobs:
             RESULT2=0
             RESULT3=0
           fi
-          
+
           # Report results
           echo "Test run results: Run1=$RESULT1, Run2=$RESULT2, Run3=$RESULT3"
-          
+
           # Set job status based on results
           if [ $RESULT1 -eq 0 ] || [ $RESULT2 -eq 0 ] || [ $RESULT3 -eq 0 ]; then
             echo "Tests passed (some may have required retries)"
@@ -201,72 +201,72 @@ jobs:
         if: always()
         run: |
           mkdir -p ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_SOURCE_NAME }}/${{ env.OPENSTUDIO_BUILD_NAME }}/Testing/dashboard
-          
+
           # Create comprehensive test dashboard
           cat > ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_SOURCE_NAME }}/${{ env.OPENSTUDIO_BUILD_NAME }}/Testing/dashboard/test-dashboard.md << 'EOF'
           # 🧪 Test Results Dashboard
-          
+
           ## Summary
-          
+
           EOF
-          
+
           # Process JUnit XML files and extract test information
           python3 << 'PYTHON_EOF'
           import xml.etree.ElementTree as ET
           import os
           import glob
           from datetime import datetime
-          
+
           build_dir = "${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_SOURCE_NAME }}/${{ env.OPENSTUDIO_BUILD_NAME }}"
           dashboard_file = f"{build_dir}/Testing/dashboard/test-dashboard.md"
-          
+
           # Find all JUnit XML files
           xml_files = glob.glob(f"{build_dir}/Testing/run*/results.xml")
-          
+
           total_tests = 0
           total_failures = 0
           total_errors = 0
           total_skipped = 0
           failed_tests = []
-          
+
           # Parse XML files
           for xml_file in xml_files:
               if os.path.exists(xml_file):
                   try:
                       tree = ET.parse(xml_file)
                       root = tree.getroot()
-                      
+
                       # Handle different JUnit XML formats
                       if root.tag == 'testsuites':
                           testsuites = root.findall('testsuite')
                       else:
                           testsuites = [root]
-                      
+
                       for testsuite in testsuites:
                           suite_name = testsuite.get('name', 'Unknown')
                           tests = int(testsuite.get('tests', 0))
                           failures = int(testsuite.get('failures', 0))
                           errors = int(testsuite.get('errors', 0))
                           skipped = int(testsuite.get('skipped', 0))
-                          
+
                           total_tests += tests
                           total_failures += failures
                           total_errors += errors
                           total_skipped += skipped
-                          
+
                           # Get failed test details
                           for testcase in testsuite.findall('testcase'):
                               test_name = testcase.get('name', 'Unknown')
                               classname = testcase.get('classname', suite_name)
-                              
+
                               failure = testcase.find('failure')
                               error = testcase.find('error')
-                              
+
                               if failure is not None or error is not None:
                                   failure_info = failure if failure is not None else error
                                   message = failure_info.get('message', 'No message')
                                   details = failure_info.text or 'No details available'
-                                  
+
                                   failed_tests.append({
                                       'suite': suite_name,
                                       'class': classname,
@@ -277,12 +277,12 @@ jobs:
                                   })
                   except Exception as e:
                       print(f"Error parsing {xml_file}: {e}")
-          
+
           # Generate dashboard content
           with open(dashboard_file, 'a') as f:
               # Summary section
               success_rate = ((total_tests - total_failures - total_errors) / total_tests * 100) if total_tests > 0 else 0
-              
+
               f.write(f"| Metric | Value |\n")
               f.write(f"|--------|-------|\n")
               f.write(f"| **Total Tests** | {total_tests} |\n")
@@ -292,18 +292,18 @@ jobs:
               f.write(f"| **Skipped** | {total_skipped} |\n")
               f.write(f"| **Success Rate** | {success_rate:.1f}% |\n")
               f.write(f"| **Generated** | {datetime.now().strftime('%Y-%m-%d %H:%M:%S UTC')} |\n\n")
-              
+
               if success_rate >= 100:
                   f.write("## ✅ All Tests Passed!\n\n")
               elif success_rate >= 95:
                   f.write("## ⚠️ Minor Issues Detected\n\n")
               else:
                   f.write("## ❌ Significant Test Failures\n\n")
-              
+
               # Failed tests section
               if failed_tests:
                   f.write(f"## 🔍 Failed Tests ({len(failed_tests)} failures)\n\n")
-                  
+
                   # Group by test suite
                   suites = {}
                   for test in failed_tests:
@@ -311,10 +311,10 @@ jobs:
                       if suite not in suites:
                           suites[suite] = []
                       suites[suite].append(test)
-                  
+
                   for suite_name, suite_tests in suites.items():
                       f.write(f"### {suite_name} ({len(suite_tests)} failures)\n\n")
-                      
+
                       for test in suite_tests:
                           f.write(f"<details>\n")
                           f.write(f"<summary><strong>{test['class']}.{test['name']}</strong> ({test['run']})</summary>\n\n")
@@ -323,7 +323,7 @@ jobs:
                           f.write(f"**Full Details:**\n")
                           f.write(f"```\n{test['details']}\n```\n\n")
                           f.write(f"</details>\n\n")
-              
+
               # Test run information
               f.write("## 📊 Test Run Information\n\n")
               f.write("| Run | XML File | Status |\n")
@@ -332,10 +332,10 @@ jobs:
                   status = "✅ Found" if os.path.exists(xml_file) else "❌ Missing"
                   run_name = os.path.basename(os.path.dirname(xml_file))
                   f.write(f"| {run_name} | `{os.path.basename(xml_file)}` | {status} |\n")
-              
+
               if not xml_files:
                   f.write("| - | No XML files found | ❌ Missing |\n")
-          
+
           print(f"Dashboard generated with {total_tests} tests, {total_failures + total_errors} failures")
           PYTHON_EOF
 
