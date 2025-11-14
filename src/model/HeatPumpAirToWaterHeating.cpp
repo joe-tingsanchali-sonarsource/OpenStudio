@@ -447,7 +447,7 @@ namespace model {
       const auto speedVector = speeds();
       auto it = std::find_if(speedVector.cbegin(), speedVector.cend(), [&](const HeatPumpAirToWaterHeatingSpeedData& s) { return s == speed; });
       if (it != speedVector.cend()) {
-        return std::distance(speedVector.cbegin(), it) + 1;  // 1-indexed
+        return static_cast<unsigned>(std::distance(speedVector.cbegin(), it)) + 1;  // 1-indexed
       }
       return boost::none;
     }
