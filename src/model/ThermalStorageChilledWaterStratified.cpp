@@ -734,7 +734,7 @@ namespace model {
     }
 
     boost::optional<double> ThermalStorageChilledWaterStratified_Impl::autosizedNominalCoolingCapacity() const {
-      return getAutosizedValue("Nominal Cooling Capacity", "W");
+      return getAutosizedValue("Maximum Heater Capacity", "W");
     }
 
     boost::optional<double> ThermalStorageChilledWaterStratified_Impl::autosizedUseSideDesignFlowRate() const {
