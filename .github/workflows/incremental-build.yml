@@ -2,9 +2,6 @@ name: Build and Test (Ubuntu 22.04)
 
 on:
   pull_request:
-  push:
-    branches:
-      - main
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -12,7 +9,7 @@ concurrency:
 
 jobs:
   build:
-    if: github.event_name == 'push' || contains(github.event.pull_request.labels.*.name, 'Pull Request - Ready for CI')
+    if: contains(github.event.pull_request.labels.*.name, 'Pull Request - Ready for CI')
     runs-on: [self-hosted, X64, Linux, 2204]
 
     permissions:
