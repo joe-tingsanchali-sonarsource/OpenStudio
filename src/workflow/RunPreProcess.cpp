@@ -68,11 +68,6 @@ void OSWorkflow::runPreProcess() {
         OS_ASSERT(idfObject_);
         workspace_->addObject(idfObject_.get());
       }
-      for (auto meter : c_metersForced) {
-        auto idfObject_ = openstudio::IdfObject::load(std::string{meter});
-        OS_ASSERT(idfObject_);
-        workspace_->addObject(idfObject_.get());
-      }
     });
     LOG(Info, "Finished preprocess job for EnergyPlus simulation");
   }
