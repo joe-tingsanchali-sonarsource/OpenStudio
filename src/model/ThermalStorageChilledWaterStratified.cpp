@@ -6,6 +6,7 @@
 #include "ThermalStorageChilledWaterStratified.hpp"
 #include "ThermalStorageChilledWaterStratified_Impl.hpp"
 
+#include "Model.hpp"
 #include "Schedule.hpp"
 #include "Schedule_Impl.hpp"
 #include "ThermalZone.hpp"
@@ -14,6 +15,8 @@
 #include "ScheduleDay.hpp"
 #include "ScheduleTypeLimits.hpp"
 #include "ScheduleTypeRegistry.hpp"
+#include "WaterHeaterSizing.hpp"
+#include "WaterHeaterSizing_Impl.hpp"
 
 #include "../utilities/core/Assert.hpp"
 #include "../utilities/data/DataEnums.hpp"
@@ -75,6 +78,18 @@ namespace model {
       return ThermalStorageChilledWaterStratified::iddObjectType();
     }
 
+    std::vector<ModelObject> ThermalStorageChilledWaterStratified_Impl::children() const {
+      return std::vector<ModelObject>{waterHeaterSizing()};
+    }
+
+    ModelObject ThermalStorageChilledWaterStratified_Impl::clone(Model model) const {
+      auto whClone = WaterToWaterComponent_Impl::clone(model).cast<ThermalStorageChilledWaterStratified>();
+
+      auto sizingClone = waterHeaterSizing().clone(model).cast<WaterHeaterSizing>();
+      sizingClone.getImpl<WaterHeaterSizing_Impl>()->setWaterHeater(whClone);
+      return std::move(whClone);
+    }
+
     std::vector<ScheduleTypeKey> ThermalStorageChilledWaterStratified_Impl::getScheduleTypeKeys(const Schedule& schedule) const {
       // TODO: Check schedule display names.
       std::vector<ScheduleTypeKey> result;
@@ -94,6 +109,27 @@ namespace model {
         result.push_back(ScheduleTypeKey("ThermalStorageChilledWaterStratified", "Source Side Availability"));
       }
       return result;
+    }
+
+    WaterHeaterSizing ThermalStorageChilledWaterStratified_Impl::waterHeaterSizing() const {
+      boost::optional<WaterHeaterSizing> waterHeaterSizing_;
+
+      auto sizingObjects = getObject<ThermalStorageChilledWaterStratified>().getModelObjectSources<WaterHeaterSizing>();
+      auto predicate = [thisHandle = this->handle()](const auto& siz) {
+        try {
+          return siz.waterHeater().handle() == thisHandle;
+        } catch (...) {
+          LOG(Debug, siz.briefDescription() << " is not attached to a WaterHeater object.");
+          return false;
+        }
+      };
+
+      auto it = std::find_if(sizingObjects.cbegin(), sizingObjects.cend(), predicate);
+      if (it != sizingObjects.cend()) {
+        return *it;
+      } else {
+        LOG_AND_THROW(briefDescription() << " missing WaterHeater:Sizing object.");
+      }
     }
 
     unsigned ThermalStorageChilledWaterStratified_Impl::supplyInletPort() const {
@@ -698,7 +734,7 @@ namespace model {
     }
 
     boost::optional<double> ThermalStorageChilledWaterStratified_Impl::autosizedNominalCoolingCapacity() const {
-      return getAutosizedValue("Nominal Cooling Capacity", "W");
+      return getAutosizedValue("Maximum Heater Capacity", "W");
     }
 
     boost::optional<double> ThermalStorageChilledWaterStratified_Impl::autosizedUseSideDesignFlowRate() const {
@@ -805,6 +841,8 @@ namespace model {
     setNode8AdditionalLossCoefficient(0.0);
     setNode9AdditionalLossCoefficient(0.0);
     setNode10AdditionalLossCoefficient(0.0);
+
+    WaterHeaterSizing waterHeaterSizing(*this);
   }
 
   IddObjectType ThermalStorageChilledWaterStratified::iddObjectType() {
@@ -1216,6 +1254,10 @@ namespace model {
   ThermalStorageChilledWaterStratified::ThermalStorageChilledWaterStratified(std::shared_ptr<detail::ThermalStorageChilledWaterStratified_Impl> impl)
     : WaterToWaterComponent(std::move(impl)) {}
   /// @endcond
+
+  WaterHeaterSizing ThermalStorageChilledWaterStratified::waterHeaterSizing() const {
+    return getImpl<detail::ThermalStorageChilledWaterStratified_Impl>()->waterHeaterSizing();
+  }
 
   boost::optional<double> ThermalStorageChilledWaterStratified::autosizedNominalCoolingCapacity() const {
     return getImpl<detail::ThermalStorageChilledWaterStratified_Impl>()->autosizedNominalCoolingCapacity();

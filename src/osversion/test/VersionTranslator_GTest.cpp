@@ -4669,10 +4669,24 @@ TEST_F(OSVersionFixture, update_3_10_0_to_3_11_0_ThermalStorageChilledWaterStrat
   EXPECT_TRUE(ts.isEmpty(9));
 
   // New Field: Nominal Cooling Capacity
-  EXPECT_EQ("Autosize", ts.getString(10).get());
+  EXPECT_EQ(0.0, ts.getDouble(10).get());
 
   // After insertion and also last field: Ambient Temperature Indicator
   EXPECT_EQ("Outdoors", ts.getString(11).get());
+
+  // VT should have added one WaterHeater:Sizing object
+  std::vector<WorkspaceObject> sizingObjs = model->getObjectsByType("OS:WaterHeater:Sizing");
+  ASSERT_EQ(1u, sizingObjs.size());
+  const auto& sizingObj = sizingObjs.front();
+
+  auto wh_ = sizingObj.getTarget(1);
+  ASSERT_TRUE(wh_);
+  EXPECT_EQ(wh_->handle(), ts.handle());
+
+  EXPECT_EQ("PeakDraw", sizingObj.getString(2, false, true).get());
+  EXPECT_EQ(0.538503, sizingObj.getDouble(3).get());
+  EXPECT_EQ(0.0, sizingObj.getDouble(4).get());
+  EXPECT_EQ(1.0, sizingObj.getDouble(5).get());
 }
 
 TEST_F(OSVersionFixture, update_3_10_0_to_3_11_0_Sizing) {

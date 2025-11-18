@@ -119,7 +119,7 @@ jobs:
             -DBUILD_PYTHON_BINDINGS:BOOL=ON \
             -DBUILD_PYTHON_PIP_PACKAGE:BOOL=${{ matrix.pip_package }} \
             -DPYTHON_VERSION:STRING=${{ env.PY_VERSION }} \
-            ../${{ env.OPENSTUDIO_SOURCE }}
+            ..
 
       - name: Build with Ninja
         working-directory: ${{ env.OPENSTUDIO_BUILD }}
@@ -163,7 +163,7 @@ jobs:
         working-directory: ${{ env.OPENSTUDIO_BUILD }}
         run: |
           set -euo pipefail
-          ruby ../OpenStudio/developer/ruby/DashboardFromCDash.rb "${{ env.TEST_DASHBOARD_RELATIVE }}"
+          ruby ../developer/ruby/DashboardFromCDash.rb "${{ env.TEST_DASHBOARD_RELATIVE }}"
 
       - name: Upload Testing artifact
         if: always()
