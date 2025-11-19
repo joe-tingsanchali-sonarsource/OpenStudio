@@ -1963,7 +1963,7 @@ $logger.info "Executing argv: #{ARGV}"
 
 begin
   result = CLI.new(ARGV).execute
-rescue Exception => e
+rescue StandardError => e
   puts "Error executing argv: #{ARGV}"
   if e.backtrace.nil?
     puts "Error: #{e.message}"
