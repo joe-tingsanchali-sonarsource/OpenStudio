@@ -88,6 +88,14 @@ jobs:
           restore-keys: |
             ccache-${{ runner.os }}-${{ matrix.platform }}-
 
+      - name: Cache Conan data
+        uses: actions/cache@v4
+        with:
+          path: ~/.conan2
+          key: conan2-${{ runner.os }}-${{ matrix.platform }}-${{ github.ref }}
+          restore-keys: |
+            conan2-${{ runner.os }}-${{ matrix.platform }}-
+
       - name: Prepare workspace
         run: |
           set -euo pipefail
@@ -134,7 +142,17 @@ jobs:
             -DDISCOVER_TESTS_AFTER_BUILD:BOOL=ON \
             -DBUILD_PYTHON_PIP_PACKAGE:BOOL=${{ matrix.pip_package }} \
             -DPYTHON_VERSION:STRING=${{ env.PY_VERSION }} \
+            -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=ON \
             ..
+
+      - name: Upload configure artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: configure-${{ matrix.platform }}-${{ github.sha }}
+          path: |
+            ${{ env.OPENSTUDIO_BUILD }}/CMakeCache.txt
+            ${{ env.OPENSTUDIO_BUILD }}/compile_commands.json
 
       - name: Build with Ninja
         working-directory: ${{ env.OPENSTUDIO_BUILD }}
@@ -142,16 +160,87 @@ jobs:
           set -euo pipefail
           . ./conanbuild.sh
           export NINJA_STATUS="[%f/%t | %es elapsed | %o objs/sec]"
+          # Determine dynamic parallelism based on available memory (approx 4GB per heavy compile)
+          avail_kb=$(grep MemAvailable /proc/meminfo | awk '{print $2}') || avail_kb=0
+          avail_gb=$((avail_kb / 1024 / 1024))
+          max_jobs=${{ matrix.max_jobs }}
+          dynamic_jobs=$max_jobs
+          if [ $avail_gb -gt 0 ]; then
+            est=$((avail_gb / 4))
+            [ $est -lt 1 ] && est=1
+            if [ $est -lt $dynamic_jobs ]; then
+              dynamic_jobs=$est
+            fi
+          fi
+          # If near disk full, further constrain (<=92% usage triggers halving)
+          disk_used_pct=$(df -h . | awk 'NR==2{gsub(/%/,"",$5); print $5}') || disk_used_pct=0
+          if [ "$disk_used_pct" -ge 92 ] && [ $dynamic_jobs -gt 1 ]; then
+            dynamic_jobs=$((dynamic_jobs / 2))
+            [ $dynamic_jobs -lt 1 ] && dynamic_jobs=1
+          fi
+          # Surface cgroup memory limit if present (cgroup v2)
+          if [ -f /sys/fs/cgroup/memory.max ]; then
+            cg_limit=$(cat /sys/fs/cgroup/memory.max)
+            [ "$cg_limit" = "max" ] || echo "::notice::Cgroup memory.max bytes: $cg_limit"
+          elif [ -f /sys/fs/cgroup/memory/memory.limit_in_bytes ]; then
+            cg_limit=$(cat /sys/fs/cgroup/memory/memory.limit_in_bytes)
+            echo "::notice::Cgroup v1 memory.limit_in_bytes: $cg_limit"
+          fi
+          echo "::notice::Adaptive parallel jobs: $dynamic_jobs (Avail=${avail_gb}GB, Max=$max_jobs, DiskUsed=${disk_used_pct}%)"
+          echo "timestamp PID RSS_KB COMM" > mem_samples.log
           # Heartbeat + resource diagnostics every 5 minutes
-          ( while true; do sleep 300; echo "[heartbeat] $(date -u +"%H:%M:%S")"; if command -v free >/dev/null 2>&1; then free -h | awk 'NR==2{print "[mem] used=" $3 "/" $2}'; fi; df -h . | tail -1 | awk '{print "[disk] used=" $3 "/" $2 " (" $5 ")"}'; ps -eo pid,pmem,rsz,comm --sort=-pmem | head -n 5 | awk '{print "[topmem] PID=" $1 " MEM%=" $2 " RSS=" $3 " " $4}'; done ) &
+          ( while true; do 
+              sleep 300; 
+              stamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ"); 
+              echo "[heartbeat] $(date -u +"%H:%M:%S")"; 
+              if command -v free >/dev/null 2>&1; then free -h | awk 'NR==2{print "[mem] used=" $3 "/" $2}'; fi; 
+              df -h . | tail -1 | awk '{print "[disk] used=" $3 "/" $2 " (" $5 ")"}'; 
+              if command -v ps >/dev/null 2>&1; then ps -eo pid,rsz,comm --sort=-rsz | head -n 12 | awk -v s="$stamp" '{print s" "$1" "$2" "$3}' >> mem_samples.log; fi; 
+              ps -eo pid,pmem,rsz,comm --sort=-pmem | head -n 5 | awk '{print "[topmem] PID=" $1 " MEM%=" $2 " RSS=" $3 " " $4}';
+            done ) &
           HB_PID=$!
           # Capture full build log; ensure failure propagates through pipe
-          cmake --build . --parallel ${{ matrix.max_jobs }} 2>&1 | tee build.log
+          cmake --build . --parallel $dynamic_jobs 2>&1 | tee build.log
           BUILD_EXIT=${PIPESTATUS[0]}
           kill $HB_PID || true
           # Show basic ninja stats (non-fatal if unavailable)
           command -v ninja >/dev/null 2>&1 && ninja -d stats || true
           exit $BUILD_EXIT
+
+      - name: Summarize peak memory usage
+        if: always()
+        working-directory: ${{ env.OPENSTUDIO_BUILD }}
+        run: |
+          set -euo pipefail
+          if [ -f mem_samples.log ]; then
+            echo "::group::Peak Memory Summary"
+            peak_cc1=$(grep -E 'cc1plus$' mem_samples.log | awk '{print $3}' | sort -nr | head -n1)
+            if [ -n "$peak_cc1" ]; then
+              awk -v v="$peak_cc1" 'BEGIN{printf "Peak cc1plus RSS: %.2f GB\n", v/1024/1024}'
+            else
+              echo "No cc1plus samples recorded"
+            fi
+            echo "Top 5 peak processes (by RSS KB):"
+            awk 'NR>1 {proc[$4]=$3>proc[$4]?$3:proc[$4]}' mem_samples.log; awk 'NR>1 {proc[$4]=$3>proc[$4]?$3:proc[$4]} END {for (p in proc) printf "%s %.2f GB\n", p, proc[p]/1024/1024}' mem_samples.log | sort -k2 -nr | head -n5 || true
+            echo "Sample lines (last 8):"; tail -n 8 mem_samples.log || true
+            echo "::endgroup::"
+          else
+            echo "::warning::mem_samples.log missing"
+          fi
+
+      - name: Summarize build warnings
+        if: always()
+        working-directory: ${{ env.OPENSTUDIO_BUILD }}
+        run: |
+          set -euo pipefail
+          if [ -f build.log ]; then
+            count=$(grep -i 'warning:' build.log | wc -l || true)
+            echo "::notice::Total compiler warnings: ${count}"
+            echo "Top 20 unique warning lines (normalized):"
+            grep -i 'warning:' build.log | sed 's/^.*warning:/warning:/' | sort | uniq -c | sort -nr | head -n 20 || true
+          else
+            echo "::warning::build.log not found for warning summary"
+          fi
 
       - name: Deferred pytest discovery (second configure)
         working-directory: ${{ env.OPENSTUDIO_BUILD }}
@@ -168,6 +257,7 @@ jobs:
             -DAPPEND_TESTS_ONLY:BOOL=ON \
             -DBUILD_PYTHON_PIP_PACKAGE:BOOL=${{ matrix.pip_package }} \
             -DPYTHON_VERSION:STRING=${{ env.PY_VERSION }} \
+            -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=ON \
             ..
 
       - name: Upload build log
@@ -192,10 +282,21 @@ jobs:
         run: |
           set -euo pipefail
           . ./conanbuild.sh
-
+          # Adaptive test parallelism (tests may consume less memory; use 2GB heuristic)
+          avail_kb=$(grep MemAvailable /proc/meminfo | awk '{print $2}') || avail_kb=0
+          avail_gb=$((avail_kb / 1024 / 1024))
+          max_jobs=${{ matrix.max_jobs }}
+          dynamic_ctest_jobs=$max_jobs
+          if [ $avail_gb -gt 0 ]; then
+            est=$((avail_gb / 2))
+            [ $est -lt 1 ] && est=1
+            if [ $est -lt $dynamic_ctest_jobs ]; then
+              dynamic_ctest_jobs=$est
+            fi
+          fi
+          echo "::notice::Adaptive CTest jobs: $dynamic_ctest_jobs (Avail=${avail_gb}GB, Max=$max_jobs)"
           echo "exit_code=0" >> $GITHUB_OUTPUT
-
-          ctest --output-on-failure --parallel ${{ matrix.max_jobs }} || {
+          ctest --output-on-failure --parallel $dynamic_ctest_jobs || {
             exit_code=$?
             echo "exit_code=${exit_code}" >> $GITHUB_OUTPUT
             echo "::warning::CTest suite failed with exit code ${exit_code}"
@@ -294,4 +395,3 @@ jobs:
         run: |
           echo "::error::CTest suite failed with exit code ${{ steps.ctest.outputs.exit_code }}"
           exit 1
-
