@@ -58,7 +58,7 @@ jobs:
             display_name: Ubuntu 22.04 x64
             runner: ubuntu-22.04
             container_image: nrel/openstudio-cmake-tools:jammy
-            container_options: "-u root -e LANG=en_US.UTF-8"
+            container_options: "--privileged -u root -e LANG=en_US.UTF-8"
             test_suffix: Ubuntu-2204
             pip_package: true
             docker_trigger: true
@@ -82,15 +82,20 @@ jobs:
 
       # --- OPTIMIZATION START: ADD SWAP ---
       # This provides a safety net for the 6.17GB memory spikes
-      - name: Enable Swap Space on Host
-        # This must run on the HOST, not inside the container
+      - name: Enable Swap Space (attempt)
+        # Runs inside the container as root; attempts swap if privileged
         run: |
-          sudo fallocate -l 4G /swapfile
-          sudo chmod 600 /swapfile
-          sudo mkswap /swapfile
-          sudo swapon /swapfile
-          echo "::notice::Enabled 4GB swap space on host runner"
-          free -h
+          set -euo pipefail
+          if grep -q '/swapfile' /proc/swaps; then
+            echo "::notice::Swap already active"
+          else
+            if (fallocate -l 4G /swapfile && chmod 600 /swapfile && mkswap /swapfile && swapon /swapfile); then
+              echo "::notice::Enabled 4GB swap space (container)"
+            else
+              echo "::warning::Failed to enable swap (likely insufficient privilege); continuing"
+            fi
+          fi
+          free -h || true
       # --- OPTIMIZATION END ---
 
       - name: Restore ccache cache
