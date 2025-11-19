@@ -301,11 +301,11 @@ def test_get_model(
 
 
 def test_download_bcl_measures(measure_manager_client: MeasureManagerClient, expected_internal_state: Dict[str, Any]):
-    r = measure_manager_client.post(url="/download_bcl_measure", json={"": ""})
+    r = measure_manager_client.post(url="/download_bcl_measure", json={"":  ""})
     assert r.status_code == 400
     if measure_manager_client.is_classic:
-        # {"backtrace": [webcrick...], "error": "Missing required argument 'uid'}
-        assert "Missing required argument 'uid'" in r.text
+        # {"backtrace": [webcrick...], "error": "Missing the uid in the post data"}
+        assert "Missing the uid in the post data" in r.text
     else:
         assert r.json() == "Missing the uid in the post data"
 

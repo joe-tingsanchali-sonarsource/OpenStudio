@@ -2436,6 +2436,10 @@ if(BUILD_TESTING)
 
   CREATE_TEST_TARGETS(${target_name} "${${target_name}_test_src}" "${${target_name}_test_depends}")
 
+  # Copy schedulefile.csv to build directory for tests
+  file(COPY "${PROJECT_SOURCE_DIR}/resources/model/schedulefile.csv"
+       DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/files/")
+
   add_dependencies("${target_name}_tests"
     openstudio_model_resources
     openstudio_utilities_resources
