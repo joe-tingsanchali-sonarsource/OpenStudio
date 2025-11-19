@@ -293,6 +293,10 @@ option(BUILD_NUGET_PACKAGE "Build NuGet Package" OFF)
 # Requires: SWIG Python
 option(BUILD_PYTHON_BINDINGS "Build Python bindings" ON)
 mark_as_advanced(BUILD_PYTHON_BINDINGS)
+option(DISCOVER_TESTS_AFTER_BUILD "Defer pytest discovery to post-build second configure" OFF)
+mark_as_advanced(DISCOVER_TESTS_AFTER_BUILD)
+option(APPEND_TESTS_ONLY "Internal: append tests only during deferred discovery second pass" OFF)
+mark_as_advanced(APPEND_TESTS_ONLY)
 
 # Build ctest testing
 # Requires: EnergyPlus

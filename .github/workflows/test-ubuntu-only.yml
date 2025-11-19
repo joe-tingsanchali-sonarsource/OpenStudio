@@ -79,11 +79,25 @@ jobs:
         with:
           fetch-depth: 0
 
+      # Restore ccache to speed up repeated builds (cache lives in container HOME)
+      - name: Restore ccache cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.ccache
+          key: ccache-${{ runner.os }}-${{ matrix.platform }}-${{ github.ref }}
+          restore-keys: |
+            ccache-${{ runner.os }}-${{ matrix.platform }}-
+
       - name: Prepare workspace
         run: |
           set -euo pipefail
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           mkdir -p "$GITHUB_WORKSPACE/${{ env.OPENSTUDIO_BUILD }}"
+          # Configure ccache size (best-effort)
+          if command -v ccache >/dev/null 2>&1; then
+            ccache -M 5G || true
+            echo "Configured ccache max size:"; ccache -s | sed -n '1,10p'
+          fi
 
       - name: Configure Conan remotes
         run: |
@@ -117,6 +131,7 @@ jobs:
             -DBUILD_TESTING:BOOL=ON \
             -DCPACK_GENERATORS:STRING="${{ matrix.cpack_generators }}" \
             -DBUILD_PYTHON_BINDINGS:BOOL=ON \
+            -DDISCOVER_TESTS_AFTER_BUILD:BOOL=ON \
             -DBUILD_PYTHON_PIP_PACKAGE:BOOL=${{ matrix.pip_package }} \
             -DPYTHON_VERSION:STRING=${{ env.PY_VERSION }} \
             ..
@@ -126,7 +141,49 @@ jobs:
         run: |
           set -euo pipefail
           . ./conanbuild.sh
-          cmake --build . --parallel ${{ matrix.max_jobs }}
+          export NINJA_STATUS="[%f/%t | %es elapsed | %o objs/sec]"
+          # Heartbeat + resource diagnostics every 5 minutes
+          ( while true; do sleep 300; echo "[heartbeat] $(date -u +"%H:%M:%S")"; if command -v free >/dev/null 2>&1; then free -h | awk 'NR==2{print "[mem] used=" $3 "/" $2}'; fi; df -h . | tail -1 | awk '{print "[disk] used=" $3 "/" $2 " (" $5 ")"}'; ps -eo pid,pmem,rsz,comm --sort=-pmem | head -n 5 | awk '{print "[topmem] PID=" $1 " MEM%=" $2 " RSS=" $3 " " $4}'; done ) &
+          HB_PID=$!
+          # Capture full build log; ensure failure propagates through pipe
+          cmake --build . --parallel ${{ matrix.max_jobs }} 2>&1 | tee build.log
+          BUILD_EXIT=${PIPESTATUS[0]}
+          kill $HB_PID || true
+          # Show basic ninja stats (non-fatal if unavailable)
+          command -v ninja >/dev/null 2>&1 && ninja -d stats || true
+          exit $BUILD_EXIT
+
+      - name: Deferred pytest discovery (second configure)
+        working-directory: ${{ env.OPENSTUDIO_BUILD }}
+        run: |
+          set -euo pipefail
+          . ./conanbuild.sh
+          cmake -G Ninja \
+            -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake \
+            -DCMAKE_BUILD_TYPE:STRING=${{ env.BUILD_TYPE }} \
+            -DBUILD_TESTING:BOOL=ON \
+            -DCPACK_GENERATORS:STRING="${{ matrix.cpack_generators }}" \
+            -DBUILD_PYTHON_BINDINGS:BOOL=ON \
+            -DDISCOVER_TESTS_AFTER_BUILD:BOOL=ON \
+            -DAPPEND_TESTS_ONLY:BOOL=ON \
+            -DBUILD_PYTHON_PIP_PACKAGE:BOOL=${{ matrix.pip_package }} \
+            -DPYTHON_VERSION:STRING=${{ env.PY_VERSION }} \
+            ..
+
+      - name: Upload build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log-${{ matrix.platform }}-${{ github.sha }}
+          path: ${{ env.OPENSTUDIO_BUILD }}/build.log
+      - name: Upload triage artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: triage-${{ matrix.platform }}-${{ github.sha }}
+          path: |
+            ${{ env.OPENSTUDIO_BUILD }}/.ninja_log
+            ${{ env.OPENSTUDIO_BUILD }}/CTestTestfile.cmake
 
       - name: Run CTest suite
         id: ctest
