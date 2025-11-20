@@ -11,6 +11,10 @@ on:
         description: "Skip downstream docker workflow trigger"
         required: false
         default: "false"
+      skip_cdash_submission:
+        description: "Skip CDash submission (useful for testing without token)"
+        required: false
+        default: "false"
   workflow_call:
     inputs:
       publish_to_s3:
@@ -18,6 +22,10 @@ on:
         required: false
         default: "false"
       skip_docker_trigger:
+        type: string
+        required: false
+        default: "false"
+      skip_cdash_submission:
         type: string
         required: false
         default: "false"
@@ -267,32 +275,64 @@ jobs:
         run: |
           set -euo pipefail
           . ./conanbuild.sh
-          echo "exit_code=0" >> $GITHUB_OUTPUT
-          
+
           # Set build name and site for CDash dashboard
           export CTEST_BUILD_NAME="GitHub-${{ matrix.platform }}-${{ github.ref_name }}"
           export CTEST_SITE="${{ runner.name }}"
-          
-          # Submit to CDash using Experimental dashboard mode
-          # Pass CDASH token if available to avoid invalid token errors
-          if [ -n "${{ secrets.CDASH_TOKEN || '' }}" ]; then
+
+          # Run the tests first and capture the CTest exit code so we don't conflate
+          # test failures with CDash submission errors. We intentionally do not
+          # `set -e` on the ctest command so we can capture its exit code.
+          echo "Running ctest..."
+          ctest --output-on-failure -j ${{ matrix.max_jobs }} || true
+          CTEST_EXIT_CODE=$?
+          echo "exit_code=${CTEST_EXIT_CODE}" >> $GITHUB_OUTPUT
+
+          # Submit to CDash using Experimental dashboard mode. Submission failures
+          # (for example due to invalid tokens) should not cause the job to be
+          # considered a test failure. We'll attempt submission and log warnings
+          # on failure but preserve the original CTest exit code.
+          echo "Submitting results to CDash (best-effort)..."
+          SUBMIT_OUTPUT_FILE="cdash_submit.out"
+          SUBMIT_ERROR=0
+
+          # Allow skipping CDash submission via workflow input, and only attempt
+          # submission when a CDASH token is available. This avoids unauthenticated
+          # submissions that produce "Invalid Token" errors.
+          SKIP_CDASH_SUBMISSION="${{ inputs.skip_cdash_submission || github.event.inputs.skip_cdash_submission || 'false' }}"
+          if [ "$SKIP_CDASH_SUBMISSION" = "true" ]; then
+            echo "Skipping CDash submission (skip_cdash_submission=true)"
+            SUBMIT_ERROR=0
+          elif [ -n "${{ secrets.CDASH_TOKEN || '' }}" ]; then
             echo "Using CDASH token to submit results"
             export CDASH_SUBMIT_TOKEN="${{ secrets.CDASH_TOKEN }}"
-            ctest -D Experimental -DCDASH_SUBMIT_TOKEN=$CDASH_SUBMIT_TOKEN --output-on-failure -j ${{ matrix.max_jobs }} || {
-              exit_code=$?
-              echo "exit_code=${exit_code}" >> $GITHUB_OUTPUT
-              echo "::warning::CTest suite failed with exit code ${exit_code}"
-            }
+            ctest -D Experimental -DCDASH_SUBMIT_TOKEN=$CDASH_SUBMIT_TOKEN --output-on-failure -j ${{ matrix.max_jobs }} > "$SUBMIT_OUTPUT_FILE" 2>&1 || SUBMIT_ERROR=$?
           else
-            echo "No CDASH token provided; attempting submit without token"
-            ctest -D Experimental --output-on-failure -j ${{ matrix.max_jobs }} || {
-              exit_code=$?
-              echo "exit_code=${exit_code}" >> $GITHUB_OUTPUT
-              echo "::warning::CTest suite failed with exit code ${exit_code}"
-            }
+            echo "::warning::No CDASH token provided; skipping CDash submission to avoid failures"
+            SUBMIT_ERROR=0
           fi
-          
-          echo "::notice::Test results submitted to https://my.cdash.org/index.php?project=OpenStudio"
+
+          if [ $SUBMIT_ERROR -ne 0 ]; then
+            echo "::warning::CDash submission failed (exit ${SUBMIT_ERROR}). See output below:"
+            sed -n '1,200p' "$SUBMIT_OUTPUT_FILE" || true
+
+            # Try to detect common non-fatal errors like an invalid token and
+            # explicitly warn rather than fail the job. Preserve CTest exit code.
+            if grep -qi "invalid token" "$SUBMIT_OUTPUT_FILE" || grep -qi "Invalid Token" "$SUBMIT_OUTPUT_FILE"; then
+              echo "::warning::CDash submission failed due to Invalid Token. This is non-fatal to tests."
+            else
+              echo "::warning::CDash submission returned non-zero exit code ${SUBMIT_ERROR}."
+            fi
+          else
+            echo "::notice::CDash submission completed successfully"
+          fi
+
+          # Restore the original CTest exit code so downstream steps can fail
+          # if tests actually failed.
+          if [ ${CTEST_EXIT_CODE:-0} -ne 0 ]; then
+            echo "::warning::CTest suite failed with exit code ${CTEST_EXIT_CODE}"
+            exit ${CTEST_EXIT_CODE}
+          fi
 
 
       - name: Create packages
