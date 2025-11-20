@@ -25,6 +25,10 @@
 #include <utilities/idd/Output_Meter_Cumulative_FieldEnums.hxx>
 #include <utilities/idd/Output_Meter_Cumulative_MeterFileOnly_FieldEnums.hxx>
 
+#include <algorithm>
+#include <array>
+#include <compare>
+
 using namespace openstudio::energyplus;
 using namespace openstudio::model;
 using namespace openstudio;
@@ -203,4 +207,142 @@ TEST_F(EnergyPlusFixture, ReverseTranslator_OutputMeter_Cumulative_MeterFileOnly
   EXPECT_EQ("Timestep", modelObject.reportingFrequency());
   EXPECT_TRUE(modelObject.meterFileOnly());
   EXPECT_TRUE(modelObject.cumulative());
+}
+
+// This will grab the objects in the same order as the serialization to IDF
+std::vector<WorkspaceObject> getMetersInSerializedOrder(const Workspace& w) {
+  WorkspaceObjectVector result;
+  const std::array<IddObjectType, 4> iddTypes = {
+    IddObjectType::Output_Meter,
+    IddObjectType::Output_Meter_MeterFileOnly,
+    IddObjectType::Output_Meter_Cumulative,
+    IddObjectType::Output_Meter_Cumulative_MeterFileOnly,
+  };
+  // objects(sorted=true): same as serialization order
+  for (const WorkspaceObject& object : w.objects(true)) {
+    if (std::find(iddTypes.begin(), iddTypes.end(), object.iddObject().type()) != iddTypes.end()) {
+      result.push_back(object);
+    }
+  }
+  return result;
+}
+
+struct MeterInfo
+{
+  std::string name;
+  std::string reportingFrequency;
+  bool meterFileOnly;
+  bool cumulative;
+
+  MeterInfo(const WorkspaceObject& wo) {
+    switch (wo.iddObject().type().value()) {
+      case IddObjectType::Output_Meter: {
+        name = wo.getString(Output_MeterFields::KeyName).get();
+        reportingFrequency = wo.getString(Output_MeterFields::ReportingFrequency).get();
+        meterFileOnly = false;
+        cumulative = false;
+        break;
+      }
+      case IddObjectType::Output_Meter_MeterFileOnly: {
+        name = wo.getString(Output_Meter_MeterFileOnlyFields::KeyName).get();
+        reportingFrequency = wo.getString(Output_Meter_MeterFileOnlyFields::ReportingFrequency).get();
+        meterFileOnly = true;
+        cumulative = false;
+        break;
+      }
+      case IddObjectType::Output_Meter_Cumulative: {
+        name = wo.getString(Output_Meter_CumulativeFields::KeyName).get();
+        reportingFrequency = wo.getString(Output_Meter_CumulativeFields::ReportingFrequency).get();
+        meterFileOnly = false;
+        cumulative = true;
+        break;
+      }
+      case IddObjectType::Output_Meter_Cumulative_MeterFileOnly: {
+        name = wo.getString(Output_Meter_Cumulative_MeterFileOnlyFields::KeyName).get();
+        reportingFrequency = wo.getString(Output_Meter_Cumulative_MeterFileOnlyFields::ReportingFrequency).get();
+        meterFileOnly = true;
+        cumulative = true;
+        break;
+      }
+      default:
+        throw std::runtime_error("Unexpected IddObjectType in MeterInfo constructor");
+    }
+  }
+
+  std::string meterType() const {
+    if (cumulative && meterFileOnly) {
+      return "Output:Meter:Cumulative:MeterFileOnly";
+    } else if (cumulative) {
+      return "Output:Meter:Cumulative";
+    } else if (meterFileOnly) {
+      return "Output:Meter:MeterFileOnly";
+    } else {
+      return "Output:Meter";
+    }
+  }
+
+  auto operator<=>(const MeterInfo&) const = default;
+};
+
+std::ostream& operator<<(std::ostream& os, const MeterInfo& mi) {
+  os << mi.meterType() << "{name = '" << mi.name << "', reportingFrequency ='" << mi.reportingFrequency << "'}";
+  return os;
+}
+
+TEST_F(EnergyPlusFixture, ForwardTranslator_OutputMeter_ReproducibleOrder) {
+
+  ForwardTranslator ft;
+
+  // Electricity:Total ends up being a child of Building, so it's translated first
+  const std::vector<std::string> meter_names{"Electricity:Total", "NaturalGas:Facility", "Electricity:Facility"};
+  const std::vector<std::string> reporting_frequencies{"RunPeriod", "Monthly"};
+  const std::vector<bool> fileonlys{false};
+  const std::vector<bool> cumulatives{false};
+
+  auto prepareModel = [&meter_names, &reporting_frequencies, &fileonlys, &cumulatives]() -> openstudio::model::Model {
+    Model m;
+    for (const auto& name : meter_names) {
+      for (const auto& freq : reporting_frequencies) {
+        for (const auto& meterFileOnly : fileonlys) {
+          for (const auto& cumulative : cumulatives) {
+            OutputMeter meter(m);
+            EXPECT_TRUE(meter.setName(name));
+            EXPECT_TRUE(meter.setReportingFrequency(freq));
+            EXPECT_TRUE(meter.setMeterFileOnly(meterFileOnly));
+            EXPECT_TRUE(meter.setCumulative(cumulative));
+          }
+        }
+      }
+    }
+    return m;
+  };
+
+  auto produceMeterInfo = [&]() -> std::vector<MeterInfo> {
+    auto m = prepareModel();
+
+    const Workspace w = ft.translateModel(prepareModel());
+    const auto idfObjs = getMetersInSerializedOrder(w);
+
+    std::vector<MeterInfo> meterInfos;
+    meterInfos.reserve(idfObjs.size());
+    std::transform(idfObjs.begin(), idfObjs.end(), std::back_inserter(meterInfos), [](const WorkspaceObject& wo) { return MeterInfo(wo); });
+    return meterInfos;
+  };
+
+  auto meterInfos = produceMeterInfo();
+  ASSERT_EQ(meter_names.size() * reporting_frequencies.size() * fileonlys.size() * cumulatives.size(), meterInfos.size());
+
+  size_t n_failures = 0;
+  for (size_t n = 1; n < 10; ++n) {
+    auto newMeterInfos = produceMeterInfo();
+    // EXPECT_EQ(meterInfos, newMeterInfos) << "MeterInfos differ on iteration " << n;
+    EXPECT_EQ(meterInfos.size(), newMeterInfos.size());
+    for (size_t i = 0; i < meterInfos.size(); ++i) {
+      EXPECT_EQ(meterInfos[i], newMeterInfos[i]) << "MeterInfos differ at index " << i << " on iteration " << n;
+    }
+    if (meterInfos != newMeterInfos) {
+      ++n_failures;
+    }
+  }
+  EXPECT_EQ(0, n_failures) << "Out of 9 re-translations, " << n_failures << " produced different OutputMeter orderings.";
 }
