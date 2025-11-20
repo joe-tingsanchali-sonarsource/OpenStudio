@@ -48,6 +48,8 @@
 #include "../model/ElectricEquipmentITEAirCooled_Impl.hpp"
 #include "../model/OutputControlTableStyle.hpp"
 #include "../model/OutputControlTableStyle_Impl.hpp"
+#include "../model/OutputMeter.hpp"
+#include "../model/OutputMeter_Impl.hpp"
 #include "../model/OutputSQLite.hpp"
 #include "../model/OutputSQLite_Impl.hpp"
 
@@ -172,6 +174,47 @@ namespace energyplus {
 
   void ForwardTranslator::setExcludeSpaceTranslation(bool excludeSpaceTranslation) {
     m_forwardTranslatorOptions.setExcludeSpaceTranslation(excludeSpaceTranslation);
+  }
+
+  // #5510 - Sort by name first, then by reporting frequency
+  // This is a weird case where the "Name" field is actually not unique
+  bool OutputMeterSorterPredicate(const WorkspaceObject& a, const WorkspaceObject& b) {
+    // 1. Sort by name
+    const auto nameA = a.nameString();
+    const auto nameB = b.nameString();
+    if (nameA != nameB) {
+      return istringLess(nameA, nameB);
+    }
+
+    // Safe to cast. Now we'll sort by the remaining fields in case of name equality
+    // I don't use std::tuple{meterA.reportingFrequency(), meterA.meterFileOnly(), meterA.cumulative()} < tuple{...}
+    // Because I don't want to greedily evaluate all fields if not needed
+    auto meterA = a.cast<OutputMeter>();
+    auto meterB = b.cast<OutputMeter>();
+
+    // 2. reportingFrequency
+    const auto freqA = meterA.reportingFrequency();
+    const auto freqB = meterB.reportingFrequency();
+    if (freqA != freqB) {
+      return freqA < freqB;
+    }
+
+    // 3. meterFileOnly
+    const bool fileA = meterA.meterFileOnly();
+    const bool fileB = meterB.meterFileOnly();
+    if (fileA != fileB) {
+      return !fileA;  // A comes first if it's not File Only
+    }
+
+    // 4. cumulative
+    const bool cumA = meterA.cumulative();
+    const bool cumB = meterB.cumulative();
+    if (cumA != cumB) {
+      return !cumA;  // A comes first if it's not cumulative
+    }
+
+    // Equal in all fields
+    return false;
   }
 
   // Figure out which object
@@ -599,7 +642,11 @@ namespace energyplus {
 
       // get objects by type in sorted order
       std::vector<WorkspaceObject> objects = model.getObjectsByType(iddObjectType);
-      std::sort(objects.begin(), objects.end(), WorkspaceObjectNameLess());
+      if (iddObjectType == IddObjectType::OS_Output_Meter) {
+        std::sort(objects.begin(), objects.end(), OutputMeterSorterPredicate);
+      } else {
+        std::sort(objects.begin(), objects.end(), WorkspaceObjectNameLess());
+      }
 
       for (const WorkspaceObject& workspaceObject : objects) {
         auto modelObject = workspaceObject.cast<ModelObject>();
