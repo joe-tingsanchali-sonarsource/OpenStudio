@@ -73,7 +73,7 @@ jobs:
               *.rpm
               *OpenStudio*x86_64.tar.gz
             cpack_generators: "RPM;TGZ"
-            max_jobs: 4
+            max_jobs: 2
           - platform: ubuntu-2204-x64
             display_name: Ubuntu 22.04 x64
             runner: ubuntu-22.04
@@ -86,7 +86,7 @@ jobs:
               *.deb
               *OpenStudio*x86_64.tar.gz
             cpack_generators: "DEB;TGZ"
-            max_jobs: 4
+            max_jobs: 2
           - platform: ubuntu-2404-x64
             display_name: Ubuntu 24.04 x64
             runner: ubuntu-24.04
@@ -99,7 +99,7 @@ jobs:
               *.deb
               *OpenStudio*x86_64.tar.gz
             cpack_generators: "DEB;TGZ"
-            max_jobs: 4
+            max_jobs: 2
           - platform: ubuntu-2204-arm64
             display_name: Ubuntu 22.04 ARM64
             runner: ubuntu-22.04-arm
@@ -112,7 +112,7 @@ jobs:
               *.deb
               *OpenStudio*aarch64.tar.gz
             cpack_generators: "DEB;TGZ"
-            max_jobs: 4
+            max_jobs: 2
           - platform: ubuntu-2404-arm64
             display_name: Ubuntu 24.04 ARM64
             runner: ubuntu-24.04-arm
@@ -125,7 +125,7 @@ jobs:
               *.deb
               *OpenStudio*aarch64.tar.gz
             cpack_generators: "DEB;TGZ"
-            max_jobs: 4
+            max_jobs: 2
     defaults:
       run:
         shell: bash
@@ -451,8 +451,8 @@ jobs:
       run:
         shell: bash
     env:
-      MAX_BUILD_THREADS: 4
-      CTEST_PARALLEL_LEVEL: 4
+      MAX_BUILD_THREADS: 2
+      CTEST_PARALLEL_LEVEL: 2
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -811,8 +811,8 @@ jobs:
       run:
         shell: pwsh
     env:
-      MAX_BUILD_THREADS: 4
-      CTEST_PARALLEL_LEVEL: 4
+      MAX_BUILD_THREADS: 2
+      CTEST_PARALLEL_LEVEL: 2
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
