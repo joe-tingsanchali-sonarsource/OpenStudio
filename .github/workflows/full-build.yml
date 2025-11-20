@@ -191,11 +191,11 @@ jobs:
           fi
 
       - name: Conan install
-        working-directory: ${{ github.workspace }}/${{ env.OPENSTUDIO_SOURCE }}
+        working-directory: ${{ github.workspace }}
         run: |
           set -euo pipefail
           conan install . \
-            --output-folder="../${{ env.OPENSTUDIO_BUILD }}" \
+            --output-folder="./${{ env.OPENSTUDIO_BUILD }}" \
             --build=missing \
             -c tools.cmake.cmaketoolchain:generator=Ninja \
             -s compiler.cppstd=20 \
@@ -215,7 +215,7 @@ jobs:
             -DDISCOVER_TESTS_AFTER_BUILD:BOOL=ON \
             -DBUILD_PYTHON_PIP_PACKAGE:BOOL=${{ matrix.pip_package }} \
             -DPYTHON_VERSION:STRING=${{ env.PY_VERSION }} \
-            ../${{ env.OPENSTUDIO_SOURCE }}
+            ../
 
       - name: Build with Ninja
         working-directory: ${{ env.OPENSTUDIO_BUILD }}
@@ -268,7 +268,7 @@ jobs:
             -DAPPEND_TESTS_ONLY:BOOL=ON \
             -DBUILD_PYTHON_PIP_PACKAGE:BOOL=${{ matrix.pip_package }} \
             -DPYTHON_VERSION:STRING=${{ env.PY_VERSION }} \
-            ../${{ env.OPENSTUDIO_SOURCE }}
+            ../
 
       - name: Upload build log
         if: always()
@@ -517,11 +517,11 @@ jobs:
           fi
 
       - name: Conan install
-        working-directory: ${{ github.workspace }}/${{ env.OPENSTUDIO_SOURCE }}
+        working-directory: ${{ github.workspace }}
         run: |
           set -euo pipefail
           conan install . \
-            --output-folder="../${{ env.OPENSTUDIO_BUILD }}" \
+            --output-folder="./${{ env.OPENSTUDIO_BUILD }}" \
             --build=missing \
             -c tools.cmake.cmaketoolchain:generator=Ninja \
             -s compiler.cppstd=20 \
@@ -541,7 +541,7 @@ jobs:
             -DDISCOVER_TESTS_AFTER_BUILD:BOOL=ON \
             -DBUILD_PYTHON_PIP_PACKAGE:BOOL=OFF \
             -DPYTHON_VERSION:STRING=${{ env.PY_VERSION }} \
-            ../${{ env.OPENSTUDIO_SOURCE }}
+            ../
 
       - name: Build with Ninja
         working-directory: ${{ env.OPENSTUDIO_BUILD }}
@@ -572,7 +572,7 @@ jobs:
             -DAPPEND_TESTS_ONLY:BOOL=ON \
             -DBUILD_PYTHON_PIP_PACKAGE:BOOL=OFF \
             -DPYTHON_VERSION:STRING=${{ env.PY_VERSION }} \
-            ../${{ env.OPENSTUDIO_SOURCE }}
+            ../
 
       - name: Upload build log
         if: always()
@@ -859,10 +859,10 @@ jobs:
           }
 
       - name: Conan install
-        working-directory: ${{ github.workspace }}/${{ env.OPENSTUDIO_SOURCE }}
+        working-directory: ${{ github.workspace }}
         run: |
           conan install . `
-            --output-folder="../${{ env.OPENSTUDIO_BUILD }}" `
+            --output-folder="./${{ env.OPENSTUDIO_BUILD }}" `
             --build=missing `
             -c tools.cmake.cmaketoolchain:generator=Ninja `
             -s compiler.cppstd=20 `
@@ -873,7 +873,7 @@ jobs:
         shell: cmd
         run: |
           call conanbuild.bat
-          cmake -G Ninja -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DCMAKE_BUILD_TYPE:STRING=${{ env.BUILD_TYPE }} -DBUILD_TESTING:BOOL=ON -DCPACK_GENERATORS:STRING="NSIS;ZIP" -DBUILD_PYTHON_BINDINGS:BOOL=ON -DDISCOVER_TESTS_AFTER_BUILD:BOOL=ON -DBUILD_PYTHON_PIP_PACKAGE:BOOL=OFF -DPYTHON_VERSION:STRING=${{ env.PY_VERSION }} ../${{ env.OPENSTUDIO_SOURCE }}
+          cmake -G Ninja -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DCMAKE_BUILD_TYPE:STRING=${{ env.BUILD_TYPE }} -DBUILD_TESTING:BOOL=ON -DCPACK_GENERATORS:STRING="NSIS;ZIP" -DBUILD_PYTHON_BINDINGS:BOOL=ON -DDISCOVER_TESTS_AFTER_BUILD:BOOL=ON -DBUILD_PYTHON_PIP_PACKAGE:BOOL=OFF -DPYTHON_VERSION:STRING=${{ env.PY_VERSION }} ..\
 
       - name: Build with Ninja
         working-directory: ${{ github.workspace }}/${{ env.OPENSTUDIO_BUILD }}
@@ -893,7 +893,7 @@ jobs:
         shell: cmd
         run: |
           call conanbuild.bat
-          cmake -G Ninja -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DCMAKE_BUILD_TYPE:STRING=${{ env.BUILD_TYPE }} -DBUILD_TESTING:BOOL=ON -DCPACK_GENERATORS:STRING="NSIS;ZIP" -DBUILD_PYTHON_BINDINGS:BOOL=ON -DDISCOVER_TESTS_AFTER_BUILD:BOOL=ON -DAPPEND_TESTS_ONLY:BOOL=ON -DBUILD_PYTHON_PIP_PACKAGE:BOOL=OFF -DPYTHON_VERSION:STRING=${{ env.PY_VERSION }} ../${{ env.OPENSTUDIO_SOURCE }}
+          cmake -G Ninja -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DCMAKE_BUILD_TYPE:STRING=${{ env.BUILD_TYPE }} -DBUILD_TESTING:BOOL=ON -DCPACK_GENERATORS:STRING="NSIS;ZIP" -DBUILD_PYTHON_BINDINGS:BOOL=ON -DDISCOVER_TESTS_AFTER_BUILD:BOOL=ON -DAPPEND_TESTS_ONLY:BOOL=ON -DBUILD_PYTHON_PIP_PACKAGE:BOOL=OFF -DPYTHON_VERSION:STRING=${{ env.PY_VERSION }} ..\
 
       - name: Upload build log
         if: always()
