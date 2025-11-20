@@ -687,18 +687,11 @@ namespace energyplus {
       } else if (ita > itb) {
         return false;
       }
+      if (a.iddObject().type() == IddObjectType::OS_Output_Meter) {
+        return OutputMeterSorterPredicate(a, b);
+      }
 
-      std::string aname;
-      boost::optional<std::string> oaname = a.name();
-      if (oaname) {
-        aname = *oaname;
-      }
-      std::string bname;
-      boost::optional<std::string> obname = b.name();
-      if (obname) {
-        bname = *obname;
-      }
-      return istringLess(aname, bname);
+      return WorkspaceObjectNameLess()(a, b);
     }
 
     std::vector<IddObjectType> m_iddObjectTypes;
