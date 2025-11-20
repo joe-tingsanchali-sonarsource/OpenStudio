@@ -5,6 +5,10 @@ on:
       - develop
     tags:
       - "v*"
+  schedule:
+    # Run nightly at 8 PM ET (midnight UTC during EST, 1 AM UTC during EDT)
+    # Using 1 AM UTC to cover EDT (daylight saving time)
+    - cron: '0 1 * * *'
   workflow_dispatch:
     inputs:
       publish_to_s3:
