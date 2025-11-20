@@ -191,17 +191,18 @@ jobs:
           fi
 
       - name: Conan install
+        working-directory: ${{ github.workspace }}/${{ env.OPENSTUDIO_SOURCE }}
         run: |
           set -euo pipefail
           conan install . \
-            --output-folder="${{ env.OPENSTUDIO_BUILD }}" \
+            --output-folder="../${{ env.OPENSTUDIO_BUILD }}" \
             --build=missing \
             -c tools.cmake.cmaketoolchain:generator=Ninja \
             -s compiler.cppstd=20 \
             -s build_type=${{ env.BUILD_TYPE }}
 
       - name: Configure with CMake
-        working-directory: ${{ env.OPENSTUDIO_BUILD }}
+        working-directory: ${{ github.workspace }}/${{ env.OPENSTUDIO_BUILD }}
         run: |
           set -euo pipefail
           . ./conanbuild.sh
@@ -253,7 +254,7 @@ jobs:
           fi
 
       - name: Deferred pytest discovery (second configure)
-        working-directory: ${{ env.OPENSTUDIO_BUILD }}
+        working-directory: ${{ github.workspace }}/${{ env.OPENSTUDIO_BUILD }}
         run: |
           set -euo pipefail
           . ./conanbuild.sh
@@ -274,7 +275,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: build-log-${{ matrix.platform }}-${{ github.sha }}
-          path: ${{ env.OPENSTUDIO_BUILD }}/build.log
+          path: ${{ github.workspace }}/${{ env.OPENSTUDIO_BUILD }}/build.log
 
       - name: Upload triage artifacts
         if: always()
@@ -282,12 +283,12 @@ jobs:
         with:
           name: triage-${{ matrix.platform }}-${{ github.sha }}
           path: |
-            ${{ env.OPENSTUDIO_BUILD }}/.ninja_log
-            ${{ env.OPENSTUDIO_BUILD }}/CTestTestfile.cmake
+            ${{ github.workspace }}/${{ env.OPENSTUDIO_BUILD }}/.ninja_log
+            ${{ github.workspace }}/${{ env.OPENSTUDIO_BUILD }}/CTestTestfile.cmake
 
       - name: Run CTest suite and submit to CDash
         id: ctest
-        working-directory: ${{ env.OPENSTUDIO_BUILD }}
+        working-directory: ${{ github.workspace }}/${{ env.OPENSTUDIO_BUILD }}
         continue-on-error: true
         run: |
           set -euo pipefail
@@ -516,17 +517,18 @@ jobs:
           fi
 
       - name: Conan install
+        working-directory: ${{ github.workspace }}/${{ env.OPENSTUDIO_SOURCE }}
         run: |
           set -euo pipefail
           conan install . \
-            --output-folder="${{ env.OPENSTUDIO_BUILD }}" \
+            --output-folder="../${{ env.OPENSTUDIO_BUILD }}" \
             --build=missing \
             -c tools.cmake.cmaketoolchain:generator=Ninja \
             -s compiler.cppstd=20 \
             -s build_type=${{ env.BUILD_TYPE }}
 
       - name: Configure with CMake
-        working-directory: ${{ env.OPENSTUDIO_BUILD }}
+        working-directory: ${{ github.workspace }}/${{ env.OPENSTUDIO_BUILD }}
         run: |
           set -euo pipefail
           . ./conanbuild.sh
@@ -556,7 +558,7 @@ jobs:
           exit $BUILD_EXIT
 
       - name: Deferred pytest discovery (second configure)
-        working-directory: ${{ env.OPENSTUDIO_BUILD }}
+        working-directory: ${{ github.workspace }}/${{ env.OPENSTUDIO_BUILD }}
         run: |
           set -euo pipefail
           . ./conanbuild.sh
@@ -803,20 +805,8 @@ jobs:
           exit 1
 
   windows:
-    name: ${{ matrix.display_name }}
-    runs-on: ${{ matrix.runner }}
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - platform: windows-2019-x64
-            display_name: Windows 2019 x64
-            runner: windows-2019
-            test_suffix: Windows-2019
-          - platform: windows-2022-x64
-            display_name: Windows 2022 x64
-            runner: windows-2022
-            test_suffix: Windows-2022
+    name: Windows 2022 x64
+    runs-on: windows-2022
     defaults:
       run:
         shell: pwsh
@@ -946,21 +936,21 @@ jobs:
         shell: pwsh
         working-directory: ${{ github.workspace }}/${{ env.OPENSTUDIO_BUILD }}
         run: |
-          Compress-Archive -Path Testing -DestinationPath Testing-${{ matrix.test_suffix }}.zip -Force
+          Compress-Archive -Path Testing -DestinationPath Testing-Windows-2022.zip -Force
 
       - name: Upload Testing artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: Testing-${{ matrix.platform }}-${{ github.sha }}
+          name: Testing-windows-2022-x64-${{ github.sha }}
           path: |
-            ${{ github.workspace }}/${{ env.OPENSTUDIO_BUILD }}/Testing-${{ matrix.test_suffix }}.zip
+            ${{ github.workspace }}/${{ env.OPENSTUDIO_BUILD }}/Testing-Windows-2022.zip
 
       - name: Upload build outputs
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: packages-${{ matrix.platform }}-${{ github.sha }}
+          name: packages-windows-2022-x64-${{ github.sha }}
           path: |
             ${{ github.workspace }}/${{ env.OPENSTUDIO_BUILD }}/*.exe
             ${{ github.workspace }}/${{ env.OPENSTUDIO_BUILD }}/*.zip
