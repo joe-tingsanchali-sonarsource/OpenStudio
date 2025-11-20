@@ -2436,6 +2436,12 @@ if(BUILD_TESTING)
 
   CREATE_TEST_TARGETS(${target_name} "${${target_name}_test_src}" "${${target_name}_test_depends}")
 
+  # Add label for flaky geometry test
+  # Note: This requires the test to be discovered first by gtest_discover_tests
+  if(TEST ModelFixture.Space_Convexity)
+    set_tests_properties(ModelFixture.Space_Convexity PROPERTIES LABELS "flaky;geometry")
+  endif()
+
   # Copy schedulefile.csv to build directory for tests
   file(COPY "${PROJECT_SOURCE_DIR}/resources/model/schedulefile.csv"
        DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/files/")
