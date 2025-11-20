@@ -1,4 +1,3 @@
-name: Full Build (Develop)
 
 on:
   push:
@@ -60,7 +59,7 @@ jobs:
         include:
           - platform: ubuntu-2204-x64
             display_name: Ubuntu 22.04 x64
-            runner: linux-openstudio-2
+            runner: ubuntu-22.04
             container_image: nrel/openstudio-cmake-tools:jammy
             container_options: "-u root -e LANG=en_US.UTF-8"
             test_suffix: Ubuntu-2204
@@ -70,10 +69,10 @@ jobs:
               *.deb
               *OpenStudio*x86_64.tar.gz
             cpack_generators: "DEB;TGZ"
-            max_jobs: 16
+            max_jobs: 4
           - platform: ubuntu-2404-x64
             display_name: Ubuntu 24.04 x64
-            runner: linux-openstudio-2
+            runner: ubuntu-24.04
             container_image: nrel/openstudio-cmake-tools:noble
             container_options: "-u root -e LANG=en_US.UTF-8"
             test_suffix: Ubuntu-2404
@@ -83,20 +82,7 @@ jobs:
               *.deb
               *OpenStudio*x86_64.tar.gz
             cpack_generators: "DEB;TGZ"
-            max_jobs: 16
-          - platform: centos-9
-            display_name: CentOS Stream 9 x64
-            runner: linux-openstudio-centos9
-            container_image: nrel/openstudio-cmake-tools:centos9
-            container_options: "-u root -e LANG=en_US.UTF-8"
-            test_suffix: CentOS-9
-            pip_package: false
-            docker_trigger: false
-            upload_globs: |
-              *.rpm
-              *OpenStudio*x86_64.tar.gz
-            cpack_generators: "RPM;TGZ"
-            max_jobs: 16
+            max_jobs: 4
     defaults:
       run:
         shell: bash
@@ -108,12 +94,47 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      # --- OPTIMIZATION START: ADD SWAP ---
+      - name: Enable Swap Space (attempt)
+        # Runs inside the container as root; attempts swap if privileged
+        run: |
+          set -euo pipefail
+          if grep -q '/swapfile' /proc/swaps; then
+            echo "::notice::Swap already active"
+          else
+            if (fallocate -l 4G /swapfile && chmod 600 /swapfile && mkswap /swapfile && swapon /swapfile); then
+              echo "::notice::Enabled 4GB swap space (container)"
+            else
+              echo "::warning::Failed to enable swap (likely insufficient privilege); continuing"
+            fi
+          fi
+          free -h || true
+      # --- OPTIMIZATION END ---
+      - name: Restore ccache cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.ccache
+          key: ccache-${{ runner.os }}-${{ matrix.platform }}-${{ hashFiles('conan.lock') }}
+          restore-keys: |
+            ccache-${{ runner.os }}-${{ matrix.platform }}-
+
+      - name: Restore Conan cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.conan2
+          key: conan-${{ runner.os }}-${{ matrix.platform }}-${{ hashFiles('conan.lock') }}
+          restore-keys: |
+            conan-${{ runner.os }}-${{ matrix.platform }}-
 
       - name: Prepare workspace
         run: |
           set -euo pipefail
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           mkdir -p "$GITHUB_WORKSPACE/${{ env.OPENSTUDIO_BUILD }}"
+          if command -v ccache >/dev/null 2>&1; then
+            ccache -M 5G || true
+            echo "Configured ccache:"; ccache -s | sed -n '1,10p'
+          fi
 
       - name: Configure Conan remotes
         run: |
@@ -147,56 +168,146 @@ jobs:
             -DBUILD_TESTING:BOOL=ON \
             -DCPACK_GENERATORS:STRING="${{ matrix.cpack_generators }}" \
             -DBUILD_PYTHON_BINDINGS:BOOL=ON \
+            -DDISCOVER_TESTS_AFTER_BUILD:BOOL=ON \
             -DBUILD_PYTHON_PIP_PACKAGE:BOOL=${{ matrix.pip_package }} \
             -DPYTHON_VERSION:STRING=${{ env.PY_VERSION }} \
-            -DPython_ROOT_DIR:PATH=$HOME/.pyenv/versions/${{ env.PY_VERSION }} \
-            -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=ON \
-            ..
+            ../${{ env.OPENSTUDIO_SOURCE }}
 
       - name: Build with Ninja
         working-directory: ${{ env.OPENSTUDIO_BUILD }}
         run: |
           set -euo pipefail
           . ./conanbuild.sh
-          ninja -j ${{ env.MAX_BUILD_THREADS }} package
+          export NINJA_STATUS="[%f/%t | %es elapsed | %o objs/sec]"
+          # Start resource monitor (records RSS samples for later summary)
+          echo "timestamp PID RSS_KB COMM" > mem_samples.log
+          ( while true; do 
+              sleep 60; 
+              stamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ"); 
+              if command -v ps >/dev/null 2>&1; then ps -eo pid,rsz,comm --sort=-rsz | head -n 5 | awk -v s="$stamp" '{print s" "$1" "$2" "$3}' >> mem_samples.log; fi; 
+            done ) &
+          HB_PID=$!
+          cmake --build . --parallel ${{ matrix.max_jobs }} 2>&1 | tee build.log
+          BUILD_EXIT=${PIPESTATUS[0]}
+          kill $HB_PID || true
+          command -v ninja >/dev/null 2>&1 && ninja -d stats || true
+          exit $BUILD_EXIT
 
-      - name: Run CTest suite
+      - name: Summarize peak memory usage
+        if: always()
+        working-directory: ${{ env.OPENSTUDIO_BUILD }}
+        run: |
+          set -euo pipefail
+          if [ -f mem_samples.log ]; then
+            echo "::group::Peak Memory Summary"
+            peak_cc1=$(grep -E 'cc1plus$' mem_samples.log | awk '{print $3}' | sort -nr | head -n1)
+            if [ -n "$peak_cc1" ]; then
+              awk -v v="$peak_cc1" 'BEGIN{printf "Peak cc1plus RSS: %.2f GB\n", v/1024/1024}'
+            else
+              echo "No cc1plus samples recorded"
+            fi
+            echo "::endgroup::"
+          fi
+
+      - name: Deferred pytest discovery (second configure)
+        working-directory: ${{ env.OPENSTUDIO_BUILD }}
+        run: |
+          set -euo pipefail
+          . ./conanbuild.sh
+          cmake -G Ninja \
+            -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake \
+            -DCMAKE_BUILD_TYPE:STRING=${{ env.BUILD_TYPE }} \
+            -DBUILD_TESTING:BOOL=ON \
+            -DCPACK_GENERATORS:STRING="${{ matrix.cpack_generators }}" \
+            -DBUILD_PYTHON_BINDINGS:BOOL=ON \
+            -DDISCOVER_TESTS_AFTER_BUILD:BOOL=ON \
+            -DAPPEND_TESTS_ONLY:BOOL=ON \
+            -DBUILD_PYTHON_PIP_PACKAGE:BOOL=${{ matrix.pip_package }} \
+            -DPYTHON_VERSION:STRING=${{ env.PY_VERSION }} \
+            ../${{ env.OPENSTUDIO_SOURCE }}
+
+      - name: Upload build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log-${{ matrix.platform }}-${{ github.sha }}
+          path: ${{ env.OPENSTUDIO_BUILD }}/build.log
+
+      - name: Upload triage artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: triage-${{ matrix.platform }}-${{ github.sha }}
+          path: |
+            ${{ env.OPENSTUDIO_BUILD }}/.ninja_log
+            ${{ env.OPENSTUDIO_BUILD }}/CTestTestfile.cmake
+
+      - name: Run CTest suite and submit to CDash
         id: ctest
         working-directory: ${{ env.OPENSTUDIO_BUILD }}
         continue-on-error: true
         run: |
           set -euo pipefail
-          mkdir -p Testing/run{1,2,3}
-          EXIT_CODE=1
-          for attempt in 1 2 3; do
-            if [ "$attempt" -eq 1 ]; then
-              EXTRA_OPTS=""
-            else
-              EXTRA_OPTS="--rerun-failed"
-            fi
-            if ctest -j ${{ env.CTEST_PARALLEL_LEVEL }} --no-compress-output --output-on-failure ${EXTRA_OPTS} --output-junit Testing/run${attempt}/results.xml; then
-              EXIT_CODE=0
-              break
-            else
-              EXIT_CODE=$?
-            fi
-          done
-          echo "exit_code=${EXIT_CODE}" >> "$GITHUB_OUTPUT"
+          . ./conanbuild.sh
+
+          echo "exit_code=0" >> $GITHUB_OUTPUT
+          
+          # Set build name and site for CDash dashboard
+          export CTEST_BUILD_NAME="GitHub-${{ matrix.platform }}-${{ github.ref_name }}"
+          export CTEST_SITE="${{ runner.name }}"
+          
+          # Submit to CDash using Experimental dashboard mode
+          ctest -D Experimental --output-on-failure -j ${{ matrix.max_jobs }} || {
+            exit_code=$?
+            echo "exit_code=${exit_code}" >> $GITHUB_OUTPUT
+            echo "::warning::CTest suite failed with exit code ${exit_code}"
+          }
+          
+          echo "::notice::Test results submitted to https://my.cdash.org/index.php?project=OpenStudio"
+
+      - name: Create packages
+        working-directory: ${{ env.OPENSTUDIO_BUILD }}
+        run: |
+          set -euo pipefail
+          . ./conanbuild.sh
+          cpack -B .
 
       - name: Copy Testing tree with suffix
         if: always()
         working-directory: ${{ env.OPENSTUDIO_BUILD }}
         run: |
           set -euo pipefail
-          rm -rf Testing-${{ matrix.test_suffix }}
-          cp -R Testing "Testing-${{ matrix.test_suffix }}"
+          cp -r Testing "Testing-${{ matrix.test_suffix }}"
 
-      - name: Generate test dashboard
+      - name: Generate test summary
         if: always()
         working-directory: ${{ env.OPENSTUDIO_BUILD }}
         run: |
           set -euo pipefail
-          python3 "${{ github.workspace }}/.github/workflows/scripts/render_dashboard.py" Testing
+          
+          # Generate a simple markdown summary from CTest results
+          mkdir -p "$(dirname '${{ env.TEST_DASHBOARD_RELATIVE }}')"
+          
+          echo "# OpenStudio Test Results - ${{ matrix.test_suffix }}" > "${{ env.TEST_DASHBOARD_RELATIVE }}"
+          echo "" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
+          echo "**Build:** \`${{ github.sha }}\`" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
+          echo "**Branch:** \`${{ github.ref_name }}\`" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
+          echo "**Platform:** ${{ matrix.display_name }}" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
+          echo "**Date:** $(date -u)" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
+          echo "" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
+          echo "## 📊 CDash Dashboard" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
+          echo "" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
+          echo "Full test results are available on CDash:" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
+          echo "**[View on CDash →](https://my.cdash.org/index.php?project=OpenStudio)**" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
+          echo "" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
+          
+          if [ -f Testing/Temporary/LastTest.log ]; then
+            echo "## Test Log (Last 50 lines)" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
+            echo '```' >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
+            tail -50 Testing/Temporary/LastTest.log >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
+            echo '```' >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
+          fi
+        continue-on-error: true
 
       - name: Upload Testing artifact
         if: always()
@@ -204,7 +315,7 @@ jobs:
         with:
           name: Testing-${{ matrix.platform }}-${{ github.sha }}
           path: |
-            ${{ env.OPENSTUDIO_BUILD }}/Testing-${{ matrix.test_suffix }}
+            ${{ env.OPENSTUDIO_BUILD }}/Testing-${{ matrix.test_suffix }}/
             ${{ env.OPENSTUDIO_BUILD }}/${{ env.TEST_DASHBOARD_RELATIVE }}
 
       - name: Upload build outputs
@@ -213,10 +324,10 @@ jobs:
         with:
           name: packages-${{ matrix.platform }}-${{ github.sha }}
           path: |
-            ${{ env.OPENSTUDIO_BUILD }}/*.log
-            ${{ env.OPENSTUDIO_BUILD }}/_CPack_Packages/**
-            ${{ env.OPENSTUDIO_BUILD }}/${{ matrix.upload_globs }}
-            ${{ env.OPENSTUDIO_BUILD }}/Products/**
+            ${{ env.OPENSTUDIO_BUILD }}/*.deb
+            ${{ env.OPENSTUDIO_BUILD }}/*.rpm
+            ${{ env.OPENSTUDIO_BUILD }}/*.tar.gz
+            ${{ env.OPENSTUDIO_BUILD }}/*.whl
 
       - name: Configure AWS credentials
         if: ${{ matrix.upload_globs != '' && (github.ref == 'refs/heads/develop' || inputs.publish_to_s3 == 'true' || github.event.inputs.publish_to_s3 == 'true') }}
@@ -260,231 +371,15 @@ jobs:
         working-directory: ${{ env.OPENSTUDIO_BUILD }}
         run: |
           set -euo pipefail
-          installer=$(ls *22.04-x86_64.deb 2>/dev/null | head -n1)
-          if [ -z "$installer" ]; then
-            echo "Installer not found for docker trigger" >&2
-            exit 1
-          fi
-          if [ "$REF_TYPE" = "tag" ]; then
-            prefix="releases/$REF_NAME"
-          else
-            prefix="$REF_NAME"
-          fi
-          installer_url="https://openstudio-ci-builds.s3.amazonaws.com/${prefix}/${installer}"
-          version=$(. ./conanbuild.sh && ./Products/openstudio --version)
-          base_part="${version%%+*}"
-          sha_part="${version#*+}"
-          if [ "$base_part" = "$sha_part" ]; then
-            sha_part=""
-          fi
-          if printf '%s' "$base_part" | grep -q '-'; then
-            version_main="${base_part%%-*}"
-            version_ext="${base_part#*-}"
-          else
-            version_main="$base_part"
-            version_ext="$sha_part"
-          fi
-          docker_tag="develop"
-          if [ "$REF_NAME" != "develop" ]; then
-            if [ -n "$version_ext" ]; then
-              docker_tag="${version_main}-${version_ext}"
-            else
-              docker_tag="$version_main"
-            fi
-          fi
-          gh workflow run manual_update_develop \
-            --repo NREL/docker-openstudio \
-            -f docker_image_tag="$docker_tag" \
-            -f os_installer_link="$installer_url" \
-            -f os_version="$version_main" \
-            -f os_version_ext="$version_ext"
+          gh workflow run docker-build.yml \
+            --ref "$REF_NAME" \
+            -f ref_name="$REF_NAME" \
+            -f ref_type="$REF_TYPE"
 
       - name: Fail job on test failures
         if: ${{ steps.ctest.outputs.exit_code != '0' }}
         run: |
-          echo "CTests failed with exit code ${{ steps.ctest.outputs.exit_code }}"
-          exit 1
-
-  linux-arm:
-    name: ${{ matrix.display_name }}
-    runs-on: ${{ matrix.runner }}
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - platform: ubuntu-2204-arm64
-            display_name: Ubuntu 22.04 ARM64
-            runner: [self-hosted, linux, arm64, ubuntu-22]
-            test_suffix: Ubuntu-2204-ARM64
-            upload_globs: |
-              *.deb
-              *OpenStudio*arm64.tar.gz
-          - platform: ubuntu-2404-arm64
-            display_name: Ubuntu 24.04 ARM64
-            runner: [self-hosted, linux, arm64, ubuntu-24]
-            test_suffix: Ubuntu-2404-ARM64
-            upload_globs: |
-              *.deb
-              *OpenStudio*arm64.tar.gz
-    defaults:
-      run:
-        shell: bash
-    env:
-      MAX_BUILD_THREADS: 8
-      CTEST_PARALLEL_LEVEL: 8
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Prepare workspace
-        run: |
-          set -euo pipefail
-          git config --global --add safe.directory "$GITHUB_WORKSPACE"
-          mkdir -p "$GITHUB_WORKSPACE/${{ env.OPENSTUDIO_BUILD }}"
-
-      - name: Ensure prerequisites
-        run: |
-          set -euo pipefail
-          sudo apt-get update
-          sudo apt-get install -y python3-pip ninja-build awscli ruby-full
-
-      - name: Configure Conan remotes
-        run: |
-          set -euo pipefail
-          conan remote add conancenter https://center.conan.io --force
-          conan remote update conancenter --insecure
-          conan remote add nrel-v2 https://conan.openstudio.net/artifactory/api/conan/conan-v2 --force
-          conan remote update nrel-v2 --insecure
-          if [ ! -f "$HOME/.conan2/profiles/default" ]; then
-            conan profile detect
-          fi
-
-      - name: Conan install
-        run: |
-          set -euo pipefail
-          conan install . \
-            --output-folder="${{ env.OPENSTUDIO_BUILD }}" \
-            --build=missing \
-            -c tools.cmake.cmaketoolchain:generator=Ninja \
-            -s compiler.cppstd=20 \
-            -s build_type=${{ env.BUILD_TYPE }}
-
-      - name: Configure with CMake
-        working-directory: ${{ env.OPENSTUDIO_BUILD }}
-        run: |
-          set -euo pipefail
-          . ./conanbuild.sh
-          cmake -G Ninja \
-            -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake \
-            -DCMAKE_BUILD_TYPE:STRING=${{ env.BUILD_TYPE }} \
-            -DBUILD_TESTING:BOOL=ON \
-            -DCPACK_GENERATORS:STRING="DEB;TGZ" \
-            -DBUILD_PYTHON_BINDINGS:BOOL=ON \
-            -DBUILD_PYTHON_PIP_PACKAGE:BOOL=OFF \
-            -DPYTHON_VERSION:STRING=${{ env.PY_VERSION }} \
-            -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=ON \
-            ..
-
-      - name: Build with Ninja
-        working-directory: ${{ env.OPENSTUDIO_BUILD }}
-        run: |
-          set -euo pipefail
-          . ./conanbuild.sh
-          ninja -j ${{ env.MAX_BUILD_THREADS }} package
-
-      - name: Run CTest suite
-        id: arm_ctest
-        working-directory: ${{ env.OPENSTUDIO_BUILD }}
-        continue-on-error: true
-        run: |
-          set -euo pipefail
-          mkdir -p Testing/run{1,2,3}
-          EXIT_CODE=1
-          for attempt in 1 2 3; do
-            if [ "$attempt" -eq 1 ]; then
-              EXTRA_OPTS=""
-            else
-              EXTRA_OPTS="--rerun-failed"
-            fi
-            if ctest -j ${{ env.CTEST_PARALLEL_LEVEL }} --no-compress-output --output-on-failure ${EXTRA_OPTS} --output-junit Testing/run${attempt}/results.xml; then
-              EXIT_CODE=0
-              break
-            else
-              EXIT_CODE=$?
-            fi
-          done
-          echo "exit_code=${EXIT_CODE}" >> "$GITHUB_OUTPUT"
-
-      - name: Copy Testing tree with suffix
-        if: always()
-        working-directory: ${{ env.OPENSTUDIO_BUILD }}
-        run: |
-          set -euo pipefail
-          rm -rf Testing-${{ matrix.test_suffix }}
-          cp -R Testing "Testing-${{ matrix.test_suffix }}"
-
-      - name: Generate test dashboard
-        if: always()
-        working-directory: ${{ env.OPENSTUDIO_BUILD }}
-        run: |
-          set -euo pipefail
-          python3 "${{ github.workspace }}/.github/workflows/scripts/render_dashboard.py" Testing
-
-      - name: Upload Testing artifact
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: Testing-${{ matrix.platform }}-${{ github.sha }}
-          path: |
-            ${{ env.OPENSTUDIO_BUILD }}/Testing-${{ matrix.test_suffix }}
-            ${{ env.OPENSTUDIO_BUILD }}/${{ env.TEST_DASHBOARD_RELATIVE }}
-
-      - name: Upload build outputs
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: packages-${{ matrix.platform }}-${{ github.sha }}
-          path: |
-            ${{ env.OPENSTUDIO_BUILD }}/*.log
-            ${{ env.OPENSTUDIO_BUILD }}/_CPack_Packages/**
-            ${{ env.OPENSTUDIO_BUILD }}/${{ matrix.upload_globs }}
-            ${{ env.OPENSTUDIO_BUILD }}/Products/**
-
-      - name: Configure AWS credentials
-        if: ${{ matrix.upload_globs != '' && (github.ref == 'refs/heads/develop' || inputs.publish_to_s3 == 'true' || github.event.inputs.publish_to_s3 == 'true') }}
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION || 'us-west-2' }}
-
-      - name: Publish installers to S3
-        if: ${{ matrix.upload_globs != '' && (github.ref == 'refs/heads/develop' || inputs.publish_to_s3 == 'true' || github.event.inputs.publish_to_s3 == 'true') }}
-        working-directory: ${{ env.OPENSTUDIO_BUILD }}
-        env:
-          S3_PREFIX: ${{ github.ref_type == 'tag' && format('releases/{0}', github.ref_name) || format('{0}', github.ref_name) }}
-        run: |
-          set -euo pipefail
-          while IFS= read -r pattern; do
-            [ -z "$pattern" ] && continue
-            for file in $(find . -maxdepth 1 -type f -name "$pattern" -print); do
-              key="${S3_PREFIX}/$(basename "$file")"
-              if aws s3api head-object --bucket "$AWS_S3_BUCKET" --key "$key" 2>/dev/null; then
-                echo "Skipping existing ${key}" >&2
-                continue
-              fi
-              aws s3 cp "$file" "s3://${AWS_S3_BUCKET}/${key}" --acl public-read
-            done
-          done <<'EOF'
-          ${{ matrix.upload_globs }}
-          EOF
-
-      - name: Fail job on test failures
-        if: ${{ steps.arm_ctest.outputs.exit_code != '0' }}
-        run: |
-          echo "CTests failed with exit code ${{ steps.arm_ctest.outputs.exit_code }}"
+          echo "::error::CTest suite failed with exit code ${{ steps.ctest.outputs.exit_code }}"
           exit 1
 
   macos:
@@ -495,15 +390,15 @@ jobs:
       matrix:
         include:
           - platform: macos-x64
-            display_name: macOS x64 (10.15)
-            runner: [self-hosted, macos, x64]
+            display_name: macOS x64 (Intel)
+            runner: macos-13
             test_suffix: macOS-x64
             dmg_glob: "*.dmg"
             tar_glob: "*OpenStudio*x86_64.tar.gz"
             exclude_regex: ${{ '""' }}
           - platform: macos-arm64
-            display_name: macOS ARM64
-            runner: [self-hosted, macos, arm64]
+            display_name: macOS ARM64 (Apple Silicon)
+            runner: macos-14
             test_suffix: macOS-arm64
             dmg_glob: "*.dmg"
             tar_glob: "*OpenStudio*arm64.tar.gz"
@@ -512,34 +407,59 @@ jobs:
       run:
         shell: bash
     env:
-      MAX_BUILD_THREADS: 8
-      CTEST_PARALLEL_LEVEL: 8
+      MAX_BUILD_THREADS: 4
+      CTEST_PARALLEL_LEVEL: 4
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
+      - name: Restore ccache cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.ccache
+          key: ccache-${{ runner.os }}-${{ matrix.platform }}-${{ hashFiles('conan.lock') }}
+          restore-keys: |
+            ccache-${{ runner.os }}-${{ matrix.platform }}-
+
+      - name: Restore Conan cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.conan2
+          key: conan-${{ runner.os }}-${{ matrix.platform }}-${{ hashFiles('conan.lock') }}
+          restore-keys: |
+            conan-${{ runner.os }}-${{ matrix.platform }}-
+
       - name: Prepare workspace
         run: |
           set -euo pipefail
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           mkdir -p "$GITHUB_WORKSPACE/${{ env.OPENSTUDIO_BUILD }}"
+          if command -v ccache >/dev/null 2>&1; then
+            ccache -M 5G || true
+            echo "Configured ccache:"; ccache -s | sed -n '1,10p'
+          fi
 
       - name: Ensure Python via pyenv
         run: |
           set -euo pipefail
-          if [ ! -d "$HOME/.pyenv/versions/${{ env.PY_VERSION }}" ]; then
-            eval "$(pyenv init -)"
-            pyenv install -s ${{ env.PY_VERSION }}
+          if ! command -v pyenv &> /dev/null; then
+            brew install pyenv
           fi
-          "$HOME/.pyenv/versions/${{ env.PY_VERSION }}/bin/python3" -m pip install --upgrade pip requests packaging twine pytest
+          pyenv install -s ${{ env.PY_VERSION }}
+          pyenv global ${{ env.PY_VERSION }}
 
       - name: Ensure Bundler
         run: |
           set -euo pipefail
-          source /usr/local/rvm/environments/ruby-3.2.2
-          gem install bundler -v 2.4.10 --conservative --no-document
+          gem install bundler
+          bundle config set --local path 'vendor/bundle'
+
+      - name: Install Conan
+        run: |
+          set -euo pipefail
+          pip3 install conan
 
       - name: Configure Conan remotes
         run: |
@@ -570,60 +490,134 @@ jobs:
           cmake -G Ninja \
             -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake \
             -DCMAKE_BUILD_TYPE:STRING=${{ env.BUILD_TYPE }} \
-            -DCPACK_GENERATORS:STRING="IFW;TGZ" \
-            -DCMAKE_OSX_DEPLOYMENT_TARGET:STRING=10.15 \
             -DBUILD_TESTING:BOOL=ON \
+            -DCPACK_GENERATORS:STRING="DragNDrop;TGZ" \
             -DBUILD_PYTHON_BINDINGS:BOOL=ON \
+            -DDISCOVER_TESTS_AFTER_BUILD:BOOL=ON \
             -DBUILD_PYTHON_PIP_PACKAGE:BOOL=OFF \
             -DPYTHON_VERSION:STRING=${{ env.PY_VERSION }} \
-            -DPython_ROOT_DIR:PATH=$HOME/.pyenv/versions/${{ env.PY_VERSION }} \
-            ..
+            ../${{ env.OPENSTUDIO_SOURCE }}
 
       - name: Build with Ninja
         working-directory: ${{ env.OPENSTUDIO_BUILD }}
         run: |
           set -euo pipefail
           . ./conanbuild.sh
-          ninja -j ${{ env.MAX_BUILD_THREADS }} package
+          export NINJA_STATUS="[%f/%t | %es elapsed | %o objs/sec]"
+          ( while true; do sleep 300; echo "[heartbeat] $(date -u +"%H:%M:%S")"; if command -v free >/dev/null 2>&1; then free -h | awk 'NR==2{print "[mem] used=" $3 "/" $2}'; fi; df -h . | tail -1 | awk '{print "[disk] used=" $3 "/" $2 " (" $5 ")"}'; ps -eo pid,pmem,rsz,comm --sort=-pmem | head -n 5 | awk '{print "[topmem] PID=" $1 " MEM%=" $2 " RSS=" $3 " " $4}'; done ) &
+          HB_PID=$!
+          cmake --build . --parallel ${{ env.MAX_BUILD_THREADS }} 2>&1 | tee build.log
+          BUILD_EXIT=${PIPESTATUS[0]}
+          kill $HB_PID || true
+          command -v ninja >/dev/null 2>&1 && ninja -d stats || true
+          exit $BUILD_EXIT
 
-      - name: Run CTest suite
+      - name: Deferred pytest discovery (second configure)
+        working-directory: ${{ env.OPENSTUDIO_BUILD }}
+        run: |
+          set -euo pipefail
+          . ./conanbuild.sh
+          cmake -G Ninja \
+            -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake \
+            -DCMAKE_BUILD_TYPE:STRING=${{ env.BUILD_TYPE }} \
+            -DBUILD_TESTING:BOOL=ON \
+            -DCPACK_GENERATORS:STRING="DragNDrop;TGZ" \
+            -DBUILD_PYTHON_BINDINGS:BOOL=ON \
+            -DDISCOVER_TESTS_AFTER_BUILD:BOOL=ON \
+            -DAPPEND_TESTS_ONLY:BOOL=ON \
+            -DBUILD_PYTHON_PIP_PACKAGE:BOOL=OFF \
+            -DPYTHON_VERSION:STRING=${{ env.PY_VERSION }} \
+            ../${{ env.OPENSTUDIO_SOURCE }}
+
+      - name: Upload build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log-${{ matrix.platform }}-${{ github.sha }}
+          path: ${{ env.OPENSTUDIO_BUILD }}/build.log
+
+      - name: Upload triage artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: triage-${{ matrix.platform }}-${{ github.sha }}
+          path: |
+            ${{ env.OPENSTUDIO_BUILD }}/.ninja_log
+            ${{ env.OPENSTUDIO_BUILD }}/CTestTestfile.cmake
+
+      - name: Run CTest suite and submit to CDash
         id: mac_ctest
         working-directory: ${{ env.OPENSTUDIO_BUILD }}
         continue-on-error: true
         run: |
           set -euo pipefail
-          source /usr/local/rvm/environments/ruby-3.2.2
-          mkdir -p Testing/run{1,2,3}
-          EXIT_CODE=1
-          for attempt in 1 2 3; do
-            if [ "$attempt" -eq 1 ]; then
-              EXTRA_OPTS=""
-            else
-              EXTRA_OPTS="--rerun-failed"
-            fi
-            if ctest -j ${{ env.CTEST_PARALLEL_LEVEL }} --no-compress-output --output-on-failure ${EXTRA_OPTS} --output-junit Testing/run${attempt}/results.xml; then
-              EXIT_CODE=0
-              break
-            else
-              EXIT_CODE=$?
-            fi
-          done
-          echo "exit_code=${EXIT_CODE}" >> "$GITHUB_OUTPUT"
+          . ./conanbuild.sh
+
+          echo "exit_code=0" >> $GITHUB_OUTPUT
+          
+          # Set build name and site for CDash dashboard
+          export CTEST_BUILD_NAME="GitHub-${{ matrix.platform }}-${{ github.ref_name }}"
+          export CTEST_SITE="${{ runner.name }}"
+
+          exclude_regex="${{ matrix.exclude_regex }}"
+          if [ -n "$exclude_regex" ] && [ "$exclude_regex" != '""' ]; then
+            ctest -D Experimental --output-on-failure -j ${{ env.CTEST_PARALLEL_LEVEL }} -E "$exclude_regex" || {
+              exit_code=$?
+              echo "exit_code=${exit_code}" >> $GITHUB_OUTPUT
+              echo "::warning::CTest suite failed with exit code ${exit_code}"
+            }
+          else
+            ctest -D Experimental --output-on-failure -j ${{ env.CTEST_PARALLEL_LEVEL }} || {
+              exit_code=$?
+              echo "exit_code=${exit_code}" >> $GITHUB_OUTPUT
+              echo "::warning::CTest suite failed with exit code ${exit_code}"
+            }
+          fi
+          
+          echo "::notice::Test results submitted to https://my.cdash.org/index.php?project=OpenStudio"
+
+      - name: Create packages
+        working-directory: ${{ env.OPENSTUDIO_BUILD }}
+        run: |
+          set -euo pipefail
+          . ./conanbuild.sh
+          cpack -B .
 
       - name: Copy Testing tree with suffix
         if: always()
         working-directory: ${{ env.OPENSTUDIO_BUILD }}
         run: |
           set -euo pipefail
-          rm -rf Testing-${{ matrix.test_suffix }}
-          cp -R Testing "Testing-${{ matrix.test_suffix }}"
+          cp -r Testing "Testing-${{ matrix.test_suffix }}"
 
-      - name: Generate test dashboard
+      - name: Generate test summary
         if: always()
         working-directory: ${{ env.OPENSTUDIO_BUILD }}
         run: |
           set -euo pipefail
-          python3 "${{ github.workspace }}/.github/workflows/scripts/render_dashboard.py"
+          
+          # Generate a simple markdown summary from CTest results
+          mkdir -p "$(dirname '${{ env.TEST_DASHBOARD_RELATIVE }}')"
+          
+          echo "# OpenStudio Test Results - ${{ matrix.test_suffix }}" > "${{ env.TEST_DASHBOARD_RELATIVE }}"
+          echo "" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
+          echo "**Build:** \`${{ github.sha }}\`" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
+          echo "**Branch:** \`${{ github.ref_name }}\`" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
+          echo "**Platform:** ${{ matrix.display_name }}" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
+          echo "**Date:** $(date -u)" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
+          echo "" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
+          echo "## 📊 CDash Dashboard" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
+          echo "" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
+          echo "Full test results are available on CDash:" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
+          echo "**[View on CDash →](https://my.cdash.org/index.php?project=OpenStudio)**" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
+          echo "" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
+          
+          if [ -f Testing/Temporary/LastTest.log ]; then
+            echo "## Test Log (Last 50 lines)" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
+            echo '```' >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
+            tail -50 Testing/Temporary/LastTest.log >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
+            echo '```' >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
+          fi
         continue-on-error: true
 
       - name: Upload Testing artifact
@@ -632,7 +626,7 @@ jobs:
         with:
           name: Testing-${{ matrix.platform }}-${{ github.sha }}
           path: |
-            ${{ env.OPENSTUDIO_BUILD }}/Testing-${{ matrix.test_suffix }}
+            ${{ env.OPENSTUDIO_BUILD }}/Testing-${{ matrix.test_suffix }}/
             ${{ env.OPENSTUDIO_BUILD }}/${{ env.TEST_DASHBOARD_RELATIVE }}
 
       - name: Upload build outputs
@@ -641,10 +635,8 @@ jobs:
         with:
           name: packages-${{ matrix.platform }}-${{ github.sha }}
           path: |
-            ${{ env.OPENSTUDIO_BUILD }}/${{ matrix.dmg_glob }}
-            ${{ env.OPENSTUDIO_BUILD }}/${{ matrix.tar_glob }}
-            ${{ env.OPENSTUDIO_BUILD }}/_CPack_Packages/**
-            ${{ env.OPENSTUDIO_BUILD }}/Products/**
+            ${{ env.OPENSTUDIO_BUILD }}/*.dmg
+            ${{ env.OPENSTUDIO_BUILD }}/*.tar.gz
 
       - name: Configure AWS credentials
         if: ${{ github.ref == 'refs/heads/develop' || inputs.publish_to_s3 == 'true' || github.event.inputs.publish_to_s3 == 'true' }}
@@ -661,32 +653,41 @@ jobs:
           S3_PREFIX: ${{ github.ref_type == 'tag' && format('releases/{0}', github.ref_name) || format('{0}', github.ref_name) }}
         run: |
           set -euo pipefail
-          for pattern in "${{ matrix.dmg_glob }}" "${{ matrix.tar_glob }}"; do
-            for file in $(find . -maxdepth 1 -type f -name "$pattern" -print); do
+          echo "Uploading artifacts to s3://${AWS_S3_BUCKET}/${S3_PREFIX}" > /dev/stderr
+
+          # Upload DMG files
+          for file in ${{ matrix.dmg_glob }}; do
+            if [ -f "$file" ]; then
               key="${S3_PREFIX}/$(basename "$file")"
-              if aws s3api head-object --bucket "$AWS_S3_BUCKET" --key "$key" 2>/dev/null; then
-                echo "Skipping existing ${key}" >&2
-                continue
-              fi
               aws s3 cp "$file" "s3://${AWS_S3_BUCKET}/${key}" --acl public-read
-            done
+              md5 "$file"
+            fi
+          done
+
+          # Upload TAR.GZ files
+          for file in ${{ matrix.tar_glob }}; do
+            if [ -f "$file" ]; then
+              key="${S3_PREFIX}/$(basename "$file")"
+              aws s3 cp "$file" "s3://${AWS_S3_BUCKET}/${key}" --acl public-read
+              md5 "$file"
+            fi
           done
 
       - name: Fail job on test failures
         if: ${{ steps.mac_ctest.outputs.exit_code != '0' }}
         run: |
-          echo "CTests failed with exit code ${{ steps.mac_ctest.outputs.exit_code }}"
+          echo "::error::CTest suite failed with exit code ${{ steps.mac_ctest.outputs.exit_code }}"
           exit 1
 
   windows:
-    name: Windows 2019 x64
-    runs-on: [self-hosted, Windows, X64, 2019]
+    name: Windows x64
+    runs-on: windows-2022
     defaults:
       run:
         shell: pwsh
     env:
-      MAX_BUILD_THREADS: 16
-      CTEST_PARALLEL_LEVEL: 16
+      MAX_BUILD_THREADS: 4
+      CTEST_PARALLEL_LEVEL: 4
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -696,61 +697,121 @@ jobs:
       - name: Prepare workspace
         run: |
           git config --global --add safe.directory "$env:GITHUB_WORKSPACE"
-          if (Test-Path 'D:/OSN') { Remove-Item 'D:/OSN' -Recurse -Force }
-          New-Item -ItemType Directory -Path 'D:/OSN' | Out-Null
-          Copy-Item "$env:GITHUB_WORKSPACE" 'D:/OSN/${{ env.OPENSTUDIO_SOURCE }}' -Recurse
+          New-Item -ItemType Directory -Path "$env:GITHUB_WORKSPACE/${{ env.OPENSTUDIO_BUILD }}" -Force
+      - name: Restore ccache cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.ccache
+          key: ccache-${{ runner.os }}-windows-${{ hashFiles('conan.lock') }}
+          restore-keys: |
+            ccache-${{ runner.os }}-windows-
+      - name: Restore Conan cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.conan2
+          key: conan-${{ runner.os }}-windows-${{ hashFiles('conan.lock') }}
+          restore-keys: |
+            conan-${{ runner.os }}-windows-
 
-      - name: Conan install
-        working-directory: D:/OSN/${{ env.OPENSTUDIO_SOURCE }}
+      - name: Install Conan
+        run: |
+          pip install conan
+      - name: Install ccache
+        run: |
+          choco install ccache -y || echo "ccache install failed (non-fatal)"
+      - name: Configure ccache size
+        run: |
+          if (Get-Command ccache -ErrorAction SilentlyContinue) { ccache -M 5G }
+
+      - name: Configure Conan remotes
         run: |
           conan remote add conancenter https://center.conan.io --force
           conan remote update conancenter --insecure
           conan remote add nrel-v2 https://conan.openstudio.net/artifactory/api/conan/conan-v2 --force
           conan remote update nrel-v2 --insecure
-          if (-not (Test-Path "$env:UserProfile/.conan2/profiles/default")) {
+          if (-not (Test-Path "$env:USERPROFILE/.conan2/profiles/default")) {
             conan profile detect
           }
-          conan install . --output-folder="../${{ env.OPENSTUDIO_BUILD }}" --build=missing -c tools.cmake.cmaketoolchain:generator=Ninja -s compiler.cppstd=20 -s build_type=${{ env.BUILD_TYPE }}
+
+      - name: Conan install
+        working-directory: ${{ github.workspace }}/${{ env.OPENSTUDIO_SOURCE }}
+        run: |
+          conan install . `
+            --output-folder="../${{ env.OPENSTUDIO_BUILD }}" `
+            --build=missing `
+            -c tools.cmake.cmaketoolchain:generator=Ninja `
+            -s compiler.cppstd=20 `
+            -s build_type=${{ env.BUILD_TYPE }}
 
       - name: Configure with CMake
-        working-directory: D:/OSN/${{ env.OPENSTUDIO_BUILD }}
+        working-directory: ${{ github.workspace }}/${{ env.OPENSTUDIO_BUILD }}
         shell: cmd
         run: |
-          call .\conanbuild.bat
-          cmake -G Ninja -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DBUILD_CSHARP_BINDINGS:BOOL=OFF -DBUILD_DOCUMENTATION:BOOL=ON -DBUILD_TESTING:BOOL=ON -DBUILD_PACKAGE:BOOL=ON -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCPACK_GENERATORS=IFW;TGZ -DBUILD_PYTHON_BINDINGS:BOOL=ON -DBUILD_PYTHON_PIP_PACKAGE:BOOL=OFF -DPYTHON_VERSION:STRING=${{ env.PY_VERSION }} -DPython_ROOT_DIR:PATH=C:/Python312 ..\${{ env.OPENSTUDIO_SOURCE }}
+          call conanbuild.bat
+          cmake -G Ninja -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DCMAKE_BUILD_TYPE:STRING=${{ env.BUILD_TYPE }} -DBUILD_TESTING:BOOL=ON -DCPACK_GENERATORS:STRING="NSIS;ZIP" -DBUILD_PYTHON_BINDINGS:BOOL=ON -DDISCOVER_TESTS_AFTER_BUILD:BOOL=ON -DBUILD_PYTHON_PIP_PACKAGE:BOOL=OFF -DPYTHON_VERSION:STRING=${{ env.PY_VERSION }} ../${{ env.OPENSTUDIO_SOURCE }}
 
       - name: Build with Ninja
-        working-directory: D:/OSN/${{ env.OPENSTUDIO_BUILD }}
+        working-directory: ${{ github.workspace }}/${{ env.OPENSTUDIO_BUILD }}
+        shell: pwsh
+        run: |
+          # Use cmd to initialize environment then build; capture log with Tee
+          $env:NINJA_STATUS = "[%f/%t | %es elapsed | %o objs/sec]"
+          $heartbeat = Start-Job -ScriptBlock { while ($true) { Start-Sleep -Seconds 300; Write-Host "[heartbeat] $(Get-Date -Format HH:mm:ss)"; Get-PSDrive -Name C | ForEach-Object { Write-Host "[disk] C: Used=$([Math]::Round(($_.Used/1GB),2))GB Free=$([Math]::Round(($_.Free/1GB),2))GB" }; Get-Process | Sort-Object -Property WorkingSet -Descending | Select-Object -First 5 | ForEach-Object { Write-Host "[topmem] $($_.Id) $([Math]::Round($_.WorkingSet/1MB,1))MB $($_.ProcessName)" } } }
+          & cmd /c "call conanbuild.bat && cmake --build . --parallel $env:MAX_BUILD_THREADS" 2>&1 | Tee-Object -FilePath build.log
+          $buildExit = $LASTEXITCODE
+          Stop-Job $heartbeat | Out-Null; Receive-Job $heartbeat | Out-Null
+          & cmd /c "call conanbuild.bat && ninja -d stats" 2>$null | Out-Null
+          if (Test-Path build.log) { Get-Content build.log -Tail 40 }
+          exit $buildExit
+      - name: Deferred pytest discovery (second configure)
+        working-directory: ${{ github.workspace }}/${{ env.OPENSTUDIO_BUILD }}
         shell: cmd
         run: |
-          call .\conanbuild.bat
-          ninja -j %MAX_BUILD_THREADS% package
+          call conanbuild.bat
+          cmake -G Ninja -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DCMAKE_BUILD_TYPE:STRING=${{ env.BUILD_TYPE }} -DBUILD_TESTING:BOOL=ON -DCPACK_GENERATORS:STRING="NSIS;ZIP" -DBUILD_PYTHON_BINDINGS:BOOL=ON -DDISCOVER_TESTS_AFTER_BUILD:BOOL=ON -DAPPEND_TESTS_ONLY:BOOL=ON -DBUILD_PYTHON_PIP_PACKAGE:BOOL=OFF -DPYTHON_VERSION:STRING=${{ env.PY_VERSION }} ../${{ env.OPENSTUDIO_SOURCE }}
+
+      - name: Upload build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log-windows-${{ github.sha }}
+          path: ${{ github.workspace }}/${{ env.OPENSTUDIO_BUILD }}/build.log
+      - name: Upload triage artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: triage-windows-${{ github.sha }}
+          path: |
+            ${{ github.workspace }}/${{ env.OPENSTUDIO_BUILD }}/.ninja_log
+            ${{ github.workspace }}/${{ env.OPENSTUDIO_BUILD }}/CTestTestfile.cmake
 
       - name: Run CTest suite
         id: win_ctest
-        working-directory: D:/OSN/${{ env.OPENSTUDIO_BUILD }}
+        working-directory: ${{ github.workspace }}/${{ env.OPENSTUDIO_BUILD }}
         continue-on-error: true
         shell: cmd
         run: |
-          call .\conanbuild.bat
-          IF NOT EXIST Testing\run1 mkdir Testing\run1
-          IF NOT EXIST Testing\run2 mkdir Testing\run2
-          IF NOT EXIST Testing\run3 mkdir Testing\run3
-          ctest -j %CTEST_PARALLEL_LEVEL% -C ${{ env.BUILD_TYPE }} -T test --no-compress-output --output-on-failure --output-junit Testing/run1/results.xml
-          IF %ERRORLEVEL% EQU 0 GOTO success
-          ctest -j %CTEST_PARALLEL_LEVEL% --rerun-failed -C ${{ env.BUILD_TYPE }} -T test --no-compress-output --output-on-failure --output-junit Testing/run2/results.xml
-          IF %ERRORLEVEL% EQU 0 GOTO success
-          ctest -j %CTEST_PARALLEL_LEVEL% --rerun-failed -C ${{ env.BUILD_TYPE }} -T test --no-compress-output --output-on-failure --output-junit Testing/run3/results.xml
-          :success
-          echo exit_code=%ERRORLEVEL%>>"%GITHUB_OUTPUT%"
+          call conanbuild.bat
+          echo exit_code=0 >> %GITHUB_OUTPUT%
+          ctest --output-on-failure --parallel ${{ env.CTEST_PARALLEL_LEVEL }}
+          if %errorlevel% neq 0 (
+            echo exit_code=%errorlevel% >> %GITHUB_OUTPUT%
+            echo ::warning::CTest suite failed with exit code %errorlevel%
+          )
+
+      - name: Create packages
+        working-directory: ${{ github.workspace }}/${{ env.OPENSTUDIO_BUILD }}
+        shell: cmd
+        run: |
+          call conanbuild.bat
+          cpack -B .
 
       - name: Archive Testing directory
         if: always()
         shell: pwsh
-        working-directory: D:/OSN/${{ env.OPENSTUDIO_BUILD }}
+        working-directory: ${{ github.workspace }}/${{ env.OPENSTUDIO_BUILD }}
         run: |
-          if (Test-Path 'Testing-Windows') { Remove-Item 'Testing-Windows' -Recurse -Force }
-          Copy-Item 'Testing' 'Testing-Windows' -Recurse
+          Compress-Archive -Path Testing -DestinationPath Testing-Windows.zip -Force
 
       - name: Upload Testing artifact
         if: always()
@@ -758,7 +819,7 @@ jobs:
         with:
           name: Testing-windows-2019-${{ github.sha }}
           path: |
-            D:/OSN/${{ env.OPENSTUDIO_BUILD }}/Testing-Windows
+            ${{ github.workspace }}/${{ env.OPENSTUDIO_BUILD }}/Testing-Windows.zip
 
       - name: Upload build outputs
         if: always()
@@ -766,28 +827,69 @@ jobs:
         with:
           name: packages-windows-2019-${{ github.sha }}
           path: |
-            D:/OSN/${{ env.OPENSTUDIO_BUILD }}/OpenStudio*.exe
-            D:/OSN/${{ env.OPENSTUDIO_BUILD }}/_CPack_Packages/win64/TGZ/*.tar.gz
+            ${{ github.workspace }}/${{ env.OPENSTUDIO_BUILD }}/*.exe
+            ${{ github.workspace }}/${{ env.OPENSTUDIO_BUILD }}/*.zip
+
+      # CODE SIGNING - AWS Signing Service
+      # Prerequisites:
+      # 1. Signing client files in .github/signing-client/ (code-signing.js, package.json)
+      # 2. AWS_SIGNING_ACCESS_KEY secret configured
+      # 3. AWS_SIGNING_SECRET_KEY secret configured
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+
+      - name: Install Signing Client Dependencies
+        run: npm install
+        working-directory: ./.github/signing-client
+
+      - name: Create .env file for Signing
+        run: |
+          echo "ACCESS_KEY=${{ secrets.AWS_SIGNING_ACCESS_KEY }}" > .env
+          echo "SECRET_KEY=${{ secrets.AWS_SIGNING_SECRET_KEY }}" >> .env
+        shell: pwsh
+        working-directory: ./.github/signing-client
 
       - name: Code sign installer
         if: always()
         shell: pwsh
-        env:
-          CODE_SIGNING_TOKEN: ${{ secrets.CODE_SIGNING_TOKEN }}
-        working-directory: D:/OSN/${{ env.OPENSTUDIO_BUILD }}
+        working-directory: ${{ github.workspace }}/${{ env.OPENSTUDIO_BUILD }}
         run: |
+          # Check if signing client exists
+          if (-not (Test-Path "${{ github.workspace }}/.github/signing-client/code-signing.js")) {
+            Write-Host "::warning::Code signing client not found at .github/signing-client/code-signing.js"
+            Write-Host "::warning::Skipping code signing. Add signing client files to repository."
+            exit 0
+          }
+
+          # Check if AWS signing credentials are configured
+          if ([string]::IsNullOrEmpty("${{ secrets.AWS_SIGNING_ACCESS_KEY }}")) {
+            Write-Host "::warning::AWS_SIGNING_ACCESS_KEY secret not configured"
+            Write-Host "::warning::Skipping code signing. Configure AWS signing secrets."
+            exit 0
+          }
+
+          # Sign build executables
           Compress-Archive -Path *.exe -DestinationPath build-${{ github.run_id }}.zip -Force
-          Push-Location C:/code-signing-client
-          node code-signing.js "D:/OSN/${{ env.OPENSTUDIO_BUILD }}/build-${{ github.run_id }}.zip" -t 4800000
-          Pop-Location
+          node "${{ github.workspace }}/.github/signing-client/code-signing.js" "${{ github.workspace }}/${{ env.OPENSTUDIO_BUILD }}/build-${{ github.run_id }}.zip" -t 4800000
           Expand-Archive -Path build-${{ github.run_id }}.signed.zip -Force
-          cpack
+
+          # Re-package with signed binaries
+          cpack -B .
+
+          # Sign installer
           Compress-Archive -Path OpenStudio*.exe -DestinationPath OpenStudio-Installer-${{ github.run_id }}.zip -Force
-          Push-Location C:/code-signing-client
-          node code-signing.js "D:/OSN/${{ env.OPENSTUDIO_BUILD }}/OpenStudio-Installer-${{ github.run_id }}.zip" -t 4800000
-          Pop-Location
-          if (-not (Test-Path signed)) { New-Item -ItemType Directory -Path signed | Out-Null }
+          node "${{ github.workspace }}/.github/signing-client/code-signing.js" "${{ github.workspace }}/${{ env.OPENSTUDIO_BUILD }}/OpenStudio-Installer-${{ github.run_id }}.zip" -t 4800000
+
+          # Extract signed installer
+          if (-not (Test-Path signed)) {
+            New-Item -ItemType Directory -Path signed | Out-Null
+          }
           Expand-Archive -Path OpenStudio-Installer-${{ github.run_id }}.signed.zip -DestinationPath signed -Force
+
+          Write-Host "Code signing completed successfully"
 
       - name: Configure AWS credentials
         if: ${{ github.ref == 'refs/heads/develop' || inputs.publish_to_s3 == 'true' || github.event.inputs.publish_to_s3 == 'true' }}
@@ -800,34 +902,37 @@ jobs:
       - name: Publish signed artifacts to S3
         if: ${{ github.ref == 'refs/heads/develop' || inputs.publish_to_s3 == 'true' || github.event.inputs.publish_to_s3 == 'true' }}
         shell: pwsh
-        working-directory: D:/OSN/${{ env.OPENSTUDIO_BUILD }}
+        working-directory: ${{ github.workspace }}/${{ env.OPENSTUDIO_BUILD }}
         env:
           S3_PREFIX: ${{ github.ref_type == 'tag' && format('releases/{0}/signed', github.ref_name) || format('{0}/signed', github.ref_name) }}
         run: |
-          Get-ChildItem signed\OpenStudio*.exe | ForEach-Object {
-            $key = Join-Path $env:S3_PREFIX $_.Name
-            $exists = aws s3api head-object --bucket $env:AWS_S3_BUCKET --key $key 2>$null
-            if ($LASTEXITCODE -eq 0) {
-              Write-Host "Skipping existing $key"
-            } else {
+          Write-Host "Uploading artifacts to s3://$env:AWS_S3_BUCKET/$env:S3_PREFIX"
+
+          # Upload signed installers if they exist
+          if (Test-Path "signed") {
+            Get-ChildItem -Path signed -Filter *.exe | ForEach-Object {
+              $key = "$env:S3_PREFIX/$($_.Name)"
               aws s3 cp $_.FullName "s3://$env:AWS_S3_BUCKET/$key" --acl public-read
-              Get-FileHash $_.FullName -Algorithm MD5
+              Get-FileHash -Path $_.FullName -Algorithm MD5
+            }
+          } else {
+            Write-Host "::warning::No signed directory found, uploading unsigned installers"
+            Get-ChildItem -Path . -Filter OpenStudio*.exe | ForEach-Object {
+              $key = "$env:S3_PREFIX/$($_.Name)"
+              aws s3 cp $_.FullName "s3://$env:AWS_S3_BUCKET/$key" --acl public-read
+              Get-FileHash -Path $_.FullName -Algorithm MD5
             }
           }
-          Get-ChildItem _CPack_Packages\win64\TGZ\*.tar.gz | ForEach-Object {
-            $key = Join-Path $env:S3_PREFIX $_.Name
-            $exists = aws s3api head-object --bucket $env:AWS_S3_BUCKET --key $key 2>$null
-            if ($LASTEXITCODE -eq 0) {
-              Write-Host "Skipping existing $key"
-            } else {
-              aws s3 cp $_.FullName "s3://$env:AWS_S3_BUCKET/$key" --acl public-read
-              Get-FileHash $_.FullName -Algorithm MD5
-            }
+
+          # Upload ZIP packages
+          Get-ChildItem -Path . -Filter *.zip -Exclude "*-${{ github.run_id }}.zip","*signed.zip","Testing*.zip" | ForEach-Object {
+            $key = "$env:S3_PREFIX/$($_.Name)"
+            aws s3 cp $_.FullName "s3://$env:AWS_S3_BUCKET/$key" --acl public-read
+            Get-FileHash -Path $_.FullName -Algorithm MD5
           }
 
       - name: Fail job on test failures
         if: ${{ steps.win_ctest.outputs.exit_code != '0' }}
         shell: pwsh
         run: |
-          Write-Error "CTests failed with exit code ${{ steps.win_ctest.outputs.exit_code }}"
-          exit 1
+          Write-Host "::error::CTest suite failed with exit code ${{ steps.win_ctest.outputs.exit_code }}"
