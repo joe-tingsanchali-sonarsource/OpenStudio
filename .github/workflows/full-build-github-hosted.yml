@@ -205,7 +205,7 @@ jobs:
             ${{ env.OPENSTUDIO_BUILD }}/.ninja_log
             ${{ env.OPENSTUDIO_BUILD }}/CTestTestfile.cmake
 
-      - name: Run CTest suite
+      - name: Run CTest suite and submit to CDash
         id: ctest
         working-directory: ${{ env.OPENSTUDIO_BUILD }}
         continue-on-error: true
@@ -214,12 +214,19 @@ jobs:
           . ./conanbuild.sh
 
           echo "exit_code=0" >> $GITHUB_OUTPUT
-
-          ctest --output-on-failure --parallel ${{ matrix.max_jobs }} || {
+          
+          # Set build name and site for CDash dashboard
+          export CTEST_BUILD_NAME="GitHub-${{ matrix.platform }}-${{ github.ref_name }}"
+          export CTEST_SITE="${{ runner.name }}"
+          
+          # Submit to CDash using Experimental dashboard mode
+          ctest -D Experimental --output-on-failure -j ${{ matrix.max_jobs }} || {
             exit_code=$?
             echo "exit_code=${exit_code}" >> $GITHUB_OUTPUT
             echo "::warning::CTest suite failed with exit code ${exit_code}"
           }
+          
+          echo "::notice::Test results submitted to https://my.cdash.org/index.php?project=OpenStudio"
 
       - name: Create packages
         working-directory: ${{ env.OPENSTUDIO_BUILD }}
@@ -235,12 +242,35 @@ jobs:
           set -euo pipefail
           cp -r Testing "Testing-${{ matrix.test_suffix }}"
 
-      - name: Generate test dashboard
+      - name: Generate test summary
         if: always()
         working-directory: ${{ env.OPENSTUDIO_BUILD }}
         run: |
           set -euo pipefail
-          ruby ../OpenStudio/developer/ruby/DashboardFromCDash.rb "${{ env.TEST_DASHBOARD_RELATIVE }}"
+          
+          # Generate a simple markdown summary from CTest results
+          mkdir -p "$(dirname '${{ env.TEST_DASHBOARD_RELATIVE }}')"
+          
+          echo "# OpenStudio Test Results - ${{ matrix.test_suffix }}" > "${{ env.TEST_DASHBOARD_RELATIVE }}"
+          echo "" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
+          echo "**Build:** \`${{ github.sha }}\`" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
+          echo "**Branch:** \`${{ github.ref_name }}\`" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
+          echo "**Platform:** ${{ matrix.display_name }}" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
+          echo "**Date:** $(date -u)" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
+          echo "" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
+          echo "## 📊 CDash Dashboard" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
+          echo "" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
+          echo "Full test results are available on CDash:" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
+          echo "**[View on CDash →](https://my.cdash.org/index.php?project=OpenStudio)**" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
+          echo "" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
+          
+          if [ -f Testing/Temporary/LastTest.log ]; then
+            echo "## Test Log (Last 50 lines)" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
+            echo '```' >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
+            tail -50 Testing/Temporary/LastTest.log >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
+            echo '```' >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
+          fi
+        continue-on-error: true
 
       - name: Upload Testing artifact
         if: always()
@@ -478,7 +508,7 @@ jobs:
             ${{ env.OPENSTUDIO_BUILD }}/.ninja_log
             ${{ env.OPENSTUDIO_BUILD }}/CTestTestfile.cmake
 
-      - name: Run CTest suite
+      - name: Run CTest suite and submit to CDash
         id: mac_ctest
         working-directory: ${{ env.OPENSTUDIO_BUILD }}
         continue-on-error: true
@@ -487,21 +517,27 @@ jobs:
           . ./conanbuild.sh
 
           echo "exit_code=0" >> $GITHUB_OUTPUT
+          
+          # Set build name and site for CDash dashboard
+          export CTEST_BUILD_NAME="GitHub-${{ matrix.platform }}-${{ github.ref_name }}"
+          export CTEST_SITE="${{ runner.name }}"
 
           exclude_regex="${{ matrix.exclude_regex }}"
           if [ -n "$exclude_regex" ] && [ "$exclude_regex" != '""' ]; then
-            ctest --output-on-failure --parallel ${{ env.CTEST_PARALLEL_LEVEL }} -E "$exclude_regex" || {
+            ctest -D Experimental --output-on-failure -j ${{ env.CTEST_PARALLEL_LEVEL }} -E "$exclude_regex" || {
               exit_code=$?
               echo "exit_code=${exit_code}" >> $GITHUB_OUTPUT
               echo "::warning::CTest suite failed with exit code ${exit_code}"
             }
           else
-            ctest --output-on-failure --parallel ${{ env.CTEST_PARALLEL_LEVEL }} || {
+            ctest -D Experimental --output-on-failure -j ${{ env.CTEST_PARALLEL_LEVEL }} || {
               exit_code=$?
               echo "exit_code=${exit_code}" >> $GITHUB_OUTPUT
               echo "::warning::CTest suite failed with exit code ${exit_code}"
             }
           fi
+          
+          echo "::notice::Test results submitted to https://my.cdash.org/index.php?project=OpenStudio"
 
       - name: Create packages
         working-directory: ${{ env.OPENSTUDIO_BUILD }}
@@ -517,12 +553,34 @@ jobs:
           set -euo pipefail
           cp -r Testing "Testing-${{ matrix.test_suffix }}"
 
-      - name: Generate test dashboard
+      - name: Generate test summary
         if: always()
         working-directory: ${{ env.OPENSTUDIO_BUILD }}
         run: |
           set -euo pipefail
-          ruby ../OpenStudio/developer/ruby/DashboardFromCDash.rb "${{ env.TEST_DASHBOARD_RELATIVE }}"
+          
+          # Generate a simple markdown summary from CTest results
+          mkdir -p "$(dirname '${{ env.TEST_DASHBOARD_RELATIVE }}')"
+          
+          echo "# OpenStudio Test Results - ${{ matrix.test_suffix }}" > "${{ env.TEST_DASHBOARD_RELATIVE }}"
+          echo "" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
+          echo "**Build:** \`${{ github.sha }}\`" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
+          echo "**Branch:** \`${{ github.ref_name }}\`" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
+          echo "**Platform:** ${{ matrix.display_name }}" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
+          echo "**Date:** $(date -u)" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
+          echo "" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
+          echo "## 📊 CDash Dashboard" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
+          echo "" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
+          echo "Full test results are available on CDash:" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
+          echo "**[View on CDash →](https://my.cdash.org/index.php?project=OpenStudio)**" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
+          echo "" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
+          
+          if [ -f Testing/Temporary/LastTest.log ]; then
+            echo "## Test Log (Last 50 lines)" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
+            echo '```' >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
+            tail -50 Testing/Temporary/LastTest.log >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
+            echo '```' >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
+          fi
         continue-on-error: true
 
       - name: Upload Testing artifact
