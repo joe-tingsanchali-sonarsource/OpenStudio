@@ -503,7 +503,8 @@ jobs:
       - name: Install Conan
         run: |
           set -euo pipefail
-          pip3 install conan
+          python3 -m pip install --upgrade pip
+          python3 -m pip install conan
 
       - name: Configure Conan remotes
         run: |
@@ -823,6 +824,12 @@ jobs:
         run: |
           git config --global --add safe.directory "$env:GITHUB_WORKSPACE"
           New-Item -ItemType Directory -Path "$env:GITHUB_WORKSPACE/${{ env.OPENSTUDIO_BUILD }}" -Force
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PY_VERSION }}
+
       - name: Restore ccache cache
         uses: actions/cache@v4
         with:
