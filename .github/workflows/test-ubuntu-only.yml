@@ -57,7 +57,7 @@ jobs:
           - platform: ubuntu-2204-x64
             display_name: Ubuntu 22.04 x64
             runner: ubuntu-22.04
-            container_image: nrel/openstudio-cmake-tools:jammy
+            container_image: nrel/openstudio-cmake-tools:jammy-main
             container_options: "--privileged -u root -e LANG=en_US.UTF-8"
             test_suffix: Ubuntu-2204
             pip_package: true
@@ -74,6 +74,12 @@ jobs:
     env:
       MAX_BUILD_THREADS: ${{ matrix.max_jobs }}
       CTEST_PARALLEL_LEVEL: ${{ matrix.max_jobs }}
+      ENABLE_COVERAGE: false
+      # TODO: ENABLE_COVERAGE is intentionally left false to avoid
+      # generating/collecting coverage artifacts in CI by default.
+      # If you want coverage in a run, set ENABLE_COVERAGE=true and
+      # ensure the container has coverage tools (lcov/gcov or python/ruby coverage).
+      # Reminder: revisit coverage configuration and CI image to add required tools.
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -151,11 +157,28 @@ jobs:
         run: |
           set -euo pipefail
           . ./conanbuild.sh
+          # Ensure Bundler is installed for Ruby tests (fixes known Ubuntu test failures)
+          if command -v rvm >/dev/null 2>&1; then
+            echo "Installing bundler 2.4.10 (if missing)"
+            source /usr/local/rvm/scripts/rvm || true
+            rvm use ruby-3.2.2 || true
+            gem install bundler -v 2.4.10 --no-document || gem install bundler --no-document || true
+          else
+            echo "rvm not found; skipping bundler install step"
+          fi
+
+          # Respect optional ENABLE_COVERAGE environment variable to turn on coverage builds
+          CMAKE_COVERAGE_FLAG=""
+          if [ "${ENABLE_COVERAGE:-false}" = "true" ]; then
+            CMAKE_COVERAGE_FLAG="-DENABLE_COVERAGE:BOOL=ON"
+            echo "Coverage enabled for this build"
+          fi
           # Added Job Pools to prevent linker from consuming all RAM
           cmake -G Ninja \
             -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake \
             -DCMAKE_BUILD_TYPE:STRING=${{ env.BUILD_TYPE }} \
             -DBUILD_TESTING:BOOL=ON \
+            $CMAKE_COVERAGE_FLAG \
             -DCPACK_GENERATORS:STRING="${{ matrix.cpack_generators }}" \
             -DBUILD_PYTHON_BINDINGS:BOOL=ON \
             -DDISCOVER_TESTS_AFTER_BUILD:BOOL=ON \
@@ -251,12 +274,23 @@ jobs:
           export CTEST_SITE="${{ runner.name }}"
           
           # Submit to CDash using Experimental dashboard mode
-          # This runs: Configure, Build (skipped since already built), Test, and Submit steps
-          ctest -D Experimental --output-on-failure -j ${{ matrix.max_jobs }} || {
-            exit_code=$?
-            echo "exit_code=${exit_code}" >> $GITHUB_OUTPUT
-            echo "::warning::CTest suite failed with exit code ${exit_code}"
-          }
+          # Pass CDASH token if available to avoid invalid token errors
+          if [ -n "${{ secrets.CDASH_TOKEN || '' }}" ]; then
+            echo "Using CDASH token to submit results"
+            export CDASH_SUBMIT_TOKEN="${{ secrets.CDASH_TOKEN }}"
+            ctest -D Experimental -DCDASH_SUBMIT_TOKEN=$CDASH_SUBMIT_TOKEN --output-on-failure -j ${{ matrix.max_jobs }} || {
+              exit_code=$?
+              echo "exit_code=${exit_code}" >> $GITHUB_OUTPUT
+              echo "::warning::CTest suite failed with exit code ${exit_code}"
+            }
+          else
+            echo "No CDASH token provided; attempting submit without token"
+            ctest -D Experimental --output-on-failure -j ${{ matrix.max_jobs }} || {
+              exit_code=$?
+              echo "exit_code=${exit_code}" >> $GITHUB_OUTPUT
+              echo "::warning::CTest suite failed with exit code ${exit_code}"
+            }
+          fi
           
           echo "::notice::Test results submitted to https://my.cdash.org/index.php?project=OpenStudio"
 
@@ -268,6 +302,29 @@ jobs:
           . ./conanbuild.sh
           # Explicitly only run the generators we asked for in matrix
           cpack -G "${{ matrix.cpack_generators }}" -B .
+
+      - name: Collect and upload coverage artifacts
+        if: env.ENABLE_COVERAGE == 'true'
+        working-directory: ${{ env.OPENSTUDIO_BUILD }}
+        run: |
+          set -euo pipefail
+          echo "Collecting coverage artifacts"
+          mkdir -p coverage_artifacts
+          # Common coverage files
+          if [ -f coverage.info ]; then cp coverage.info coverage_artifacts/ || true; fi
+          if [ -f python_coverage.lcov ]; then cp python_coverage.lcov coverage_artifacts/ || true; fi
+          # Ruby coverage outputs under src/cli/test
+          find .. -type f \( -name "*.lcov" -o -name "python_coverage.xml" -o -name "python_coverage.lcov" -o -name "coverage.json" \) -maxdepth 5 -print | xargs -I{} cp --parents {} coverage_artifacts/ || true
+          tar -czf coverage_artifacts.tar.gz coverage_artifacts || true
+        continue-on-error: true
+
+      - name: Upload coverage artifacts
+        if: env.ENABLE_COVERAGE == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ matrix.platform }}-${{ github.sha }}
+          path: |
+            ${{ env.OPENSTUDIO_BUILD }}/coverage_artifacts.tar.gz
           
       - name: Copy Testing tree with suffix
         if: always()
