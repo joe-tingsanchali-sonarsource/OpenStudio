@@ -48,7 +48,6 @@ env:
   OPENSTUDIO_BUILD: OS-build-release-v2
   PY_VERSION: "3.12.2"
   AWS_S3_BUCKET: openstudio-ci-builds
-  TEST_DASHBOARD_RELATIVE: Testing/dashboard/test-dashboard.md
 
 jobs:
   linux-x64:
@@ -237,22 +236,6 @@ jobs:
           command -v ninja >/dev/null 2>&1 && ninja -d stats || true
           exit $BUILD_EXIT
 
-      - name: Summarize peak memory usage
-        if: always()
-        working-directory: ${{ env.OPENSTUDIO_BUILD }}
-        run: |
-          set -euo pipefail
-          if [ -f mem_samples.log ]; then
-            echo "::group::Peak Memory Summary"
-            peak_cc1=$(grep -E 'cc1plus$' mem_samples.log | awk '{print $3}' | sort -nr | head -n1)
-            if [ -n "$peak_cc1" ]; then
-              awk -v v="$peak_cc1" 'BEGIN{printf "Peak cc1plus RSS: %.2f GB\n", v/1024/1024}'
-            else
-              echo "No cc1plus samples recorded"
-            fi
-            echo "::endgroup::"
-          fi
-
       - name: Deferred pytest discovery (second configure)
         working-directory: ${{ github.workspace }}/${{ env.OPENSTUDIO_BUILD }}
         run: |
@@ -286,7 +269,7 @@ jobs:
             ${{ github.workspace }}/${{ env.OPENSTUDIO_BUILD }}/.ninja_log
             ${{ github.workspace }}/${{ env.OPENSTUDIO_BUILD }}/CTestTestfile.cmake
 
-      - name: Run CTest suite and submit to CDash
+      - name: Run CTest suite
         id: ctest
         working-directory: ${{ github.workspace }}/${{ env.OPENSTUDIO_BUILD }}
         continue-on-error: true
@@ -296,18 +279,12 @@ jobs:
 
           echo "exit_code=0" >> $GITHUB_OUTPUT
           
-          # Set build name and site for CDash dashboard
-          export CTEST_BUILD_NAME="GitHub-${{ matrix.platform }}-${{ github.ref_name }}"
-          export CTEST_SITE="${{ runner.name }}"
-          
-          # Submit to CDash using Experimental dashboard mode
-          ctest -D Experimental --output-on-failure -j ${{ matrix.max_jobs }} || {
+          # Run tests
+          ctest --output-on-failure -j ${{ matrix.max_jobs }} || {
             exit_code=$?
             echo "exit_code=${exit_code}" >> $GITHUB_OUTPUT
             echo "::warning::CTest suite failed with exit code ${exit_code}"
           }
-          
-          echo "::notice::Test results submitted to https://my.cdash.org/index.php?project=OpenStudio"
 
       - name: Create packages
         working-directory: ${{ env.OPENSTUDIO_BUILD }}
@@ -323,36 +300,6 @@ jobs:
           set -euo pipefail
           cp -r Testing "Testing-${{ matrix.test_suffix }}"
 
-      - name: Generate test summary
-        if: always()
-        working-directory: ${{ env.OPENSTUDIO_BUILD }}
-        run: |
-          set -euo pipefail
-          
-          # Generate a simple markdown summary from CTest results
-          mkdir -p "$(dirname '${{ env.TEST_DASHBOARD_RELATIVE }}')"
-          
-          echo "# OpenStudio Test Results - ${{ matrix.test_suffix }}" > "${{ env.TEST_DASHBOARD_RELATIVE }}"
-          echo "" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
-          echo "**Build:** \`${{ github.sha }}\`" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
-          echo "**Branch:** \`${{ github.ref_name }}\`" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
-          echo "**Platform:** ${{ matrix.display_name }}" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
-          echo "**Date:** $(date -u)" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
-          echo "" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
-          echo "## 📊 CDash Dashboard" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
-          echo "" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
-          echo "Full test results are available on CDash:" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
-          echo "**[View on CDash →](https://my.cdash.org/index.php?project=OpenStudio)**" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
-          echo "" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
-          
-          if [ -f Testing/Temporary/LastTest.log ]; then
-            echo "## Test Log (Last 50 lines)" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
-            echo '```' >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
-            tail -50 Testing/Temporary/LastTest.log >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
-            echo '```' >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
-          fi
-        continue-on-error: true
-
       - name: Upload Testing artifact
         if: always()
         uses: actions/upload-artifact@v4
@@ -360,7 +307,6 @@ jobs:
           name: Testing-${{ matrix.platform }}-${{ github.sha }}
           path: |
             ${{ env.OPENSTUDIO_BUILD }}/Testing-${{ matrix.test_suffix }}/
-            ${{ env.OPENSTUDIO_BUILD }}/${{ env.TEST_DASHBOARD_RELATIVE }}
 
       - name: Upload build outputs
         if: always()
@@ -593,7 +539,7 @@ jobs:
             ${{ env.OPENSTUDIO_BUILD }}/.ninja_log
             ${{ env.OPENSTUDIO_BUILD }}/CTestTestfile.cmake
 
-      - name: Run CTest suite and submit to CDash
+      - name: Run CTest suite
         id: mac_ctest
         working-directory: ${{ env.OPENSTUDIO_BUILD }}
         continue-on-error: true
@@ -603,26 +549,20 @@ jobs:
 
           echo "exit_code=0" >> $GITHUB_OUTPUT
           
-          # Set build name and site for CDash dashboard
-          export CTEST_BUILD_NAME="GitHub-${{ matrix.platform }}-${{ github.ref_name }}"
-          export CTEST_SITE="${{ runner.name }}"
-
           exclude_regex="${{ matrix.exclude_regex }}"
           if [ -n "$exclude_regex" ] && [ "$exclude_regex" != '""' ]; then
-            ctest -D Experimental --output-on-failure -j ${{ env.CTEST_PARALLEL_LEVEL }} -E "$exclude_regex" || {
+            ctest --output-on-failure -j ${{ env.CTEST_PARALLEL_LEVEL }} -E "$exclude_regex" || {
               exit_code=$?
               echo "exit_code=${exit_code}" >> $GITHUB_OUTPUT
               echo "::warning::CTest suite failed with exit code ${exit_code}"
             }
           else
-            ctest -D Experimental --output-on-failure -j ${{ env.CTEST_PARALLEL_LEVEL }} || {
+            ctest --output-on-failure -j ${{ env.CTEST_PARALLEL_LEVEL }} || {
               exit_code=$?
               echo "exit_code=${exit_code}" >> $GITHUB_OUTPUT
               echo "::warning::CTest suite failed with exit code ${exit_code}"
             }
           fi
-          
-          echo "::notice::Test results submitted to https://my.cdash.org/index.php?project=OpenStudio"
 
       - name: Create packages
         working-directory: ${{ env.OPENSTUDIO_BUILD }}
@@ -706,36 +646,6 @@ jobs:
           set -euo pipefail
           cp -r Testing "Testing-${{ matrix.test_suffix }}"
 
-      - name: Generate test summary
-        if: always()
-        working-directory: ${{ env.OPENSTUDIO_BUILD }}
-        run: |
-          set -euo pipefail
-          
-          # Generate a simple markdown summary from CTest results
-          mkdir -p "$(dirname '${{ env.TEST_DASHBOARD_RELATIVE }}')"
-          
-          echo "# OpenStudio Test Results - ${{ matrix.test_suffix }}" > "${{ env.TEST_DASHBOARD_RELATIVE }}"
-          echo "" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
-          echo "**Build:** \`${{ github.sha }}\`" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
-          echo "**Branch:** \`${{ github.ref_name }}\`" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
-          echo "**Platform:** ${{ matrix.display_name }}" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
-          echo "**Date:** $(date -u)" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
-          echo "" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
-          echo "## 📊 CDash Dashboard" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
-          echo "" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
-          echo "Full test results are available on CDash:" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
-          echo "**[View on CDash →](https://my.cdash.org/index.php?project=OpenStudio)**" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
-          echo "" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
-          
-          if [ -f Testing/Temporary/LastTest.log ]; then
-            echo "## Test Log (Last 50 lines)" >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
-            echo '```' >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
-            tail -50 Testing/Temporary/LastTest.log >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
-            echo '```' >> "${{ env.TEST_DASHBOARD_RELATIVE }}"
-          fi
-        continue-on-error: true
-
       - name: Upload Testing artifact
         if: always()
         uses: actions/upload-artifact@v4
@@ -743,7 +653,6 @@ jobs:
           name: Testing-${{ matrix.platform }}-${{ github.sha }}
           path: |
             ${{ env.OPENSTUDIO_BUILD }}/Testing-${{ matrix.test_suffix }}/
-            ${{ env.OPENSTUDIO_BUILD }}/${{ env.TEST_DASHBOARD_RELATIVE }}
 
       - name: Upload build outputs
         if: always()
