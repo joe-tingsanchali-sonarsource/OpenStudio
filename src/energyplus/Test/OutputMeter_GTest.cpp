@@ -296,8 +296,8 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_OutputMeter_ReproducibleOrder) {
   // Electricity:Total ends up being a child of Building, so it's translated first
   const std::vector<std::string> meter_names{"Electricity:Total", "NaturalGas:Facility", "Electricity:Facility"};
   const std::vector<std::string> reporting_frequencies{"RunPeriod", "Monthly"};
-  const std::vector<bool> fileonlys{false};
-  const std::vector<bool> cumulatives{false};
+  const std::vector<bool> fileonlys{true, false};
+  const std::vector<bool> cumulatives{true, false};
 
   auto prepareModel = [&meter_names, &reporting_frequencies, &fileonlys, &cumulatives]() -> openstudio::model::Model {
     Model m;
