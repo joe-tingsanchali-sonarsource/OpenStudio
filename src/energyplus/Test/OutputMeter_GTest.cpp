@@ -234,6 +234,9 @@ struct MeterInfo
   bool meterFileOnly;
   bool cumulative;
 
+  MeterInfo(std::string t_name, std::string t_reportingFrequency, bool meterFileOnly, bool cumulative)
+    : name(std::move(t_name)), reportingFrequency(std::move(t_reportingFrequency)), meterFileOnly(meterFileOnly), cumulative(cumulative) {};
+
   MeterInfo(const WorkspaceObject& wo) {
     switch (wo.iddObject().type().value()) {
       case IddObjectType::Output_Meter: {
@@ -292,12 +295,45 @@ std::ostream& operator<<(std::ostream& os, const MeterInfo& mi) {
 TEST_F(EnergyPlusFixture, ForwardTranslator_OutputMeter_ReproducibleOrder) {
 
   ForwardTranslator ft;
+  ft.setExcludeLCCObjects(true);
+  ft.setExcludeHTMLOutputReport(true);
+  ft.setExcludeSQliteOutputReport(true);
+  ft.setExcludeVariableDictionary(true);
 
   // Electricity:Total ends up being a child of Building, so it's translated first
   const std::vector<std::string> meter_names{"Electricity:Total", "NaturalGas:Facility", "Electricity:Facility"};
   const std::vector<std::string> reporting_frequencies{"RunPeriod", "Monthly"};
   const std::vector<bool> fileonlys{true, false};
   const std::vector<bool> cumulatives{true, false};
+
+  const std::vector<std::string> ordered_meter_names = {
+    "Electricity:Total",  // This one is first because it's a child of Building
+    "Electricity:Facility",
+    "NaturalGas:Facility",
+  };
+  std::vector<std::string> ordered_reporting_frequencies = reporting_frequencies;
+  std::sort(ordered_reporting_frequencies.begin(), ordered_reporting_frequencies.end());
+
+  // TL;DR: this means that given the same name and reporting frequency, order is
+  // 1. Output:Meter
+  // 2. Output:Meter:Cumulative
+  // 3. Output:Meter:MeterFileOnly
+  // 4. Output:Meter:Cumulative:MeterFileOnly
+  std::vector<bool> ordered_fileonlys = fileonlys;
+  std::sort(ordered_fileonlys.begin(), ordered_fileonlys.end());  // false, true
+  std::vector<bool> ordered_cumulatives = cumulatives;
+  std::sort(ordered_cumulatives.begin(), ordered_cumulatives.end());  // false, true
+
+  std::vector<MeterInfo> expectedMeterInfos;
+  for (const auto& name : ordered_meter_names) {
+    for (const auto& reportingFrequency : ordered_reporting_frequencies) {
+      for (const auto& meterFileOnly : ordered_fileonlys) {
+        for (const auto& cumulative : ordered_cumulatives) {
+          expectedMeterInfos.emplace_back(name, reportingFrequency, meterFileOnly, cumulative);
+        }
+      }
+    }
+  }
 
   auto prepareModel = [&meter_names, &reporting_frequencies, &fileonlys, &cumulatives]() -> openstudio::model::Model {
     Model m;
@@ -331,6 +367,7 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_OutputMeter_ReproducibleOrder) {
 
   auto meterInfos = produceMeterInfo();
   ASSERT_EQ(meter_names.size() * reporting_frequencies.size() * fileonlys.size() * cumulatives.size(), meterInfos.size());
+  EXPECT_EQ(expectedMeterInfos, meterInfos);
 
   size_t n_failures = 0;
   for (size_t n = 1; n < 10; ++n) {
