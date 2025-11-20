@@ -503,6 +503,8 @@ jobs:
       - name: Install Conan
         run: |
           set -euo pipefail
+          eval "$(pyenv init --path)"
+          eval "$(pyenv init -)"
           python3 -m pip install --upgrade pip
           python3 -m pip install conan
 
