@@ -855,7 +855,7 @@ jobs:
           call conanbuild.bat
           echo Checking for cpack...
           where cpack || (cmake --version && echo cpack should be available)
-          cpack -B .
+          cpack -G "NSIS;ZIP" -B .
 
       - name: Archive Testing directory
         if: always()
