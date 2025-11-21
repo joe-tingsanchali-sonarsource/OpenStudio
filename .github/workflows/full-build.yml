@@ -191,6 +191,15 @@ jobs:
             conan profile detect
           fi
 
+          # Force Conan to provide CMake for CentOS 9 to avoid broken system/container cmake (missing ctest/cpack)
+          if [[ "${{ matrix.platform }}" == "centos-9-x64" ]]; then
+            if ! grep -q "cmake/3.29.0" "$HOME/.conan2/profiles/default"; then
+              echo "" >> "$HOME/.conan2/profiles/default"
+              echo "[tool_requires]" >> "$HOME/.conan2/profiles/default"
+              echo "cmake/3.29.0" >> "$HOME/.conan2/profiles/default"
+            fi
+          fi
+
       - name: Conan install
         working-directory: ${{ github.workspace }}
         run: |
@@ -286,12 +295,20 @@ jobs:
 
           echo "exit_code=0" >> $GITHUB_OUTPUT
           
-          # Run tests
-          ctest --output-on-failure -j ${{ matrix.max_jobs }} || {
-            exit_code=$?
-            echo "exit_code=${exit_code}" >> $GITHUB_OUTPUT
-            echo "::warning::CTest suite failed with exit code ${exit_code}"
-          }
+          exclude_regex="${{ matrix.exclude_regex }}"
+          if [ -n "$exclude_regex" ] && [ "$exclude_regex" != '""' ]; then
+            ctest --output-on-failure -j ${{ matrix.max_jobs }} -E "$exclude_regex" || {
+              exit_code=$?
+              echo "exit_code=${exit_code}" >> $GITHUB_OUTPUT
+              echo "::warning::CTest suite failed with exit code ${exit_code}"
+            }
+          else
+            ctest --output-on-failure -j ${{ matrix.max_jobs }} || {
+              exit_code=$?
+              echo "exit_code=${exit_code}" >> $GITHUB_OUTPUT
+              echo "::warning::CTest suite failed with exit code ${exit_code}"
+            }
+          fi
 
       - name: Create packages
         working-directory: ${{ github.workspace }}/${{ env.OPENSTUDIO_BUILD }}
@@ -855,8 +872,7 @@ jobs:
           call conanbuild.bat
           echo Checking for cpack...
           where cpack || (cmake --version && echo cpack should be available)
-          cpack -B .
-
+          cpack -G "NSIS;ZIP" -B .
       - name: Archive Testing directory
         if: always()
         shell: pwsh

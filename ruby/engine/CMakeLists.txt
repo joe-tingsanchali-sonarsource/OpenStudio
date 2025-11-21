@@ -185,6 +185,14 @@ if(APPLE)
   set_target_properties(rubyengine PROPERTIES
     INSTALL_RPATH "@loader_path"
   )
+  # Workaround for ld64 "imageOffset32 fixup target must be defined" errors
+  # caused by very large Mach-O sections (embedded ruby data). Disables
+  # chained fixups which makes the linker avoid a problematic code path.
+  if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
+    target_link_options(rubyengine PRIVATE "-Wl,-no_fixup_chains")
+  else()
+    target_link_options(rubyengine PRIVATE "-Wl,-no_fixup_chains")
+  endif()
 elseif(UNIX)
   set_target_properties(rubyengine PROPERTIES
     INSTALL_RPATH "$ORIGIN"
