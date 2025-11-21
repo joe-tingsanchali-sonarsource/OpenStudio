@@ -100,6 +100,34 @@ body:
       label: Environment
       description: |
         Some additional details about your environment for this issue (if relevant)
+
+        To get your platform info, you can run the following commands in your terminal
+
+        <details>
+
+        <summary>Helpers: click to expand</summary>
+
+        * Linux:
+
+        ```bash
+        echo "* Platform (Operating system, version, architecture): **$(lsb_release -is) $(lsb_release -rs) $(uname -m)**"
+        ```
+
+        * macOS:
+
+        ```bash
+        echo "* Platform (Operating system, version, architecture): **$(sw_vers -productName) $(sw_vers -productVersion) $(uname -m)**"
+        ```
+
+        * Windows (PowerShell):
+
+        ```powershell
+        $os = Get-CimInstance Win32_OperatingSystem
+        $release = (Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion").DisplayVersion
+        Write-Output "* Platform (Operating system, version, architecture): **$($os.Caption) $($os.Version) $release $env:PROCESSOR_ARCHITECTURE**"
+        ```
+        </details>
+
       placeholder: |
         * Platform (Operating system, version, architecture): **Linux Ubuntu 24.04**
         or
