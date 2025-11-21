@@ -1,0 +1,112 @@
+[2025-11-10T20:23:50.143Z] Received SIGTERM signal
+[2025-11-10T20:24:06.929Z] Loaded security config with 2 allowed paths
+[2025-11-10T20:24:06.930Z] Security module initialized
+[2025-11-10T20:24:06.930Z] Starting MCP Terminal server...
+[2025-11-10T20:24:06.930Z] Current working directory: /Users/achapin/OpenStudio/openstudio-full/OpenStudio
+[2025-11-10T20:24:06.930Z] Process arguments: ["/opt/homebrew/Cellar/node/24.6.0/bin/node","/Users/achapin/.npm/_npx/3520434043d140a8/node_modules/.bin/terminal-mcp-server"]
+[2025-11-10T20:24:06.938Z] Received request: {"method":"tools/list","params":{"signal":{}}}
+[2025-11-10T20:50:44.212Z] Received SIGTERM signal
+[2025-11-10T20:51:02.117Z] Loaded security config with 2 allowed paths
+[2025-11-10T20:51:02.118Z] Security module initialized
+[2025-11-10T20:51:02.118Z] Starting MCP Terminal server...
+[2025-11-10T20:51:02.118Z] Current working directory: /Users/achapin/OpenStudio/openstudio-full/OpenStudio
+[2025-11-10T20:51:02.118Z] Process arguments: ["/opt/homebrew/Cellar/node/24.6.0/bin/node","/Users/achapin/.npm/_npx/3520434043d140a8/node_modules/.bin/terminal-mcp-server"]
+[2025-11-10T20:51:02.200Z] Received SIGTERM signal
+[2025-11-10T20:51:19.327Z] Loaded security config with 2 allowed paths
+[2025-11-10T20:51:19.328Z] Security module initialized
+[2025-11-10T20:51:19.328Z] Starting MCP Terminal server...
+[2025-11-10T20:51:19.328Z] Current working directory: /Users/achapin/OpenStudio/openstudio-full/OpenStudio
+[2025-11-10T20:51:19.329Z] Process arguments: ["/opt/homebrew/Cellar/node/24.6.0/bin/node","/Users/achapin/.npm/_npx/3520434043d140a8/node_modules/.bin/terminal-mcp-server"]
+[2025-11-10T20:51:19.332Z] Received request: {"method":"tools/list","params":{"signal":{}}}
+[2025-11-11T06:37:26.333Z] Received SIGTERM signal
+[2025-11-13T22:09:40.331Z] Loaded security config with 2 allowed paths
+[2025-11-13T22:09:40.338Z] Security module initialized
+[2025-11-13T22:09:40.338Z] Starting MCP Terminal server...
+[2025-11-13T22:09:40.338Z] Current working directory: /Users/achapin/OpenStudio/openstudio-full/OpenStudio
+[2025-11-13T22:09:40.338Z] Process arguments: ["/opt/homebrew/Cellar/node/24.6.0/bin/node","/Users/achapin/.npm/_npx/3520434043d140a8/node_modules/.bin/terminal-mcp-server"]
+[2025-11-13T22:09:40.345Z] Received request: {"method":"tools/list","params":{"signal":{}}}
+[2025-11-15T05:55:39.980Z] Received SIGTERM signal
+[2025-11-18T21:30:43.923Z] Loaded security config with 2 allowed paths
+[2025-11-18T21:30:43.926Z] Security module initialized
+[2025-11-18T21:30:43.926Z] Starting MCP Terminal server...
+[2025-11-18T21:30:43.926Z] Current working directory: /Users/achapin/OpenStudio/openstudio-full/OpenStudio
+[2025-11-18T21:30:43.927Z] Process arguments: ["/opt/homebrew/Cellar/node/24.6.0/bin/node","/Users/achapin/.npm/_npx/3520434043d140a8/node_modules/.bin/terminal-mcp-server"]
+[2025-11-18T21:30:43.930Z] Received request: {"method":"tools/list","params":{"signal":{}}}
+[2025-11-18T21:30:48.828Z] Received SIGTERM signal
+[2025-11-18T21:30:59.929Z] Loaded security config with 2 allowed paths
+[2025-11-18T21:30:59.930Z] Security module initialized
+[2025-11-18T21:30:59.930Z] Starting MCP Terminal server...
+[2025-11-18T21:30:59.930Z] Current working directory: /Users/achapin/OpenStudio/openstudio-full/OpenStudio
+[2025-11-18T21:30:59.930Z] Process arguments: ["/opt/homebrew/Cellar/node/24.6.0/bin/node","/Users/achapin/.npm/_npx/3520434043d140a8/node_modules/.bin/terminal-mcp-server"]
+[2025-11-18T21:30:59.933Z] Received request: {"method":"tools/list","params":{"signal":{}}}
+[2025-11-19T18:41:35.604Z] Received SIGTERM signal
+[2025-11-19T18:41:48.631Z] Loaded security config with 2 allowed paths
+[2025-11-19T18:41:48.634Z] Security module initialized
+[2025-11-19T18:41:48.634Z] Starting MCP Terminal server...
+[2025-11-19T18:41:48.634Z] Current working directory: /Users/achapin/OpenStudio/openstudio-full/OpenStudio
+[2025-11-19T18:41:48.634Z] Process arguments: ["/opt/homebrew/Cellar/node/24.6.0/bin/node","/Users/achapin/.npm/_npx/3520434043d140a8/node_modules/.bin/terminal-mcp-server"]
+[2025-11-19T18:41:48.638Z] Received request: {"method":"tools/list","params":{"signal":{}}}
+[2025-11-19T18:42:52.415Z] Received SIGTERM signal
+[2025-11-19T18:43:04.538Z] Loaded security config with 2 allowed paths
+[2025-11-19T18:43:04.539Z] Security module initialized
+[2025-11-19T18:43:04.539Z] Starting MCP Terminal server...
+[2025-11-19T18:43:04.539Z] Current working directory: /Users/achapin/OpenStudio/openstudio-full/OpenStudio
+[2025-11-19T18:43:04.539Z] Process arguments: ["/opt/homebrew/Cellar/node/24.6.0/bin/node","/Users/achapin/.npm/_npx/3520434043d140a8/node_modules/.bin/terminal-mcp-server"]
+[2025-11-19T18:43:04.542Z] Received request: {"method":"tools/list","params":{"signal":{}}}
+[2025-11-19T18:58:32.448Z] Received SIGTERM signal
+[2025-11-19T18:58:45.162Z] Loaded security config with 2 allowed paths
+[2025-11-19T18:58:45.165Z] Security module initialized
+[2025-11-19T18:58:45.165Z] Starting MCP Terminal server...
+[2025-11-19T18:58:45.165Z] Current working directory: /Users/achapin/OpenStudio/openstudio-full/OpenStudio
+[2025-11-19T18:58:45.165Z] Process arguments: ["/opt/homebrew/Cellar/node/24.6.0/bin/node","/Users/achapin/.npm/_npx/3520434043d140a8/node_modules/.bin/terminal-mcp-server"]
+[2025-11-19T18:58:45.172Z] Received request: {"method":"tools/list","params":{"signal":{}}}
+[2025-11-19T19:51:07.550Z] Received SIGTERM signal
+[2025-11-19T19:51:19.489Z] Loaded security config with 2 allowed paths
+[2025-11-19T19:51:19.490Z] Security module initialized
+[2025-11-19T19:51:19.491Z] Starting MCP Terminal server...
+[2025-11-19T19:51:19.491Z] Current working directory: /Users/achapin/OpenStudio/openstudio-full/OpenStudio
+[2025-11-19T19:51:19.491Z] Process arguments: ["/opt/homebrew/Cellar/node/24.6.0/bin/node","/Users/achapin/.npm/_npx/3520434043d140a8/node_modules/.bin/terminal-mcp-server"]
+[2025-11-19T19:51:19.494Z] Received request: {"method":"tools/list","params":{"signal":{}}}
+[2025-11-19T19:58:15.683Z] Received SIGTERM signal
+[2025-11-19T20:44:54.846Z] Loaded security config with 2 allowed paths
+[2025-11-19T20:44:54.847Z] Security module initialized
+[2025-11-19T20:44:54.848Z] Starting MCP Terminal server...
+[2025-11-19T20:44:54.848Z] Current working directory: /Users/achapin/OpenStudio/openstudio-full/OpenStudio
+[2025-11-19T20:44:54.848Z] Process arguments: ["/opt/homebrew/Cellar/node/24.6.0/bin/node","/Users/achapin/.npm/_npx/3520434043d140a8/node_modules/.bin/terminal-mcp-server"]
+[2025-11-19T20:44:54.852Z] Received request: {"method":"tools/list","params":{"signal":{}}}
+[2025-11-19T20:44:59.538Z] Received SIGTERM signal
+[2025-11-19T20:45:12.828Z] Loaded security config with 2 allowed paths
+[2025-11-19T20:45:12.829Z] Security module initialized
+[2025-11-19T20:45:12.829Z] Starting MCP Terminal server...
+[2025-11-19T20:45:12.830Z] Current working directory: /Users/achapin/OpenStudio/openstudio-full/OpenStudio
+[2025-11-19T20:45:12.830Z] Process arguments: ["/opt/homebrew/Cellar/node/24.6.0/bin/node","/Users/achapin/.npm/_npx/3520434043d140a8/node_modules/.bin/terminal-mcp-server"]
+[2025-11-19T20:45:12.834Z] Received request: {"method":"tools/list","params":{"signal":{}}}
+[2025-11-19T23:31:46.792Z] Received SIGTERM signal
+[2025-11-19T23:31:59.013Z] Loaded security config with 2 allowed paths
+[2025-11-19T23:31:59.014Z] Security module initialized
+[2025-11-19T23:31:59.014Z] Starting MCP Terminal server...
+[2025-11-19T23:31:59.015Z] Current working directory: /Users/achapin/OpenStudio/openstudio-full/OpenStudio
+[2025-11-19T23:31:59.015Z] Process arguments: ["/opt/homebrew/Cellar/node/24.6.0/bin/node","/Users/achapin/.npm/_npx/3520434043d140a8/node_modules/.bin/terminal-mcp-server"]
+[2025-11-19T23:31:59.018Z] Received request: {"method":"tools/list","params":{"signal":{}}}
+[2025-11-20T02:26:52.540Z] Received SIGTERM signal
+[2025-11-20T02:27:06.977Z] Loaded security config with 2 allowed paths
+[2025-11-20T02:27:06.981Z] Security module initialized
+[2025-11-20T02:27:06.981Z] Starting MCP Terminal server...
+[2025-11-20T02:27:06.981Z] Current working directory: /Users/achapin/OpenStudio/openstudio-full/OpenStudio
+[2025-11-20T02:27:06.981Z] Process arguments: ["/opt/homebrew/Cellar/node/24.6.0/bin/node","/Users/achapin/.npm/_npx/3520434043d140a8/node_modules/.bin/terminal-mcp-server"]
+[2025-11-20T02:27:06.988Z] Received request: {"method":"tools/list","params":{"signal":{}}}
+[2025-11-20T14:12:15.820Z] Received SIGTERM signal
+[2025-11-20T14:12:30.416Z] Loaded security config with 2 allowed paths
+[2025-11-20T14:12:30.419Z] Security module initialized
+[2025-11-20T14:12:30.419Z] Starting MCP Terminal server...
+[2025-11-20T14:12:30.419Z] Current working directory: /Users/achapin/OpenStudio/openstudio-full/OpenStudio
+[2025-11-20T14:12:30.419Z] Process arguments: ["/opt/homebrew/Cellar/node/24.6.0/bin/node","/Users/achapin/.npm/_npx/3520434043d140a8/node_modules/.bin/terminal-mcp-server"]
+[2025-11-20T14:12:30.424Z] Received request: {"method":"tools/list","params":{"signal":{}}}
+[2025-11-20T19:57:30.324Z] Received SIGTERM signal
+[2025-11-20T20:33:23.842Z] Loaded security config with 2 allowed paths
+[2025-11-20T20:33:23.843Z] Security module initialized
+[2025-11-20T20:33:23.843Z] Starting MCP Terminal server...
+[2025-11-20T20:33:23.844Z] Current working directory: /Users/achapin/OpenStudio/openstudio-full/OpenStudio
+[2025-11-20T20:33:23.844Z] Process arguments: ["/opt/homebrew/Cellar/node/24.6.0/bin/node","/Users/achapin/.npm/_npx/3520434043d140a8/node_modules/.bin/terminal-mcp-server"]
+[2025-11-20T20:33:23.848Z] Received request: {"method":"tools/list","params":{"signal":{}}}
+[2025-11-20T22:01:39.280Z] Received SIGTERM signal
