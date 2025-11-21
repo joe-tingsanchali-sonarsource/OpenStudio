@@ -210,6 +210,8 @@ jobs:
             -DCMAKE_BUILD_TYPE:STRING=${{ env.BUILD_TYPE }} \
             -DBUILD_TESTING:BOOL=ON \
             -DCPACK_GENERATORS:STRING="${{ matrix.cpack_generators }}" \
+            -DCPACK_BINARY_STGZ=OFF \
+            -DCPACK_BINARY_TZ=OFF \
             -DBUILD_PYTHON_BINDINGS:BOOL=ON \
             -DDISCOVER_TESTS_AFTER_BUILD:BOOL=ON \
             -DBUILD_PYTHON_PIP_PACKAGE:BOOL=${{ matrix.pip_package }} \
@@ -246,6 +248,8 @@ jobs:
             -DCMAKE_BUILD_TYPE:STRING=${{ env.BUILD_TYPE }} \
             -DBUILD_TESTING:BOOL=ON \
             -DCPACK_GENERATORS:STRING="${{ matrix.cpack_generators }}" \
+            -DCPACK_BINARY_STGZ=OFF \
+            -DCPACK_BINARY_TZ=OFF \
             -DBUILD_PYTHON_BINDINGS:BOOL=ON \
             -DDISCOVER_TESTS_AFTER_BUILD:BOOL=ON \
             -DAPPEND_TESTS_ONLY:BOOL=ON \
@@ -291,6 +295,9 @@ jobs:
         run: |
           set -euo pipefail
           . ./conanbuild.sh
+          echo "PATH: $PATH"
+          echo "Checking for cpack..."
+          which cpack || cmake --version
           cpack -B .
 
       - name: Copy Testing tree with suffix
@@ -488,6 +495,8 @@ jobs:
             -DCMAKE_BUILD_TYPE:STRING=${{ env.BUILD_TYPE }} \
             -DBUILD_TESTING:BOOL=ON \
             -DCPACK_GENERATORS:STRING="DragNDrop;TGZ" \
+            -DCPACK_BINARY_STGZ=OFF \
+            -DCPACK_BINARY_TZ=OFF \
             -DBUILD_PYTHON_BINDINGS:BOOL=ON \
             -DDISCOVER_TESTS_AFTER_BUILD:BOOL=ON \
             -DBUILD_PYTHON_PIP_PACKAGE:BOOL=OFF \
@@ -518,6 +527,8 @@ jobs:
             -DCMAKE_BUILD_TYPE:STRING=${{ env.BUILD_TYPE }} \
             -DBUILD_TESTING:BOOL=ON \
             -DCPACK_GENERATORS:STRING="DragNDrop;TGZ" \
+            -DCPACK_BINARY_STGZ=OFF \
+            -DCPACK_BINARY_TZ=OFF \
             -DBUILD_PYTHON_BINDINGS:BOOL=ON \
             -DDISCOVER_TESTS_AFTER_BUILD:BOOL=ON \
             -DAPPEND_TESTS_ONLY:BOOL=ON \
@@ -571,6 +582,9 @@ jobs:
         run: |
           set -euo pipefail
           . ./conanbuild.sh
+          echo "PATH: $PATH"
+          echo "Checking for cpack..."
+          which cpack || cmake --version
           cpack -B .
 
       - name: Code sign and notarize macOS packages
@@ -793,7 +807,7 @@ jobs:
         shell: cmd
         run: |
           call conanbuild.bat
-          cmake -G Ninja -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DCMAKE_BUILD_TYPE:STRING=${{ env.BUILD_TYPE }} -DBUILD_TESTING:BOOL=ON -DCPACK_GENERATORS:STRING="NSIS;ZIP" -DBUILD_PYTHON_BINDINGS:BOOL=ON -DDISCOVER_TESTS_AFTER_BUILD:BOOL=ON -DBUILD_PYTHON_PIP_PACKAGE:BOOL=OFF -DPYTHON_VERSION:STRING=${{ env.PY_VERSION }} ..\
+          cmake -G Ninja -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DCMAKE_BUILD_TYPE:STRING=${{ env.BUILD_TYPE }} -DBUILD_TESTING:BOOL=ON -DCPACK_GENERATORS:STRING="NSIS;ZIP" -DCPACK_BINARY_STGZ=OFF -DCPACK_BINARY_TZ=OFF -DBUILD_PYTHON_BINDINGS:BOOL=ON -DDISCOVER_TESTS_AFTER_BUILD:BOOL=ON -DBUILD_PYTHON_PIP_PACKAGE:BOOL=OFF -DPYTHON_VERSION:STRING=${{ env.PY_VERSION }} ..\
 
       - name: Build with Ninja
         working-directory: ${{ github.workspace }}/${{ env.OPENSTUDIO_BUILD }}
@@ -813,7 +827,7 @@ jobs:
         shell: cmd
         run: |
           call conanbuild.bat
-          cmake -G Ninja -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DCMAKE_BUILD_TYPE:STRING=${{ env.BUILD_TYPE }} -DBUILD_TESTING:BOOL=ON -DCPACK_GENERATORS:STRING="NSIS;ZIP" -DBUILD_PYTHON_BINDINGS:BOOL=ON -DDISCOVER_TESTS_AFTER_BUILD:BOOL=ON -DAPPEND_TESTS_ONLY:BOOL=ON -DBUILD_PYTHON_PIP_PACKAGE:BOOL=OFF -DPYTHON_VERSION:STRING=${{ env.PY_VERSION }} ..\
+          cmake -G Ninja -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DCMAKE_BUILD_TYPE:STRING=${{ env.BUILD_TYPE }} -DBUILD_TESTING:BOOL=ON -DCPACK_GENERATORS:STRING="NSIS;ZIP" -DCPACK_BINARY_STGZ=OFF -DCPACK_BINARY_TZ=OFF -DBUILD_PYTHON_BINDINGS:BOOL=ON -DDISCOVER_TESTS_AFTER_BUILD:BOOL=ON -DAPPEND_TESTS_ONLY:BOOL=ON -DBUILD_PYTHON_PIP_PACKAGE:BOOL=OFF -DPYTHON_VERSION:STRING=${{ env.PY_VERSION }} ..\
 
       - name: Upload build log
         if: always()
@@ -849,6 +863,8 @@ jobs:
         shell: cmd
         run: |
           call conanbuild.bat
+          echo Checking for cpack...
+          where cpack || (cmake --version && echo cpack should be available)
           cpack -B .
 
       - name: Archive Testing directory
