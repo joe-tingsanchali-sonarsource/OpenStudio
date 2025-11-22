@@ -196,6 +196,14 @@ Bundle tests require network access to rubygems.org. If they fail:
    ctest -R "test_bundle" --output-on-failure
    ```
 
+### Windows Specifics for CLI Tests
+
+If running CLI tests locally on Windows, execute the following command in `src/cli/test/bundle_git/` first:
+
+```shell
+bundle lock --add-platform x64-mingw-ucrt
+```
+
 ### Test Utility Scripts
 
 For CI and development workflows, use the test utilities:
