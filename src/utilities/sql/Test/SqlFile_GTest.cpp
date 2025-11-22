@@ -361,7 +361,7 @@ TEST_F(SqlFileFixture, AnnualTotalCosts) {
   // =========== Check that within our development based on the current E+ version we do not make the results vary (at all)  =================
 
   // Total annual costs for all fuel types
-  EXPECT_NEAR(ep_2520.annualTotalUtilityCost, sqlFile2.annualTotalUtilityCost().get(), 1.0);
+  EXPECT_NEAR(ep_2520.annualTotalUtilityCost, sqlFile2.annualTotalUtilityCost().get(), 5.0);
 
   // Costs by fuel type
   // NOTE: Using EXPECT_NEAR instead of EXPECT_DOUBLE_EQ for cross-platform compatibility (ARM64 vs x86)

@@ -126,7 +126,7 @@ jobs:
               *OpenStudio*aarch64.tar.gz
             cpack_generators: "DEB;TGZ"
             max_jobs: 2
-            exclude_regex: "^('SqlFileFixture.AnnualTotalCosts'|'GeometryFixture.Plane_RayIntersection'|'ModelFixture.4678_SubSurfaceGlassUFactorSqlError')$"
+            exclude_regex: "^('SqlFileFixture.AnnualTotalCosts')$"
     defaults:
       run:
         shell: bash

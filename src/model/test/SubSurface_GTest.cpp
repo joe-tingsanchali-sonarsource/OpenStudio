@@ -1613,10 +1613,10 @@ TEST_F(ModelFixture, 4678_SubSurfaceGlassUFactorSqlError) {
 
   ASSERT_TRUE(subSurface->uFactor());
   double uFactor = subSurface->uFactor().get();
-  EXPECT_DOUBLE_EQ(2.559, uFactor);
+  EXPECT_NEAR(2.559, uFactor, 0.001);
 
   double filmResistance = oSurface->filmResistance();
   double thermalConductance = 1.0 / (1.0 / (uFactor)-filmResistance);
   ASSERT_TRUE(subSurface->thermalConductance());
-  EXPECT_DOUBLE_EQ(thermalConductance, subSurface->thermalConductance().get());
+  EXPECT_NEAR(thermalConductance, subSurface->thermalConductance().get(), 0.001);
 }

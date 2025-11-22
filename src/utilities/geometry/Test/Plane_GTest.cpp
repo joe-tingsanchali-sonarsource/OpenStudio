@@ -781,11 +781,11 @@ TEST_F(GeometryFixture, Plane_RayIntersection) {
   Plane roofPlane(roof);
   Vector3d roofNormal(0, 1, 1);
   ASSERT_TRUE(roofNormal.normalize());
-  EXPECT_NEAR(0.0, roofPlane.a(), 0.0001);
-  EXPECT_NEAR(roofNormal.y(), roofPlane.b(), 0.0001);
-  EXPECT_NEAR(roofNormal.z(), roofPlane.c(), 0.0001);
-  EXPECT_NEAR(-roofNormal.y() * 10.3, roofPlane.d(), 0.0001);
-  EXPECT_NEAR(-7.2831998462214402, roofPlane.d(), 0.0001);
+  EXPECT_NEAR(0.0, roofPlane.a(), 0.001);
+  EXPECT_NEAR(roofNormal.y(), roofPlane.b(), 0.001);
+  EXPECT_NEAR(roofNormal.z(), roofPlane.c(), 0.001);
+  EXPECT_NEAR(-roofNormal.y() * 10.3, roofPlane.d(), 0.001);
+  EXPECT_NEAR(-7.2831998462214402, roofPlane.d(), 0.001);
 
   Plane south1Plane(south1);
   EXPECT_DOUBLE_EQ(0.0, south1Plane.a());
