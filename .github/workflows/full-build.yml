@@ -746,7 +746,7 @@ jobs:
         shell: pwsh
     env:
       MAX_BUILD_THREADS: 3
-      CTEST_PARALLEL_LEVEL: 3
+      CTEST_PARALLEL_LEVEL: 2
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
