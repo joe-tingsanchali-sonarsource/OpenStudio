@@ -23,6 +23,13 @@ inputs:
   ctest_parallel_level:
     required: false
     default: '2'
+  ctest_parallel_level:
+    required: false
+    default: '2'
+  cmake_args:
+    required: false
+    default: ''
+
 
 outputs:
   ctest_exit_code:
@@ -53,6 +60,7 @@ runs:
           -DDISCOVER_TESTS_AFTER_BUILD:BOOL=ON \
           -DBUILD_PYTHON_PIP_PACKAGE:BOOL=${{ inputs.pip_package }} \
           -DPYTHON_VERSION:STRING=${{ inputs.py_version }} \
+          ${{ inputs.cmake_args }} \
           $LINKER_FLAGS ../
 
     # --- CONFIGURE (WINDOWS) ---
@@ -70,7 +78,8 @@ runs:
           -DBUILD_PYTHON_BINDINGS:BOOL=ON ^
           -DDISCOVER_TESTS_AFTER_BUILD:BOOL=ON ^
           -DBUILD_PYTHON_PIP_PACKAGE:BOOL=OFF ^
-          -DPYTHON_VERSION:STRING=${{ inputs.py_version }} ..\
+          -DPYTHON_VERSION:STRING=${{ inputs.py_version }} ^
+          ${{ inputs.cmake_args }} ..\
 
     # --- BUILD (UNIX) ---
     - name: Build with Ninja (Unix)

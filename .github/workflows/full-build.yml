@@ -535,7 +535,8 @@ jobs:
           build_dir: ${{ env.OPENSTUDIO_BUILD }}
           platform_name: ${{ env.PLATFORM }}
           py_version: ${{ env.PY_VERSION }}
-          cpack_generators: "NSIS;ZIP"
+          cpack_generators: "IFW;ZIP"
+          cmake_args: "-DBUILD_DOCUMENTATION:BOOL=ON -DBUILD_CSHARP_BINDINGS:BOOL=OFF"
           parallel_level: ${{ env.MAX_BUILD_THREADS }}
           ctest_parallel_level: ${{ env.CTEST_PARALLEL_LEVEL }}
           exclude_regex: ${{ matrix.exclude_regex }}
@@ -548,7 +549,7 @@ jobs:
           call conanbuild.bat
           echo Checking for cpack...
           where cpack || (cmake --version && echo cpack should be available)
-          cpack -G "NSIS;ZIP" -B .
+          cpack -G "IFW;ZIP" -B .
 
       - name: Archive Testing directory
         if: always()
@@ -601,7 +602,7 @@ jobs:
         shell: pwsh
         env:
           AWS_S3_BUCKET: openstudio-ci-builds
-          QTIFW_PATH: C:\Qt\Tools\QtInstallerFramework\3.2\bin
+          QTIFW_PATH: C:\Qt\Tools\QtInstallerFramework\4.1\bin
         working-directory: ${{ github.workspace }}/${{ env.OPENSTUDIO_BUILD }}
         run: |
           # ---------------------------------------------------------
@@ -658,7 +659,7 @@ jobs:
           # 4. Run CPack (Generates Installer)
           # ---------------------------------------------------------
           Write-Host "Running CPack..."
-          cpack -G "NSIS;ZIP" -B .
+          cpack -G "IFW;ZIP" -B .
           
           # ---------------------------------------------------------
           # 5. Sign Installer
