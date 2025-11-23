@@ -186,6 +186,26 @@ jobs:
             echo "Configured ccache:"; ccache -s | sed -n '1,10p'
           fi
 
+      - name: Pre-install Ruby (CentOS 9)
+        if: matrix.platform == 'centos-9-x64'
+        run: |
+          set -euo pipefail
+          
+          # Install dependencies for Ruby build
+          # We need these to ensure Ruby builds with SSL, Readline, etc.
+          dnf install -y git patch bzip2 openssl-devel readline-devel zlib-devel libyaml-devel libffi-devel
+
+          # Install ruby-build
+          git clone https://github.com/rbenv/ruby-build.git /tmp/ruby-build
+          /tmp/ruby-build/install.sh
+          rm -rf /tmp/ruby-build
+
+          # Install Ruby
+          RUBY_PATH="$RUNNER_TOOL_CACHE/Ruby/${{ env.RUBY_VERSION }}/x64"
+          echo "Compiling Ruby ${{ env.RUBY_VERSION }} to $RUBY_PATH..."
+          ruby-build "${{ env.RUBY_VERSION }}" "$RUBY_PATH"
+          touch "$RUBY_PATH.complete"
+
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
@@ -312,11 +332,20 @@ jobs:
           echo "exit_code=0" >> $GITHUB_OUTPUT
           
           # Run tests
-          ctest --output-on-failure -j ${{ matrix.max_jobs }} || {
-            exit_code=$?
-            echo "exit_code=${exit_code}" >> $GITHUB_OUTPUT
-            echo "::warning::CTest suite failed with exit code ${exit_code}"
-          }
+          exclude_regex="${{ matrix.exclude_regex }}"
+          if [ -n "$exclude_regex" ] && [ "$exclude_regex" != '""' ]; then
+            ctest --output-on-failure -j ${{ env.CTEST_PARALLEL_LEVEL }} -E "$exclude_regex" || {
+              exit_code=$?
+              echo "exit_code=${exit_code}" >> $GITHUB_OUTPUT
+              echo "::warning::CTest suite failed with exit code ${exit_code}"
+            }
+          else
+            ctest --output-on-failure -j ${{ env.CTEST_PARALLEL_LEVEL }} || {
+              exit_code=$?
+              echo "exit_code=${exit_code}" >> $GITHUB_OUTPUT
+              echo "::warning::CTest suite failed with exit code ${exit_code}"
+            }
+          fi
 
       - name: Create packages
         working-directory: ${{ github.workspace }}/${{ env.OPENSTUDIO_BUILD }}
@@ -824,9 +853,13 @@ jobs:
           restore-keys: |
             conan-${{ runner.os }}-windows-
 
-      - name: Install Conan
+      - name: Install Conan and aqtinstall
         run: |
-          pip install conan
+          pip install conan aqtinstall
+
+      - name: Install QtIFW
+        run: |
+          python -m aqt tool windows tools_ifw 3.2.2 qt.tools.ifw.322 --outputdir C:\Qt
 
       - name: Install ccache
         run: |
@@ -870,10 +903,10 @@ jobs:
           # Use cmd to initialize environment then build; capture log with Tee
           $env:NINJA_STATUS = "[%f/%t | %es elapsed | %o objs/sec]"
           $heartbeat = Start-Job -ScriptBlock { while ($true) { Start-Sleep -Seconds 300; Write-Host "[heartbeat] $(Get-Date -Format HH:mm:ss)"; Get-PSDrive -Name C | ForEach-Object { Write-Host "[disk] C: Used=$([Math]::Round(($_.Used/1GB),2))GB Free=$([Math]::Round(($_.Free/1GB),2))GB" }; Get-Process | Sort-Object -Property WorkingSet -Descending | Select-Object -First 5 | ForEach-Object { Write-Host "[topmem] $($_.Id) $([Math]::Round($_.WorkingSet/1MB,1))MB $($_.ProcessName)" } } }
-          & cmd /c "call conanbuild.bat && cmake --build . --parallel $env:MAX_BUILD_THREADS" 2>&1 | Tee-Object -FilePath build.log
+          & C:\Windows\System32\cmd.exe /c "call conanbuild.bat && cmake --build . --parallel $env:MAX_BUILD_THREADS" 2>&1 | Tee-Object -FilePath build.log
           $buildExit = $LASTEXITCODE
           Stop-Job $heartbeat | Out-Null; Receive-Job $heartbeat | Out-Null
-          & cmd /c "call conanbuild.bat && ninja -d stats" 2>$null | Out-Null
+          & C:\Windows\System32\cmd.exe /c "call conanbuild.bat && ninja -d stats" 2>$null | Out-Null
           if (Test-Path build.log) { Get-Content build.log -Tail 40 }
           exit $buildExit
 
@@ -910,7 +943,12 @@ jobs:
         run: |
           call conanbuild.bat
           echo exit_code=0 >> %GITHUB_OUTPUT%
-          ctest --output-on-failure --parallel ${{ env.CTEST_PARALLEL_LEVEL }}
+          set "exclude_regex=${{ matrix.exclude_regex }}"
+          if defined exclude_regex (
+            ctest --output-on-failure --parallel ${{ env.CTEST_PARALLEL_LEVEL }} -E "%exclude_regex%"
+          ) else (
+            ctest --output-on-failure --parallel ${{ env.CTEST_PARALLEL_LEVEL }}
+          )
           if %errorlevel% neq 0 (
             echo exit_code=%errorlevel% >> %GITHUB_OUTPUT%
             echo ::warning::CTest suite failed with exit code %errorlevel%
@@ -978,7 +1016,7 @@ jobs:
         shell: pwsh
         env:
           AWS_S3_BUCKET: openstudio-ci-builds
-          QTIFW_PATH: C:\Qt\QtIFW-3.2.2\bin
+          QTIFW_PATH: C:\Qt\Tools\QtInstallerFramework\3.2.2\bin
         working-directory: ${{ github.workspace }}/${{ env.OPENSTUDIO_BUILD }}
         run: |
           # ---------------------------------------------------------
