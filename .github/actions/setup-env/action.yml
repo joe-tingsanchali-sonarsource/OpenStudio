@@ -1,0 +1,110 @@
+name: 'Setup OpenStudio Environment'
+description: 'Handles Checkout, Caching, Ruby, and Conan Setup'
+inputs:
+  platform:
+    description: 'Platform identifier (e.g., ubuntu-2204-x64, windows-2022)'
+    required: true
+  ruby_version:
+    description: 'Ruby version to install'
+    required: true
+  build_dir:
+    description: 'Directory for the build'
+    required: true
+  install_qt:
+    description: 'Install QtIFW (Windows only)'
+    required: false
+    default: 'false'
+  build_type:
+    description: 'Build type (Release/Debug)'
+    required: false
+    default: 'Release'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Prepare workspace
+      shell: bash
+      run: |
+        git config --global --add safe.directory "$GITHUB_WORKSPACE"
+        mkdir -p "$GITHUB_WORKSPACE/${{ inputs.build_dir }}"
+
+    # --- CACHING ---
+    - name: Compute conan.lock hash
+      id: conan_hash
+      shell: bash
+      run: |
+        if command -v sha256sum >/dev/null 2>&1; then
+          echo "hash=$(sha256sum conan.lock | awk '{print $1}')" >> $GITHUB_OUTPUT
+        else
+          echo "hash=$(shasum -a 256 conan.lock | awk '{print $1}')" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Restore ccache
+      uses: actions/cache@v4
+      with:
+        path: ~/.ccache
+        key: ccache-${{ runner.os }}-${{ inputs.platform }}-${{ steps.conan_hash.outputs.hash }}
+        restore-keys: ccache-${{ runner.os }}-${{ inputs.platform }}-
+
+    - name: Restore Conan cache
+      uses: actions/cache@v4
+      with:
+        path: ~/.conan2
+        key: conan-${{ runner.os }}-${{ inputs.platform }}-${{ steps.conan_hash.outputs.hash }}
+        restore-keys: conan-${{ runner.os }}-${{ inputs.platform }}-
+
+    # --- TOOLING SETUP ---
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: ${{ inputs.ruby_version }}
+        bundler-cache: true
+
+    - name: Install Dependencies (Windows)
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        pip install conan aqtinstall
+        choco install ccache -y --no-progress
+        if (Get-Command ccache -ErrorAction SilentlyContinue) { ccache -M 5G }
+    
+    - name: Install QtIFW (Windows)
+      if: runner.os == 'Windows' && inputs.install_qt == 'true'
+      shell: pwsh
+      run: python -m aqt tool windows tools_ifw 3.2.2 qt.tools.ifw.322 --outputdir C:\Qt
+
+    - name: Install Conan (Mac/Linux Non-Container)
+      if: runner.os == 'macOS'
+      shell: bash
+      run: |
+        # Assumes python3 is available (e.g. from pyenv setup in main workflow)
+        python3 -m pip install --upgrade pip
+        python3 -m pip install conan
+
+    # --- CONAN CONFIG ---
+    - name: Configure Conan remotes
+      shell: bash
+      run: |
+        conan remote add conancenter https://center2.conan.io --force
+        conan remote update conancenter --insecure
+        conan remote add nrel-v2 https://conan.openstudio.net/artifactory/api/conan/conan-v2 --force
+        conan remote update nrel-v2 --insecure
+        if [ ! -f "$HOME/.conan2/profiles/default" ]; then conan profile detect; fi
+
+    - name: Conan install
+      shell: bash
+      working-directory: ${{ github.workspace }}
+      run: |
+        # Determine generator based on OS
+        GEN="Ninja"
+        conan install . \
+          --output-folder="./${{ inputs.build_dir }}" \
+          --build=missing \
+          -c tools.cmake.cmaketoolchain:generator=$GEN \
+          -s compiler.cppstd=20 \
+          -s build_type=${{ inputs.build_type }}
