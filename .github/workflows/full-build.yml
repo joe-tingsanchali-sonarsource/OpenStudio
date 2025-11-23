@@ -605,21 +605,17 @@ jobs:
           # ---------------------------------------------------------
           # 1. Add QtIFW to PATH (Required for CPack)
           # ---------------------------------------------------------
-          # Try to find QtIFW if the default path doesn't exist
-          if (-not (Test-Path $env:QTIFW_PATH)) {
-             Write-Host "Default QtIFW path not found: $env:QTIFW_PATH"
-             $altPath = "C:\Qt\Tools\QtInstallerFramework\3.2.2\bin"
-             if (Test-Path $altPath) {
-                 $env:QTIFW_PATH = $altPath
-                 Write-Host "Found QtIFW at alternative path: $env:QTIFW_PATH"
-             }
-          }
-
-          if (Test-Path $env:QTIFW_PATH) {
-            Write-Host "Adding QtIFW to PATH: $env:QTIFW_PATH"
-            $env:PATH = "$env:QTIFW_PATH;$env:PATH"
+          $qtToolsPath = "C:\Qt\Tools"
+          $binaryCreator = Get-ChildItem -Path $qtToolsPath -Recurse -Filter "binarycreator.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
+          
+          if ($binaryCreator) {
+            $qtIfwBinPath = $binaryCreator.DirectoryName
+            Write-Host "Found QtIFW at: $qtIfwBinPath"
+            $env:PATH = "$qtIfwBinPath;$env:PATH"
           } else {
-            Write-Host "::warning::QtIFW path not found at $env:QTIFW_PATH"
+            Write-Host "::error::QtIFW (binarycreator.exe) not found in $qtToolsPath"
+            Get-ChildItem -Path $qtToolsPath -Recurse -Depth 2 | Select-Object FullName
+            exit 1
           }
 
           # ---------------------------------------------------------
@@ -660,7 +656,7 @@ jobs:
           # 4. Run CPack (Generates Installer)
           # ---------------------------------------------------------
           Write-Host "Running CPack..."
-          cpack -B .
+          cpack -G "NSIS;ZIP" -B .
           
           # ---------------------------------------------------------
           # 5. Sign Installer
