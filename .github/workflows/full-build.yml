@@ -118,7 +118,7 @@ jobs:
             cpack_generators: "DEB;TGZ"
             max_jobs: 2
             ctest_parallel_level: 1
-            exclude_regex: "^('GeometryFixture.Plane_RayIntersection'|'ModelFixture.4678_SubSurfaceGlassUFactorSqlError'|'BCLFixture.BCLComponent'|'SqlFileFixture.AnnualTotalCosts'|'CLITest-UUID_Test-uuid_hash')$"
+            exclude_regex: "^('SqlFileFixture.AnnualTotalCosts')$"
           - platform: ubuntu-2404-arm64
             display_name: Ubuntu 24.04 ARM64
             runner: ubuntu-24.04-arm
@@ -320,14 +320,10 @@ jobs:
       CTEST_PARALLEL_LEVEL: 2
     steps:
       # --- UNIQUE MAC PREP ---
-      - name: Ensure Python via pyenv
-        run: |
-          set -euo pipefail
-          if ! command -v pyenv &> /dev/null; then
-            brew install pyenv
-          fi
-          pyenv install -s ${{ env.PY_VERSION }}
-          pyenv global ${{ env.PY_VERSION }}
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PY_VERSION }}
 
       # --- COMPOSITE ACTIONS ---
       - name: Checkout repository
@@ -356,8 +352,6 @@ jobs:
         working-directory: ${{ env.OPENSTUDIO_BUILD }}
         run: |
           set -euo pipefail
-          eval "$(pyenv init --path)"
-          eval "$(pyenv init -)"
           . ./conanbuild.sh
           echo "PATH: $PATH"
           echo "Checking for cpack..."
@@ -587,11 +581,13 @@ jobs:
 
       # CODE SIGNING - AWS Signing Service
       - name: Setup Node.js
+        if: always()
         uses: actions/setup-node@v4
         with:
           node-version: "18"
 
       - name: Create .env file for Signing
+        if: always()
         run: |
           echo "ACCESS_KEY=${{ secrets.AWS_SIGNING_ACCESS_KEY }}" > "${{ github.workspace }}/.github/signing-client/.env"
           echo "SECRET_KEY=${{ secrets.AWS_SIGNING_SECRET_KEY }}" >> "${{ github.workspace }}/.github/signing-client/.env"
@@ -603,12 +599,22 @@ jobs:
         shell: pwsh
         env:
           AWS_S3_BUCKET: openstudio-ci-builds
-          QTIFW_PATH: C:\Qt\Tools\QtInstallerFramework\3.2.2\bin
+          QTIFW_PATH: C:\Qt\Tools\QtInstallerFramework\3.2\bin
         working-directory: ${{ github.workspace }}/${{ env.OPENSTUDIO_BUILD }}
         run: |
           # ---------------------------------------------------------
           # 1. Add QtIFW to PATH (Required for CPack)
           # ---------------------------------------------------------
+          # Try to find QtIFW if the default path doesn't exist
+          if (-not (Test-Path $env:QTIFW_PATH)) {
+             Write-Host "Default QtIFW path not found: $env:QTIFW_PATH"
+             $altPath = "C:\Qt\Tools\QtInstallerFramework\3.2.2\bin"
+             if (Test-Path $altPath) {
+                 $env:QTIFW_PATH = $altPath
+                 Write-Host "Found QtIFW at alternative path: $env:QTIFW_PATH"
+             }
+          }
+
           if (Test-Path $env:QTIFW_PATH) {
             Write-Host "Adding QtIFW to PATH: $env:QTIFW_PATH"
             $env:PATH = "$env:QTIFW_PATH;$env:PATH"
