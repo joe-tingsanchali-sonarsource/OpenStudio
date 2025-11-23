@@ -184,6 +184,11 @@ jobs:
           echo "::notice::Crypto policy set to LEGACY to allow BCL downloads"    
 
       # --- COMPOSITE ACTION CALLS ---
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - uses: ./.github/actions/setup-env
         with:
           platform: ${{ matrix.platform }}
@@ -325,6 +330,11 @@ jobs:
           pyenv global ${{ env.PY_VERSION }}
 
       # --- COMPOSITE ACTIONS ---
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - uses: ./.github/actions/setup-env
         with:
           platform: ${{ matrix.platform }}
