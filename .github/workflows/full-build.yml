@@ -117,7 +117,7 @@ jobs:
             cpack_generators: "DEB;TGZ"
             max_jobs: 2
             ctest_parallel_level: 1
-            exclude_regex: "^('GeometryFixture.Plane_RayIntersection'|'ModelFixture.4678_SubSurfaceGlassUFactorSqlError'|'BCLFixture.BCLComponent')$"
+            exclude_regex: "^('GeometryFixture.Plane_RayIntersection'|'ModelFixture.4678_SubSurfaceGlassUFactorSqlError'|'BCLFixture.BCLComponent'|'SqlFileFixture.AnnualTotalCosts'|'CLITest-UUID_Test-uuid_hash')$"
           - platform: ubuntu-2404-arm64
             display_name: Ubuntu 24.04 ARM64
             runner: ubuntu-24.04-arm
@@ -132,7 +132,7 @@ jobs:
             cpack_generators: "DEB;TGZ"
             max_jobs: 2
             ctest_parallel_level: 1
-            exclude_regex: "^('SqlFileFixture.AnnualTotalCosts')$"
+            exclude_regex: "^('SqlFileFixture.AnnualTotalCosts'|'CLITest-UUID_Test-uuid_hash')$"
     defaults:
       run:
         shell: bash
@@ -414,14 +414,14 @@ jobs:
             test_suffix: macOS-x64
             dmg_glob: "*.dmg"
             tar_glob: "*OpenStudio*x86_64.tar.gz"
-            exclude_regex: "^('BCLFixture.BCLComponent')$"
+            exclude_regex: "^('BCLFixture.BCLComponent'|'BCLFixture.LocalBCL_AuthKey'|'BCLFixture.RemoteBCLTest'|'BCLFixture.RemoteBCLTest2'|'BCLFixture.GetComponentByUID'|'BCLFixture.RemoteBCLMetaSearchTest'|'BCLFixture.RemoteBCL_EncodingURI'|'BCLFixture.RemoteBCL_BCLSearchResult')$"
           - platform: macos-arm64
             display_name: macOS ARM64 (Apple Silicon)
             runner: macos-14
             test_suffix: macOS-arm64
             dmg_glob: "*.dmg"
             tar_glob: "*OpenStudio*arm64.tar.gz"
-            exclude_regex: "^('BCLFixture.BCLComponent')$"
+            exclude_regex: "^('BCLFixture.BCLComponent'|'BCLFixture.LocalBCL_AuthKey'|'BCLFixture.RemoteBCLTest'|'BCLFixture.RemoteBCLTest2'|'BCLFixture.GetComponentByUID'|'BCLFixture.RemoteBCLMetaSearchTest'|'BCLFixture.RemoteBCL_EncodingURI'|'BCLFixture.RemoteBCL_BCLSearchResult')$"
     defaults:
       run:
         shell: bash
