@@ -23,9 +23,7 @@ inputs:
   ctest_parallel_level:
     required: false
     default: '2'
-  ctest_parallel_level:
-    required: false
-    default: '2'
+
   cmake_args:
     required: false
     default: ''

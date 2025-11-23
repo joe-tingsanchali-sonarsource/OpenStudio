@@ -73,7 +73,7 @@ runs:
     - name: Install QtIFW (Windows)
       if: runner.os == 'Windows' && inputs.install_qt == 'true'
       shell: pwsh
-      run: python -m aqt install-tool windows desktop tools_ifw qt.tools.ifw.41 --outputdir C:\Qt
+      run: python -m aqt install-tool windows desktop tools_ifw qt.tools.ifw.48 --outputdir C:\Qt
 
     - name: Install Conan (Mac/Linux Non-Container)
       if: runner.os == 'macOS'
