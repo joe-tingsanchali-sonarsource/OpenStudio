@@ -131,6 +131,14 @@ runs:
       run: |
         . ./conanbuild.sh
         
+        # Fix for missing ctest/cpack in PATH
+        if ! command -v ctest &> /dev/null && command -v cmake &> /dev/null; then
+          CMAKE_REAL_PATH=$(readlink -f "$(command -v cmake)")
+          CMAKE_DIR=$(dirname "$CMAKE_REAL_PATH")
+          export PATH="$CMAKE_DIR:$PATH"
+          echo "Added cmake dir to PATH: $CMAKE_DIR"
+        fi
+        
         echo "exit_code=0" >> $GITHUB_OUTPUT
         
         EX_REGEX="${{ inputs.exclude_regex }}"

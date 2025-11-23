@@ -118,7 +118,7 @@ jobs:
             cpack_generators: "DEB;TGZ"
             max_jobs: 2
             ctest_parallel_level: 1
-            exclude_regex: "^('SqlFileFixture.AnnualTotalCosts')$"
+            exclude_regex: "^(SqlFileFixture.AnnualTotalCosts)$"
           - platform: ubuntu-2404-arm64
             display_name: Ubuntu 24.04 ARM64
             runner: ubuntu-24.04-arm
@@ -133,7 +133,7 @@ jobs:
             cpack_generators: "DEB;TGZ"
             max_jobs: 2
             ctest_parallel_level: 1
-            exclude_regex: "^('SqlFileFixture.AnnualTotalCosts'|'CLITest-UUID_Test-uuid_hash')$"
+            exclude_regex: "^(SqlFileFixture.AnnualTotalCosts|CLITest-UUID_Test-uuid_hash)$"
     defaults:
       run:
         shell: bash
@@ -155,7 +155,9 @@ jobs:
               echo "::warning::Failed to enable swap (likely insufficient privilege); continuing"
             fi
           fi
-          free -h || true
+          if command -v free &> /dev/null; then
+            free -h || true
+          fi
 
       - name: Pre-install Ruby (CentOS 9)
         if: matrix.platform == 'centos-9-x64'
