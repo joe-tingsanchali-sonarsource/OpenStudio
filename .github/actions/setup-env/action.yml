@@ -99,9 +99,15 @@ runs:
       run: |
         # Determine generator based on OS
         GEN="Ninja"
-        conan install . \
-          --output-folder="./${{ inputs.build_dir }}" \
-          --build=missing \
-          -c tools.cmake.cmaketoolchain:generator=$GEN \
-          -s compiler.cppstd=20 \
-          -s build_type=${{ inputs.build_type }}
+
+        # Default arguments
+        CONAN_ARGS="--output-folder=./${{ inputs.build_dir }} --build=missing -c tools.cmake.cmaketoolchain:generator=$GEN -s compiler.cppstd=20 -s build_type=${{ inputs.build_type }}"
+
+        # [Logic] Force static linking on macOS to avoid Homebrew path issues
+        # We also force it on Linux for better portability, but keep Windows dynamic
+        if [ "${{ runner.os }}" == "macOS" ]; then
+          CONAN_ARGS="$CONAN_ARGS -o *:shared=False"
+        fi
+
+        # Run Conan
+        conan install . $CONAN_ARGS
