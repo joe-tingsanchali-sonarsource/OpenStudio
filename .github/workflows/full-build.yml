@@ -521,6 +521,12 @@ jobs:
           Set-Location src/cli/test/bundle_git
           bundle lock --add-platform x64-mingw-ucrt
 
+      - name: Install Doxygen
+        run: choco install doxygen.install -y
+
+      - name: Install Python Dependencies
+        run: pip install pytest numpy
+
       # --- COMPOSITE ACTIONS ---
       - uses: ./.github/actions/setup-env
         with:
