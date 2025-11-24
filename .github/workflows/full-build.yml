@@ -550,27 +550,6 @@ jobs:
           exclude_regex: ${{ matrix.exclude_regex }}
 
       # --- UNIQUE WIN PACKAGING/SIGNING ---
-      - name: Add QtIFW to PATH
-        shell: pwsh
-        run: |
-          $qtToolsPath = "C:\Qt\Tools"
-          $binaryCreator = Get-ChildItem -Path $qtToolsPath -Recurse -Filter "binarycreator.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
-          if ($binaryCreator) {
-            $qtIfwBinPath = $binaryCreator.DirectoryName
-            Write-Host "Found QtIFW at: $qtIfwBinPath"
-            echo "$qtIfwBinPath" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-          } else {
-            Write-Warning "QtIFW not found in $qtToolsPath"
-          }
-
-      - name: Create packages
-        working-directory: ${{ github.workspace }}/${{ env.OPENSTUDIO_BUILD }}
-        shell: cmd
-        run: |
-          call conanbuild.bat
-          echo Checking for cpack...
-          where cpack || (cmake --version && echo cpack should be available)
-          cpack -G "IFW;ZIP" -B .
 
       - name: Archive Testing directory
         if: always()
@@ -593,15 +572,6 @@ jobs:
           name: Testing-windows-2022-x64-${{ github.sha }}
           path: |
             ${{ github.workspace }}/${{ env.OPENSTUDIO_BUILD }}/Testing-Windows-2022.zip
-
-      - name: Upload build outputs
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: packages-windows-2022-x64-${{ github.sha }}
-          path: |
-            ${{ github.workspace }}/${{ env.OPENSTUDIO_BUILD }}/*.exe
-            ${{ github.workspace }}/${{ env.OPENSTUDIO_BUILD }}/*.zip
 
       # CODE SIGNING - AWS Signing Service
       - name: Setup Node.js
@@ -707,6 +677,15 @@ jobs:
           } else {
             Write-Host "::warning::No installer files found to sign. CPack likely failed."
           }
+
+      - name: Upload build outputs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: packages-windows-2022-x64-${{ github.sha }}
+          path: |
+            ${{ github.workspace }}/${{ env.OPENSTUDIO_BUILD }}/*.exe
+            ${{ github.workspace }}/${{ env.OPENSTUDIO_BUILD }}/*.zip
 
       - name: Configure AWS credentials
         if: ${{ github.ref == 'refs/heads/develop' || inputs.publish_to_s3 == 'true' || github.event.inputs.publish_to_s3 == 'true' }}
