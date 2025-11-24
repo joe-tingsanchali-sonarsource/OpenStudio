@@ -110,3 +110,9 @@
 [2025-11-20T20:33:23.844Z] Process arguments: ["/opt/homebrew/Cellar/node/24.6.0/bin/node","/Users/achapin/.npm/_npx/3520434043d140a8/node_modules/.bin/terminal-mcp-server"]
 [2025-11-20T20:33:23.848Z] Received request: {"method":"tools/list","params":{"signal":{}}}
 [2025-11-20T22:01:39.280Z] Received SIGTERM signal
+[2025-11-22T06:18:12.331Z] Loaded security config with 2 allowed paths
+[2025-11-22T06:18:12.332Z] Security module initialized
+[2025-11-22T06:18:12.332Z] Starting MCP Terminal server...
+[2025-11-22T06:18:12.332Z] Current working directory: /Users/achapin/OpenStudio/openstudio-full/OpenStudio
+[2025-11-22T06:18:12.333Z] Process arguments: ["/opt/homebrew/Cellar/node/24.6.0/bin/node","/Users/achapin/.npm/_npx/3520434043d140a8/node_modules/.bin/terminal-mcp-server"]
+[2025-11-22T06:18:12.335Z] Received request: {"method":"tools/list","params":{"signal":{}}}
