@@ -548,6 +548,19 @@ jobs:
           exclude_regex: ${{ matrix.exclude_regex }}
 
       # --- UNIQUE WIN PACKAGING/SIGNING ---
+      - name: Add QtIFW to PATH
+        shell: pwsh
+        run: |
+          $qtToolsPath = "C:\Qt\Tools"
+          $binaryCreator = Get-ChildItem -Path $qtToolsPath -Recurse -Filter "binarycreator.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
+          if ($binaryCreator) {
+            $qtIfwBinPath = $binaryCreator.DirectoryName
+            Write-Host "Found QtIFW at: $qtIfwBinPath"
+            echo "$qtIfwBinPath" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          } else {
+            Write-Warning "QtIFW not found in $qtToolsPath"
+          }
+
       - name: Create packages
         working-directory: ${{ github.workspace }}/${{ env.OPENSTUDIO_BUILD }}
         shell: cmd

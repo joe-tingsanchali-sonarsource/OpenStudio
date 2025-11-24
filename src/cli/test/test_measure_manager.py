@@ -86,7 +86,7 @@ class MeasureManagerClient(requests.Session):
 
         r = self.post("/set", json={"my_measures_dir": str(my_measures_dir)})
         r.raise_for_status()
-        assert self.internal_state()["my_measures_dir"] == my_measures_dir.as_posix()
+        assert self.internal_state()["my_measures_dir"] == str(my_measures_dir)
 
         measure_dir = my_measures_dir / "MyMeasure"
         data = {
@@ -234,7 +234,7 @@ def test_set_measures_dir(measure_manager_client, expected_internal_state, tmp_p
     if measure_manager_client.is_classic:
         assert r.status_code == 200
         assert not r.json()
-        expected_internal_state["my_measures_dir"] = my_measures_dir.as_posix()
+        expected_internal_state["my_measures_dir"] = str(my_measures_dir)
         assert measure_manager_client.internal_state() == expected_internal_state
     else:
         assert r.status_code == 400
@@ -245,7 +245,7 @@ def test_set_measures_dir(measure_manager_client, expected_internal_state, tmp_p
 
     r = measure_manager_client.post("/set", json={"my_measures_dir": str(my_measures_dir)})
     r.raise_for_status()
-    expected_internal_state["my_measures_dir"] = my_measures_dir.as_posix()
+    expected_internal_state["my_measures_dir"] = str(my_measures_dir)
     assert measure_manager_client.internal_state() == expected_internal_state
 
 
