@@ -166,7 +166,7 @@ runs:
         RUBYOPT: -Eutf-8
       run: |
         call conanbuild.bat
-        echo exit_code=0 >> %GITHUB_OUTPUT%
+        echo exit_code=0>>%GITHUB_OUTPUT%
         set "exclude_regex=${{ inputs.exclude_regex }}"
         if defined exclude_regex (
           ctest --output-on-failure -C Release --parallel ${{ inputs.ctest_parallel_level }} -E "%exclude_regex%"
@@ -174,7 +174,7 @@ runs:
           ctest --output-on-failure -C Release --parallel ${{ inputs.ctest_parallel_level }}
         )
         if %errorlevel% neq 0 (
-          echo exit_code=%errorlevel% >> %GITHUB_OUTPUT%
+          echo exit_code=%errorlevel%>>%GITHUB_OUTPUT%
         )
 
     - name: Set CTest Exit Code
