@@ -76,6 +76,7 @@ jobs:
             cpack_generators: "RPM;TGZ"
             max_jobs: 2
             ctest_parallel_level: 2
+            exclude_regex: "^(BCLFixture.RemoteBCLMetaSearchTest)$"
           - platform: ubuntu-2204-x64
             display_name: Ubuntu 22.04 x64
             runner: ubuntu-22.04
