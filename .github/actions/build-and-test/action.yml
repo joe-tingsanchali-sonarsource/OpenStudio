@@ -50,9 +50,6 @@ runs:
 
         cmake -G Ninja \
           -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake \
-          -DRUBY_EXECUTABLE=/Users/runner/hostedtoolcache/Ruby/${{ inputs.ruby_version }}/${{ runner.arch }}/bin/ruby \
-          -DRUBY_INCLUDE_DIR=/Users/runner/hostedtoolcache/Ruby/${{ inputs.ruby_version }}/${{ runner.arch }}/include/ruby-3.2.0 \
-          -DRUBY_LIBRARY=/Users/runner/hostedtoolcache/Ruby/${{ inputs.ruby_version }}/${{ runner.arch }}/lib/libruby.3.2.dylib \
           -DCMAKE_BUILD_TYPE:STRING=${{ inputs.build_type }} \
           -DBUILD_TESTING:BOOL=ON \
           -DCPACK_GENERATORS:STRING="${{ inputs.cpack_generators }}" \
