@@ -81,7 +81,7 @@ runs:
       run: |
         # Assumes python3 is available (e.g. from pyenv setup in main workflow)
         python3 -m pip install --upgrade pip
-        python3 -m pip install conan
+        python3 -m pip install conan numpy
 
     # --- CONAN CONFIG ---
     - name: Configure Conan remotes
