@@ -99,7 +99,7 @@ jobs:
 
       # --- UNIQUE MAC SIGNING ---
       - name: Code sign and notarize macOS packages
-        if: ${{ github.ref == 'refs/heads/develop' || inputs.publish_to_s3 == 'true' || github.event.inputs.publish_to_s3 == 'true' }}
+        if: (${{ github.ref == 'refs/heads/develop' || inputs.publish_to_s3 == 'true' || github.event.inputs.publish_to_s3 == 'true' }}) && (secrets.APPLE_CERT_DATA != '' && secrets.APPLE_CERT_PASSWORD != '')
         working-directory: ${{ env.OPENSTUDIO_BUILD }}
         env:
           APPLE_CERT_DATA: ${{ secrets.APPLE_CERT_DATA }}
@@ -110,13 +110,6 @@ jobs:
           APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
         run: |
           set -euo pipefail
-          
-          # Check if signing credentials are configured
-          if [ -z "$APPLE_CERT_DATA" ] || [ -z "$APPLE_CERT_PASSWORD" ]; then
-            echo "::warning::Apple signing certificates not configured"
-            echo "::warning::Skipping code signing. Configure APPLE_CERT_DATA and APPLE_CERT_PASSWORD secrets."
-            exit 0
-          fi
           
           # Create temporary keychain
           KEYCHAIN_PATH="$RUNNER_TEMP/build.keychain"
