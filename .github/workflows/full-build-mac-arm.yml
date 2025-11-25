@@ -126,26 +126,15 @@ jobs:
           set -euo pipefail
           echo "Uploading artifacts to s3://${AWS_S3_BUCKET}/${S3_PREFIX}" > /dev/stderr
 
-          # Upload signed DMG files if they exist, otherwise upload unsigned
-          if [ -d "signed" ] && [ "$(ls -A signed/*.dmg 2>/dev/null)" ]; then
-            echo "Uploading signed DMG files..."
-            for file in signed/*.dmg; do
-              if [ -f "$file" ]; then
-                key="${S3_PREFIX}/$(basename "$file")"
-                aws s3 cp "$file" "s3://${AWS_S3_BUCKET}/${key}" --acl public-read
-                md5 "$file"
-              fi
-            done
-          else
-            echo "Uploading unsigned DMG files..."
-            for file in ${{ matrix.dmg_glob }}; do
-              if [ -f "$file" ]; then
-                key="${S3_PREFIX}/$(basename "$file")"
-                aws s3 cp "$file" "s3://${AWS_S3_BUCKET}/${key}" --acl public-read
-                md5 "$file"
-              fi
-            done
-          fi
+          # Upload unsigned DMG files, skipping any signed ones for now as requested.
+          echo "Uploading unsigned DMG files..."
+          for file in ${{ matrix.dmg_glob }}; do
+            if [ -f "$file" ]; then
+              key="${S3_PREFIX}/$(basename "$file")"
+              aws s3 cp "$file" "s3://${AWS_S3_BUCKET}/${key}" --acl public-read
+              md5 "$file"
+            fi
+          done
 
           # Upload TAR.GZ files
           for file in ${{ matrix.tar_glob }}; do
@@ -164,7 +153,6 @@ jobs:
           path: |
             ${{ env.OPENSTUDIO_BUILD }}/*.dmg
             ${{ env.OPENSTUDIO_BUILD }}/*.tar.gz
-            ${{ env.OPENSTUDIO_BUILD }}/signed/*.dmg
 
       - name: Fail job on test failures
         if: ${{ steps.build_and_test_steps.outputs.ctest_exit_code != '0' }}
