@@ -25,18 +25,22 @@ jobs:
       # fail-fast: Default is true, switch to false to allow one platform to fail and still run others
       fail-fast: false
       matrix:
-        name: [Ubuntu, macOS, macOS_arm64, Windows_py37, Windows_py38, Windows_py39, Windows_py310, Windows_py311, Windows_py312, Windows_py313]
+        name: [Ubuntu, Ubuntu_arm64, macOS, macOS_arm64, Windows_py37, Windows_py38, Windows_py39, Windows_py310, Windows_py311, Windows_py312, Windows_py313]
         include:
         - name: Ubuntu
           os: ubuntu-22.04
           python-version: 3.8
           allow_failure: false
+        - name: Ubuntu_arm64
+          os: ubuntu-22.04-arm
+          python-version: 3.8
+          allow_failure: true
         - name: macOS
-          os: macos-12
+          os: macos-13
           python-version: 3.8
           allow_failure: false
           MACOSX_DEPLOYMENT_TARGET: 10.15
-          SDKROOT: /Applications/Xcode_13.2.1.app
+          SDKROOT: /Applications/Xcode_15.2.app
         - name: macOS_arm64
           os: macos-14
           python-version: 3.8
@@ -69,7 +73,7 @@ jobs:
           allow_failure: false
         - name: Windows_py313
           os: windows-2019
-          python-version: '3.13'
+          python-version: '3.13.5'
           allow_failure: true  # Possible this fails, don't care yet
 
     steps:
@@ -283,13 +287,24 @@ jobs:
           if [ "${{ matrix.name }}" == "macOS_arm64" ]; then
             PYTHON_ARCH=arm64
             # Avoid "builtin __has_nothrow_assign is deprecated; use __is_nothrow_assignable instead" in boost/1.79 with recent clang
-            conan install . --output-folder=./build --build=missing -c tools.cmake.cmaketoolchain:generator=Ninja -s compiler.cppstd=20 -s build_type=Release -o with_testing=False -o with_benchmark=False -c tools.build:cxxflags="['-D_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION -Wno-enum-constexpr-conversion']"
+            conan install . --output-folder=./build --build=missing \
+              -c tools.cmake.cmaketoolchain:generator=Ninja -s compiler.cppstd=20 -s build_type=Release \
+              -o with_testing=False -o with_benchmark=False -o with_ruby=False \
+              -c tools.build:cxxflags="['-D_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION -Wno-enum-constexpr-conversion']"
           else
-            conan install . --output-folder=./build --build=missing -c tools.cmake.cmaketoolchain:generator=Ninja -s compiler.cppstd=20 -s build_type=Release -o with_testing=False -o with_benchmark=False -c tools.build:cxxflags="['-D_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION']"
+            conan install . --output-folder=./build --build=missing \
+              -c tools.cmake.cmaketoolchain:generator=Ninja -s compiler.cppstd=20 -s build_type=Release \
+              -o with_testing=False -o with_benchmark=False -o with_ruby=False \
+              -c tools.build:cxxflags="['-D_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION']"
           fi
         else
+          if [ "${{ matrix.name }}" == "Ubuntu_arm64" ]; then
+            PYTHON_ARCH=arm64
+          fi
           PYTHON_VERSION=${{ steps.setup-python.outputs.python-version }}
-          conan install . --output-folder=./build --build=missing -c tools.cmake.cmaketoolchain:generator=Ninja -s compiler.cppstd=20 -s build_type=Release -o with_testing=False -o with_benchmark=False
+          conan install . --output-folder=./build --build=missing \
+            -c tools.cmake.cmaketoolchain:generator=Ninja -s compiler.cppstd=20 -s build_type=Release \
+            -o with_testing=False -o with_benchmark=False -o with_ruby=False
         fi
         echo -e "::endgroup::"
 
@@ -302,7 +317,15 @@ jobs:
         echo -e "::endgroup::"
 
         begin_group "Build"
-        cmake --build --preset conan-release
+        if [ "${{ matrix.name }}" == "Ubuntu_arm64" ]; then
+          echo "Ubuntu_arm64 is apparently running out of memory/CPU during the build as of 2025-06-18, so work around it"
+          N=$(nproc)
+          cmake --build --preset conan-release --target openstudiolib -j $N
+          cmake --build --preset conan-release --target python_sdk -j $(($N - 2))
+          cmake --build --preset conan-release -j $(($N - 2))
+        else
+          cmake --build --preset conan-release
+        fi
         echo -e "::endgroup::"
 
 
@@ -385,14 +408,18 @@ jobs:
       # fail-fast: Default is true, switch to false to allow one platform to fail and still run others
       fail-fast: false
       matrix:
-        name: [Ubuntu, macOS, macOS_arm64, Windows_py37, Windows_py38, Windows_py39, Windows_py310, Windows_py311, Windows_py312, Windows_py313]
+        name: [Ubuntu, Ubuntu_arm64, macOS, macOS_arm64, Windows_py37, Windows_py38, Windows_py39, Windows_py310, Windows_py311, Windows_py312, Windows_py313]
         include:
         - name: Ubuntu
           os: ubuntu-22.04
           python-version: 3.11  # Voluntarily using a newer version than built with for Unix
           allow_failure: false
+        - name: Ubuntu_arm64
+          os: ubuntu-22.04-arm
+          python-version: 3.12
+          allow_failure: true
         - name: macOS
-          os: macos-12
+          os: macos-13
           python-version: 3.11
           allow_failure: false
         - name: macOS_arm64

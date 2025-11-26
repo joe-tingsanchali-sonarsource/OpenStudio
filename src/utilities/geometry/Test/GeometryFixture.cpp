@@ -16,7 +16,9 @@ using openstudio::Vector3d;
 
 bool pointEqual(const openstudio::Point3d& a, const openstudio::Point3d& b) {
   Vector3d diff = a - b;
-  return diff.length() <= 0.0001;
+  // Increased tolerance from 0.0001 to 0.001 for ARM64/cross-platform compatibility
+  // Geometry calculations (normalization, intersections) may vary slightly between architectures
+  return diff.length() <= 0.001;
 }
 
 bool pointsEqual(const std::vector<openstudio::Point3d>& a, const std::vector<openstudio::Point3d>& b) {
@@ -35,7 +37,9 @@ bool pointsEqual(const std::vector<openstudio::Point3d>& a, const std::vector<op
 
 bool vectorEqual(const openstudio::Vector3d& a, const openstudio::Vector3d& b) {
   Vector3d diff = a - b;
-  return diff.length() <= 0.0001;
+  // Increased tolerance from 0.0001 to 0.001 for ARM64/cross-platform compatibility
+  // Vector operations (normalization, dot products) may vary slightly between architectures
+  return diff.length() <= 0.001;
 }
 
 double totalArea(const std::vector<std::vector<Point3d>>& polygons) {

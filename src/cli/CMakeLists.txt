@@ -264,7 +264,7 @@ if(BUILD_TESTING)
 
   add_test(NAME OpenStudioCLI.Run_AlfalfaWorkflow
     COMMAND ${CMAKE_COMMAND} "-DCMD1=$<TARGET_FILE:openstudio> run -m -w compact_alfalfa.osw"
-    "-DCMD2=${CMAKE_COMMAND} -E cat run/alfalfa.json"
+    "-DCMD2=\"${CMAKE_COMMAND}\" -E cat run/alfalfa.json"
     -P ${CMAKE_SOURCE_DIR}/CMake/RunCommands.cmake
     WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/resources/Examples/compact_osw"
   )
@@ -614,6 +614,11 @@ if(BUILD_TESTING)
         )
 
       set_tests_properties("${CTEST_NAME}" PROPERTIES TIMEOUT 660 )
+      
+      # Add labels for network-dependent bundle tests
+      if(TEST_NAME MATCHES "bundle" AND NOT TEST_NAME MATCHES "no_bundle")
+        set_tests_properties("${CTEST_NAME}" PROPERTIES LABELS "network;bundle;cli")
+      endif()
     endforeach()
 
   endforeach()

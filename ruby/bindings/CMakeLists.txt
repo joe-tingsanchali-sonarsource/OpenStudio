@@ -2,6 +2,7 @@ add_library( rubybindings OBJECT
   InitRubyBindings.hpp
   InitRubyBindings.cpp
 )
+set_property(TARGET rubybindings PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 target_include_directories(rubybindings PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
