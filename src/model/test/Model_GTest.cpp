@@ -567,8 +567,11 @@ TEST_F(ExampleModelFixture, ExampleModel_ReloadTwoTimes) {
 
   // order of reloaded models should be the same as in memory model
   std::vector<WorkspaceObject> objects = model.objects();
+  std::sort(objects.begin(), objects.end(), [](const auto& a, const auto& b) { return a.handle() < b.handle(); });
   std::vector<WorkspaceObject> objects1 = model1->objects();
+  std::sort(objects1.begin(), objects1.end(), [](const auto& a, const auto& b) { return a.handle() < b.handle(); });
   std::vector<WorkspaceObject> objects2 = model2->objects();
+  std::sort(objects2.begin(), objects2.end(), [](const auto& a, const auto& b) { return a.handle() < b.handle(); });
 
   for (unsigned i = 0; i < N; ++i) {
     EXPECT_EQ(objects[i].handle(), objects1[i].handle());

@@ -78,6 +78,8 @@ class Bundle_Test < Minitest::Test
       if lock == LOCK_NATIVE
         if /mingw/.match(RUBY_PLATFORM) || /mswin/.match(RUBY_PLATFORM)
           assert(run_command('bundle lock --add_platform mswin64'))
+        elsif /darwin/.match(RUBY_PLATFORM) && /arm64/.match(RUBY_PLATFORM)
+          assert(run_command('bundle lock --add_platform arm64-darwin'))
         end
       elsif lock == LOCK_RUBY
         assert(run_command('bundle lock --add_platform ruby'))

@@ -912,6 +912,15 @@ TEST_F(gbXMLFixture, ForwardTranslator_exposedToSun) {
   // Test for #4559 - OpenStudio exported gbXML 'exposedToSun' attribute not written
   Model model = exampleModel();
 
+  // Explicitly set the sun exposure to ensure deterministic behavior
+  auto surface1 = model.getConcreteModelObjectByName<Surface>("Surface 1");
+  ASSERT_TRUE(surface1);
+  surface1->setSunExposure("NoSun");
+
+  auto surface2 = model.getConcreteModelObjectByName<Surface>("Surface 2");
+  ASSERT_TRUE(surface2);
+  surface2->setSunExposure("SunExposed");
+
   // Write out the XML
   path p = resourcesPath() / openstudio::toPath("gbxml/exampleModel.xml");
 

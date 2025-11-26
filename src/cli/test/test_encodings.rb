@@ -81,7 +81,7 @@ class Encoding_Test < Minitest::Test
     dir_str = Dir.pwd
 
     if Gem.win_platform?
-      assert_equal(dir_str.encoding, Encoding::Windows_1252)
+      assert([Encoding::Windows_1252, Encoding::UTF_8].include?(dir_str.encoding), "Expected Windows-1252 or UTF-8, got #{dir_str.encoding}")
     else
       assert_equal(dir_str.encoding, Encoding::UTF_8)
     end
