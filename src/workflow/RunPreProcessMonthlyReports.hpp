@@ -245,17 +245,4 @@ Output:Table:Monthly,
   ValueWhenMaximumOrMinimum;              !- Aggregation Type for Variable or Meter 14
 )idf"};
 
-static constexpr std::array<std::string_view, 7> c_metersForced{
-  // These are needed for the calibration report
-  "Output:Meter:MeterFileOnly,NaturalGas:Facility,Daily;",
-  "Output:Meter:MeterFileOnly,Electricity:Facility,Timestep;",
-  "Output:Meter:MeterFileOnly,Electricity:Facility,Daily;",
-
-  // Always add in the timestep facility meters
-  "Output:Meter,Electricity:Facility,Timestep;",
-  "Output:Meter,NaturalGas:Facility,Timestep;",
-  "Output:Meter,DistrictHeatingWater:Facility,Timestep;",
-  "Output:Meter,DistrictCooling:Facility,Timestep;",
-};
-
 #endif  // WORKFLOW_RUNPREPROCESSMONTHLY_REPORTS_HPP

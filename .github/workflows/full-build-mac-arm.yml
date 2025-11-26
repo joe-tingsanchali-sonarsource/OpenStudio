@@ -1,0 +1,237 @@
+name: Full Build (MacOS ARM64 Only)
+
+on:
+  workflow_dispatch:
+    inputs:
+      publish_to_s3:
+        description: "Force S3 publishing even when not on develop"
+        required: false
+        default: "false"
+      skip_docker_trigger:
+        description: "Skip downstream docker workflow trigger"
+        required: false
+        default: "false"
+
+concurrency:
+  group: full-build-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  actions: read
+  checks: write
+  pull-requests: write
+  packages: write
+  id-token: write
+
+env:
+  BUILD_TYPE: Release
+  OPENSTUDIO_SOURCE: OpenStudio
+  OPENSTUDIO_BUILD: OS-build-release-v2
+  PY_VERSION: "3.12.2"
+  RUBY_VERSION: "3.2.2"
+  AWS_S3_BUCKET: openstudio-ci-builds
+
+jobs:
+  macos:
+    name: ${{ matrix.display_name }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: macos-arm64
+            display_name: macOS ARM64 (Apple Silicon)
+            runner: macos-14
+            test_suffix: macOS-arm64
+            dmg_glob: "*.dmg"
+            tar_glob: "*OpenStudio*arm64.tar.gz"
+    defaults:
+      run:
+        shell: bash
+    env:
+      MAX_BUILD_THREADS: 2
+      CTEST_PARALLEL_LEVEL: 2
+    steps:
+      # --- UNIQUE MAC PREP ---
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PY_VERSION }}
+
+      # --- COMPOSITE ACTIONS ---
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: ./.github/actions/setup-env
+        with:
+          platform: ${{ matrix.platform }}
+          ruby_version: ${{ env.RUBY_VERSION }}
+          build_dir: ${{ env.OPENSTUDIO_BUILD }}
+
+      - uses: ./.github/actions/build-and-test
+        id: build_and_test_steps
+        with:
+          build_dir: ${{ env.OPENSTUDIO_BUILD }}
+          platform_name: ${{ matrix.platform }}
+          py_version: ${{ env.PY_VERSION }}
+          cpack_generators: "DragNDrop;TGZ"
+          parallel_level: ${{ env.MAX_BUILD_THREADS }}
+          ctest_parallel_level: ${{ env.CTEST_PARALLEL_LEVEL }}
+          exclude_regex: ${{ matrix.exclude_regex }}
+
+      - name: Create packages
+        working-directory: ${{ env.OPENSTUDIO_BUILD }}
+        run: |
+          set -euo pipefail
+          . ./conanbuild.sh
+          echo "PATH: $PATH"
+          echo "Checking for cpack..."
+          which cpack || cmake --version
+          cpack -B .
+
+      # --- UNIQUE MAC SIGNING ---
+      - name: Code sign and notarize macOS packages
+        if: ${{ github.ref == 'refs/heads/develop' || inputs.publish_to_s3 == 'true' || github.event.inputs.publish_to_s3 == 'true' }}
+        working-directory: ${{ env.OPENSTUDIO_BUILD }}
+        env:
+          APPLE_CERT_DATA: ${{ secrets.APPLE_CERT_DATA }}
+          APPLE_CERT_PASSWORD: ${{ secrets.APPLE_CERT_PASSWORD }}
+          APPLE_DEV_ID: ${{ secrets.APPLE_DEV_ID }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_ID_USERNAME: ${{ secrets.APPLE_ID_USERNAME }}
+          APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
+        run: |
+          set -euo pipefail
+          
+          # Check if signing credentials are configured
+          if [ -z "$APPLE_CERT_DATA" ] || [ -z "$APPLE_CERT_PASSWORD" ]; then
+            echo "::warning::Apple signing certificates not configured"
+            echo "::warning::Skipping code signing. Configure APPLE_CERT_DATA and APPLE_CERT_PASSWORD secrets."
+            exit 0
+          fi
+          
+          # Create temporary keychain
+          KEYCHAIN_PATH="$RUNNER_TEMP/build.keychain"
+          KEYCHAIN_PASSWORD=$(openssl rand -base64 32)
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          
+          # Import certificate
+          CERT_PATH="$RUNNER_TEMP/certificate.p12"
+          echo "$APPLE_CERT_DATA" | base64 --decode > "$CERT_PATH"
+          security import "$CERT_PATH" -k "$KEYCHAIN_PATH" -P "$APPLE_CERT_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security list-keychain -d user -s "$KEYCHAIN_PATH" $(security list-keychain -d user | sed s/"//g)
+          
+          # Sign DMG files
+          mkdir -p signed
+          for dmg in ${{ matrix.dmg_glob }}; do
+            if [ -f "$dmg" ]; then
+              echo "Signing $dmg..."
+              codesign --force --sign "$APPLE_DEV_ID" --timestamp --options runtime "$dmg" || {
+                echo "::warning::Failed to sign $dmg"
+                cp "$dmg" "signed/$(basename "$dmg")"
+                continue
+              }
+              
+              # Notarize if credentials available
+              if [ -n "$APPLE_ID_USERNAME" ] && [ -n "$APPLE_ID_PASSWORD" ]; then
+                echo "Notarizing $dmg..."
+                xcrun notarytool submit "$dmg" \
+                  --apple-id "$APPLE_ID_USERNAME" \
+                  --password "$APPLE_ID_PASSWORD" \
+                  --team-id "$APPLE_TEAM_ID" \
+                  --wait || echo "::warning::Notarization failed for $dmg"
+                
+                # Staple the notarization ticket
+                xcrun stapler staple "$dmg" || echo "::warning::Stapling failed for $dmg"
+              fi
+              
+              cp "$dmg" "signed/$(basename "$dmg")"
+            fi
+          done
+          
+          # Cleanup
+          security delete-keychain "$KEYCHAIN_PATH" || true
+          rm -f "$CERT_PATH"
+          
+          echo "Code signing completed"
+
+      - name: Copy Testing tree with suffix
+        if: always()
+        working-directory: ${{ env.OPENSTUDIO_BUILD }}
+        run: |
+          set -euo pipefail
+          if [ -d Testing ]; then
+            cp -r Testing "Testing-${{ matrix.test_suffix }}"
+          else
+            echo "::warning::Testing directory not found; skipping copy"
+            mkdir -p "Testing-${{ matrix.test_suffix }}"
+          fi
+
+      - name: Configure AWS credentials
+        if: ${{ github.ref == 'refs/heads/develop' || inputs.publish_to_s3 == 'true' || github.event.inputs.publish_to_s3 == 'true' }}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION || 'us-west-2' }}
+
+      - name: Publish installers to S3
+        if: ${{ github.ref == 'refs/heads/develop' || inputs.publish_to_s3 == 'true' || github.event.inputs.publish_to_s3 == 'true' }}
+        working-directory: ${{ env.OPENSTUDIO_BUILD }}
+        env:
+          S3_PREFIX: ${{ github.ref_type == 'tag' && format('releases/{0}', github.ref_name) || format('{0}', github.ref_name) }}
+        run: |
+          set -euo pipefail
+          echo "Uploading artifacts to s3://${AWS_S3_BUCKET}/${S3_PREFIX}" > /dev/stderr
+
+          # Upload signed DMG files if they exist, otherwise upload unsigned
+          if [ -d "signed" ] && [ "$(ls -A signed/*.dmg 2>/dev/null)" ]; then
+            echo "Uploading signed DMG files..."
+            for file in signed/*.dmg; do
+              if [ -f "$file" ]; then
+                key="${S3_PREFIX}/$(basename "$file")"
+                aws s3 cp "$file" "s3://${AWS_S3_BUCKET}/${key}" --acl public-read
+                md5 "$file"
+              fi
+            done
+          else
+            echo "Uploading unsigned DMG files..."
+            for file in ${{ matrix.dmg_glob }}; do
+              if [ -f "$file" ]; then
+                key="${S3_PREFIX}/$(basename "$file")"
+                aws s3 cp "$file" "s3://${AWS_S3_BUCKET}/${key}" --acl public-read
+                md5 "$file"
+              fi
+            done
+          fi
+
+          # Upload TAR.GZ files
+          for file in ${{ matrix.tar_glob }}; do
+            if [ -f "$file" ]; then
+              key="${S3_PREFIX}/$(basename "$file")"
+              aws s3 cp "$file" "s3://${AWS_S3_BUCKET}/${key}" --acl public-read
+              md5 "$file"
+            fi
+          done
+
+      - name: Upload build artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: packages-macos-arm64
+          path: |
+            ${{ env.OPENSTUDIO_BUILD }}/*.dmg
+            ${{ env.OPENSTUDIO_BUILD }}/*.tar.gz
+            ${{ env.OPENSTUDIO_BUILD }}/signed/*.dmg
+
+      - name: Fail job on test failures
+        if: ${{ steps.build_and_test_steps.outputs.ctest_exit_code != '0' }}
+        run: |
+          echo "::error::CTest suite failed with exit code ${{ steps.build_and_test_steps.outputs.ctest_exit_code }}"
+          exit 1
