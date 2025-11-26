@@ -87,6 +87,34 @@ jobs:
           ctest_parallel_level: ${{ env.CTEST_PARALLEL_LEVEL }}
           exclude_regex: ${{ matrix.exclude_regex }}
 
+      - name: Setup Homebrew cache
+        if: runner.os == 'macOS'
+        uses: actions/cache@v4
+        with:
+          path: |
+            /Users/runner/Library/Caches/Homebrew
+            /Users/runner/Library/Logs/Homebrew
+          key: ${{ runner.os }}-homebrew-${{ hashFiles('**/Brewfile','**/.github/**') }}
+          restore-keys: |
+            ${{ runner.os }}-homebrew-
+
+      - name: Install Qt Installer Framework (IFW)
+        if: runner.os == 'macOS'
+        run: |
+          set -euo pipefail
+          echo "Installing qt-installer-framework via brew..."
+          if ! command -v brew >/dev/null 2>&1; then
+            echo "Homebrew not found; skipping IFW install"
+          else
+            brew update || true
+            brew install qt-installer-framework || true
+            QTIFW_PREFIX=$(brew --prefix qt-installer-framework 2>/dev/null || echo "")
+            if [ -n "$QTIFW_PREFIX" ]; then
+              echo "Adding QTIFW bin to PATH: $QTIFW_PREFIX/bin"
+              export PATH="$QTIFW_PREFIX/bin:$PATH"
+            fi
+          fi
+
       - name: Create packages
         working-directory: ${{ env.OPENSTUDIO_BUILD }}
         run: |
@@ -95,6 +123,12 @@ jobs:
           echo "PATH: $PATH"
           echo "Checking for cpack..."
           which cpack || cmake --version
+          echo "Checking for binarycreator..."
+          if ! command -v binarycreator >/dev/null 2>&1; then
+            echo "::error::binarycreator (Qt IFW) not found in PATH. Ensure 'brew install qt-installer-framework' succeeded or use a runner with Qt IFW preinstalled."
+            exit 1
+          fi
+          binarycreator --version || true
           cpack -B .
 
       - name: Copy Testing tree with suffix
