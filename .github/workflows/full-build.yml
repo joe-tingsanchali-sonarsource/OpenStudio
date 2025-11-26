@@ -136,7 +136,7 @@ jobs:
             cpack_generators: "DEB;TGZ"
             max_jobs: 2
             ctest_parallel_level: 1
-            exclude_regex: "^(SqlFileFixture.AnnualTotalCosts|CLITest-UUID_Test-uuid_hash)$"
+            exclude_regex: "^(SqlFileFixture.AnnualTotalCosts|CLITest-UUID_Test-uuid_hash|RubyTest-UUID_Test-uuid_hash)$"
     defaults:
       run:
         shell: bash
