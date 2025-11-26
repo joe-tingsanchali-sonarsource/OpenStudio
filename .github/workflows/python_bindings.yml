@@ -253,6 +253,13 @@ jobs:
         fi;
         df -h || true
 
+    - name: Clean build directory (Windows)
+      if: runner.os == 'Windows'
+      shell: bash
+      working-directory: ${{ github.workspace }}
+      run: |
+        git clean -fdx
+        rm -rf ./build
     - name: Configure CMake & build (Windows)
       if: runner.os == 'Windows'
       shell: cmd
