@@ -52,7 +52,7 @@ runs:
           -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake \
           -DCMAKE_BUILD_TYPE:STRING=${{ inputs.build_type }} \
           -DBUILD_TESTING:BOOL=ON \
-          -DCPACK_GENERATORS:STRING="${{ inputs.cpack_generators }}" \
+          -DCPACK_GENERATOR:STRING="${{ inputs.cpack_generators }}" \
           -DCPACK_BINARY_STGZ=OFF -DCPACK_BINARY_TZ=OFF \
           -DBUILD_PYTHON_BINDINGS:BOOL=ON \
           -DDISCOVER_TESTS_AFTER_BUILD:BOOL=ON \
@@ -71,7 +71,7 @@ runs:
         cmake -G Ninja -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake ^
           -DCMAKE_BUILD_TYPE:STRING=${{ inputs.build_type }} ^
           -DBUILD_TESTING:BOOL=ON ^
-          -DCPACK_GENERATORS:STRING="${{ inputs.cpack_generators }}" ^
+          -DCPACK_GENERATOR:STRING="${{ inputs.cpack_generators }}" ^
           -DCPACK_BINARY_STGZ=OFF -DCPACK_BINARY_TZ=OFF ^
           -DBUILD_PYTHON_BINDINGS:BOOL=ON ^
           -DDISCOVER_TESTS_AFTER_BUILD:BOOL=ON ^
