@@ -82,7 +82,7 @@ jobs:
           build_dir: ${{ env.OPENSTUDIO_BUILD }}
           platform_name: ${{ matrix.platform }}
           py_version: ${{ env.PY_VERSION }}
-          cpack_generators: "DragNDrop;TGZ"
+          cpack_generators: "IFW;TGZ"
           parallel_level: ${{ env.MAX_BUILD_THREADS }}
           ctest_parallel_level: ${{ env.CTEST_PARALLEL_LEVEL }}
           exclude_regex: ${{ matrix.exclude_regex }}
