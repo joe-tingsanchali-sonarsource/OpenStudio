@@ -88,7 +88,10 @@ class OpenStudioBuildRecipe(ConanFile):
         tc.cache_variables["CPACK_BINARY_IFW"] = False
         tc.cache_variables["CPACK_BINARY_DEB"] = False
         if self.settings.build_type == "Release":
-            if is_apple_os(self) or self.settings.os == "Windows":
+            if is_apple_os(self):
+                tc.cache_variables["CPACK_BINARY_IFW"] = True
+                tc.cache_variables["CPACK_BINARY_DRAGNDROP"] = True
+            elif self.settings.os == "Windows":
                 tc.cache_variables["CPACK_BINARY_IFW"] = True
             else:
                 tc.cache_variables["CPACK_BINARY_DEB"] = True
