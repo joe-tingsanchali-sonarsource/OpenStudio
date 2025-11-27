@@ -2,6 +2,7 @@
 
 require 'minitest/autorun'
 require 'openstudio'
+require 'timeout'
 
 # test bundle capability in CLI
 # currently CLI cannot do bundle install, rely on system bundle for that for now
@@ -46,7 +47,7 @@ class Bundle_Test < Minitest::Test
   def run_bundle_install(subfolder, lock:)
     puts bold(cyan("Running bundle install in #{subfolder} with lock='#{lock}'"))
     
-    max_attempts = 3
+    max_attempts = 5
     attempt = 0
     
     Dir.chdir(subfolder) do
@@ -57,13 +58,22 @@ class Bundle_Test < Minitest::Test
       begin
         attempt += 1
         puts yellow("Bundle install attempt #{attempt}/#{max_attempts}...") if attempt > 1
-        success = run_command('bundle install')
+        
+        begin
+          Timeout.timeout(300) do
+            success = run_command('bundle install')
+          end
+        rescue Timeout::Error
+          puts red("Bundle install timed out after 300 seconds")
+          success = false
+        end
         
         if !success
           # Check if this looks like a network error by examining recent output
           if attempt < max_attempts
-            puts yellow("Bundle install failed, retrying in #{2 ** attempt} seconds...")
-            sleep(2 ** attempt)
+            wait_time = 5 * (2 ** (attempt - 1))
+            puts yellow("Bundle install failed, retrying in #{wait_time} seconds...")
+            sleep(wait_time)
           end
         end
       end while !success && attempt < max_attempts

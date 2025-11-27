@@ -613,7 +613,7 @@ if(BUILD_TESTING)
         "$<TARGET_FILE:openstudio>" "${f}" "--name=test_${TEST_NAME}"
         )
 
-      set_tests_properties("${CTEST_NAME}" PROPERTIES TIMEOUT 660 )
+      set_tests_properties("${CTEST_NAME}" PROPERTIES TIMEOUT 1200 )
       
       # Add labels for network-dependent bundle tests
       if(TEST_NAME MATCHES "bundle" AND NOT TEST_NAME MATCHES "no_bundle")
