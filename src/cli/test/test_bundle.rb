@@ -3,6 +3,8 @@
 require 'minitest/autorun'
 require 'openstudio'
 require 'timeout'
+require 'socket'
+require 'net/http'
 
 # test bundle capability in CLI
 # currently CLI cannot do bundle install, rely on system bundle for that for now
@@ -44,9 +46,36 @@ class Bundle_Test < Minitest::Test
     FileUtils.rm_rf(p)
   end
 
+  def diagnose_network_health
+    puts bold(magenta("--- Network Diagnostic Start ---"))
+    
+    # DNS
+    target = 'rubygems.org'
+    begin
+      ips = Socket.getaddrinfo(target, nil).map { |x| x[2] }.uniq
+      puts green("DNS: Resolved #{target} to #{ips.join(', ')}")
+    rescue => e
+      puts red("DNS: Failed to resolve #{target}: #{e.message}")
+    end
+
+    # Connectivity to 443
+    begin
+      Timeout.timeout(5) do
+        TCPSocket.new(target, 443).close
+        puts green("TCP: Connection to #{target}:443 successful")
+      end
+    rescue => e
+      puts red("TCP: Failed to connect to #{target}:443: #{e.message}")
+    end
+    
+    puts bold(magenta("--- Network Diagnostic End ---"))
+  end
+
   def run_bundle_install(subfolder, lock:)
     puts bold(cyan("Running bundle install in #{subfolder} with lock='#{lock}'"))
     
+    diagnose_network_health
+
     max_attempts = 5
     attempt = 0
     
