@@ -44,6 +44,7 @@ jobs:
             display_name: macOS ARM64 (Apple Silicon)
             runner: macos-14
             test_suffix: macOS-arm64
+            install_qt: 'true'
             dmg_glob: "*.dmg"
             tar_glob: "*OpenStudio*arm64.tar.gz"
             exclude_regex: "GeometryFixture.Plane_RayIntersection|ModelFixture.Space_Convexity|ISOModelFixture.SimModel"
@@ -75,7 +76,7 @@ jobs:
           platform: ${{ matrix.platform }}
           ruby_version: ${{ env.RUBY_VERSION }}
           build_dir: ${{ env.OPENSTUDIO_BUILD }}
-          install_qt: 'true'
+          install_qt: ${{ matrix.install_qt }}
 
       - uses: ./.github/actions/build-and-test
         id: build_and_test_steps
