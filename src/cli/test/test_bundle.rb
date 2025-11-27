@@ -76,7 +76,7 @@ class Bundle_Test < Minitest::Test
     
     diagnose_network_health
 
-    max_attempts = 5
+    max_attempts = 2
     attempt = 0
     
     Dir.chdir(subfolder) do
@@ -89,11 +89,11 @@ class Bundle_Test < Minitest::Test
         puts yellow("Bundle install attempt #{attempt}/#{max_attempts}...") if attempt > 1
         
         begin
-          Timeout.timeout(300) do
+          Timeout.timeout(60) do
             success = run_command('bundle install')
           end
         rescue Timeout::Error
-          puts red("Bundle install timed out after 300 seconds")
+          puts red("Bundle install timed out after 60 seconds")
           success = false
         end
         
