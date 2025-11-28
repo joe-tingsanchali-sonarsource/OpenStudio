@@ -33,9 +33,48 @@ class Bundle_Test < Minitest::Test
   def cyan(msg); colorize(msg, 36) end
   def gray(msg); colorize(msg, 37) end
 
-  def run_command(cmd)
+  def run_command(cmd, timeout: 600)
     puts yellow("$ #{cmd}")
-    system(cmd)
+    
+    # Attempt to force IPv4 for rubygems.org connections
+    env = ENV.to_h
+    # Append -rsocket to ensure Socket is loaded if we need it, though the real fix 
+    # might come from an external RUBYOPT injection.
+    
+    begin
+      require 'open3'
+      output_str = ""
+      exit_status = nil
+      
+      Open3.popen2e(env, cmd) do |stdin, stdout_and_stderr, wait_thr|
+        stdin.close
+        
+        # Read output in a separate thread to prevent deadlock
+        reader = Thread.new do
+          stdout_and_stderr.each_line do |line|
+            output_str << line
+            puts line if LOGLEVEL == 'Trace'
+          end
+        end
+        
+        if wait_thr.join(timeout)
+          exit_status = wait_thr.value
+        else
+          # Timeout occurred
+          Process.kill("TERM", wait_thr.pid) rescue nil
+          puts red("Command timed out after #{timeout} seconds")
+          # detach to avoid zombie? wait_thr.join handles it usually
+          return false
+        end
+        
+        reader.join
+      end
+      
+      return exit_status.success?
+    rescue => e
+      puts red("Command failed: #{e.message}")
+      return false
+    end
   end
 
   def rm_if_exist(p)
@@ -76,7 +115,7 @@ class Bundle_Test < Minitest::Test
     
     diagnose_network_health
 
-    max_attempts = 2
+    max_attempts = 3
     attempt = 0
     
     Dir.chdir(subfolder) do
@@ -88,19 +127,13 @@ class Bundle_Test < Minitest::Test
         attempt += 1
         puts yellow("Bundle install attempt #{attempt}/#{max_attempts}...") if attempt > 1
         
-        begin
-          Timeout.timeout(60) do
-            success = run_command('bundle install')
-          end
-        rescue Timeout::Error
-          puts red("Bundle install timed out after 60 seconds")
-          success = false
-        end
+        # Increased timeout to 300 seconds (5 minutes) per attempt
+        success = run_command('bundle install', timeout: 300)
         
         if !success
           # Check if this looks like a network error by examining recent output
           if attempt < max_attempts
-            wait_time = 5 * (2 ** (attempt - 1))
+            wait_time = 10 * (2 ** (attempt - 1))
             puts yellow("Bundle install failed, retrying in #{wait_time} seconds...")
             sleep(wait_time)
           end
