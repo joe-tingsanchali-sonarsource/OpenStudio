@@ -233,11 +233,15 @@ if(APPLE)
 
   set(ENERGYPLUS_SYSTEM_VERSION "")
 
-  find_program(UNAME uname)
-  execute_process(COMMAND ${UNAME} -m
-    OUTPUT_VARIABLE ARCH
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-  )
+  if (DEFINED CMAKE_OSX_ARCHITECTURES AND NOT "${CMAKE_OSX_ARCHITECTURES}" STREQUAL "")
+    set(ARCH "${CMAKE_OSX_ARCHITECTURES}")
+  else()
+    find_program(UNAME uname)
+    execute_process(COMMAND ${UNAME} -m
+      OUTPUT_VARIABLE ARCH
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+  endif()
 
 elseif(UNIX)
   # OS_RELEASE is the result of `uname -r` which is unhelpful (eg '5.4.0-42-generic')
