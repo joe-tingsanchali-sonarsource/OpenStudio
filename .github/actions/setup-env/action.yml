@@ -116,5 +116,10 @@ runs:
           CONAN_ARGS="$CONAN_ARGS -o *:shared=False"
         fi
 
+        # Explicitly target armv8 on macos-arm64 to avoid x86_64 fallback
+        if [ "${{ inputs.platform }}" == "macos-arm64" ]; then
+          CONAN_ARGS="$CONAN_ARGS -s arch=armv8"
+        fi
+
         # Run Conan
         conan install . $CONAN_ARGS
