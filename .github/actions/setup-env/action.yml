@@ -11,7 +11,7 @@ inputs:
     description: 'Directory for the build'
     required: true
   install_qt:
-    description: 'Install QtIFW (Windows only)'
+    description: 'Install QtIFW (Windows and macOS)'
     required: false
     default: 'false'
   build_type:
