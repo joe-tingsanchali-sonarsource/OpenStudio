@@ -75,13 +75,20 @@ runs:
       shell: pwsh
       run: python -m aqt install-tool windows desktop tools_ifw qt.tools.ifw.47 --outputdir C:\Qt
 
-    - name: Install Conan (Mac/Linux Non-Container)
+    - name: Install Dependencies (Mac/Linux)
       if: runner.os == 'macOS'
       shell: bash
       run: |
         # Assumes python3 is available (e.g. from pyenv setup in main workflow)
         python3 -m pip install --upgrade pip
-        python3 -m pip install conan numpy
+        python3 -m pip install conan numpy aqtinstall
+
+    - name: Install QtIFW (macOS)
+      if: runner.os == 'macOS' && inputs.install_qt == 'true'
+      shell: bash
+      run: |
+        python3 -m aqt install-tool mac desktop tools_ifw qt.tools.ifw.47 --outputdir $HOME/Qt
+        echo "$HOME/Qt/Tools/QtInstallerFramework/4.7/bin" >> $GITHUB_PATH
 
     # --- CONAN CONFIG ---
     - name: Configure Conan remotes
@@ -107,6 +114,11 @@ runs:
         # We also force it on Linux for better portability, but keep Windows dynamic
         if [ "${{ runner.os }}" == "macOS" ]; then
           CONAN_ARGS="$CONAN_ARGS -o *:shared=False"
+        fi
+
+        # Explicitly target armv8 on macos-arm64 to avoid x86_64 fallback
+        if [ "${{ inputs.platform }}" == "macos-arm64" ]; then
+          CONAN_ARGS="$CONAN_ARGS -s arch=armv8"
         fi
 
         # Run Conan
