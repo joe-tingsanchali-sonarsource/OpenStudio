@@ -1532,6 +1532,17 @@ cpack_ifw_configure_component(Unspecified
   REQUIRES_ADMIN_RIGHTS
 )
 
+if(BUILD_PYTHON_BINDINGS)
+  cpack_add_component(Python
+    DISPLAY_NAME "Python API"
+    DESCRIPTION "Python API"
+  )
+
+  cpack_ifw_configure_component(Python
+    REQUIRES_ADMIN_RIGHTS
+  )
+endif()
+
 if(BUILD_CSHARP_BINDINGS)
   cpack_add_component(CSharpAPI
     DISPLAY_NAME "C# API"
