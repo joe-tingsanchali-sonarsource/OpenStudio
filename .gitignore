@@ -1,13 +1,6 @@
 .idea
 .ruby-version
-<<<<<<< HEAD
-<<<<<<< HEAD
 .python-version
-=======
->>>>>>> 7b3fb876ae (Add configuration for Bundler, enhance test utilities, and improve test handling)
-=======
-.python-version
->>>>>>> 21d7edbe9c (Cherry-pick .gitignore from jenkins_lint_consistent)
 .bundle/
 vendor/bundle/
 !.bundle/config
@@ -47,10 +40,7 @@ Testing/
 CMakeUserPresets.json
 .env
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 21d7edbe9c (Cherry-pick .gitignore from jenkins_lint_consistent)
+
 AGENTS.md
 
 # Virtual Environments
@@ -69,11 +59,4 @@ src/cli/test/bundle_git/
 .cursor/
 .windsurf/
 .cline/
-<<<<<<< HEAD
 .continue/
-=======
-AGENTS.md
->>>>>>> 4919897db8 (Docs: Add AGENTS.md to .gitignore)
-=======
-.continue/
->>>>>>> 21d7edbe9c (Cherry-pick .gitignore from jenkins_lint_consistent)
