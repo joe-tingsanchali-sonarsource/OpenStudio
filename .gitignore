@@ -1,5 +1,6 @@
 .idea
 .ruby-version
+.python-version
 .bundle/
 vendor/bundle/
 !.bundle/config
@@ -32,6 +33,7 @@ htmlcov/
 coverage.xml
 .pytest_cache/
 junit.xml
+Testing/
 
 .cppcheck*/
 
@@ -39,3 +41,21 @@ CMakeUserPresets.json
 .env
 
 AGENTS.md
+
+# Virtual Environments
+venv/
+.venv/
+.venv_*/
+env/
+.env/
+
+# OpenStudio Test Artifacts
+src/cli/test/bundle_git/
+
+# Agent/Tooling
+.gemini/
+.opencode/
+.cursor/
+.windsurf/
+.cline/
+.continue/
