@@ -12,8 +12,8 @@ env:
 
 jobs:
   build:
-    if: contains(github.event.pull_request.labels.*.name, 'Pull Request - Ready for CI')
-    runs-on: [self-hosted, Linux]
+    if: github.event_name == 'push' || contains(github.event.pull_request.labels.*.name, 'Pull Request - Ready for CI')
+    runs-on: linux-openstudio-2
 
     permissions:
       contents: read
@@ -52,10 +52,18 @@ jobs:
 
       - name: Install ccache
         run: |
-          # Fix Kitware GPG key issue
-          wget --no-check-certificate -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null
-          echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu jammy main' | tee /etc/apt/sources.list.d/kitware.list >/dev/null
+          # Update CA certificates first
+          apt-get update && apt-get install -y ca-certificates curl
+          
+          # Remove any existing Kitware sources that may cause conflicts
+          rm -f /etc/apt/sources.list.d/archive_uri-https_apt_kitware_com_ubuntu_-jammy.list
+          rm -f /etc/apt/sources.list.d/kitware.list
+          
+          # Install ccache from Ubuntu repositories (avoiding Kitware SSL issues)
           apt-get update && apt-get install -y ccache
+          
+          # Verify ccache installation
+          ccache --version
 
       - name: Set default compiler
         run: |
@@ -91,10 +99,21 @@ jobs:
       - name: Install dependencies
         run: |
           cd ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_SOURCE_NAME }}
+          
+          # Configure Conan to use system CA certificates
+          export CONAN_CA_CERT_PATH=/etc/ssl/certs/ca-certificates.crt
+          export REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+          export SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+          
+          # Ensure CA certificates are up to date
+          update-ca-certificates
+          
+          # Create the Conan CA certificate file that it expects
+          mkdir -p /home/root/.conan2
+          cp /etc/ssl/certs/ca-certificates.crt /home/root/.conan2/cacert.pem
+          
           conan remote add conancenter https://center.conan.io --force
-          conan remote update conancenter --insecure
           conan remote add nrel-v2 https://conan.openstudio.net/artifactory/api/conan/conan-v2 --force
-          conan remote update nrel-v2 --insecure
           if [ ! -f "${{ env.DOCKER_ROOT }}/.conan2/profiles/default" ]; then
             conan profile detect
           fi
@@ -139,7 +158,11 @@ jobs:
         working-directory: ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_SOURCE_NAME }}/${{ env.OPENSTUDIO_BUILD_NAME }}
         run: |
           . ./conanbuild.sh
+          echo "Starting build with ccache statistics:"
+          ccache --show-stats
           ninja -j ${{ env.MAX_SAFE_THREADS }} package
+          echo "Build completed. Final ccache statistics:"
+          ccache --show-stats
 
       - name: Run CTests with enhanced error handling
         working-directory: ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_SOURCE_NAME }}/${{ env.OPENSTUDIO_BUILD_NAME }}
@@ -195,6 +218,7 @@ jobs:
           name: test-summary
           path: ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_SOURCE_NAME }}/${{ env.OPENSTUDIO_BUILD_NAME }}/Testing/test-summary.md
         if: always()
+        continue-on-error: true
 
       - name: Generate test results dashboard
         if: always()
@@ -353,6 +377,7 @@ jobs:
             ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_SOURCE_NAME }}/${{ env.OPENSTUDIO_BUILD_NAME }}/Testing/dashboard/
             ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_SOURCE_NAME }}/${{ env.OPENSTUDIO_BUILD_NAME }}/Testing/run*/
         if: always()
+        continue-on-error: true
 
       - name: Upload build artifacts with metadata
         uses: actions/upload-artifact@v4
@@ -363,3 +388,4 @@ jobs:
             ${{ env.OPENSTUDIO_DOCKER_VOLUME }}/${{ env.OPENSTUDIO_SOURCE_NAME }}/${{ env.OPENSTUDIO_BUILD_NAME }}/_CPack_Packages/Linux/TGZ/*.tar.gz
           retention-days: 30
         if: always()
+        continue-on-error: true
