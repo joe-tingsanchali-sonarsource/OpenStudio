@@ -13,6 +13,7 @@
 #include "../../../src/scriptengine/ScriptEngine.hpp"
 
 #include <fmt/format.h>
+#include <sstream>
 
 class PythonEngineFixture : public testing::Test
 {
@@ -21,6 +22,41 @@ class PythonEngineFixture : public testing::Test
     openstudio::path scriptPath = openstudio::getApplicationSourceDirectory() / fmt::format("python/engine/test/{}/measure.py", classAndDirName);
     OS_ASSERT(openstudio::filesystem::is_regular_file(scriptPath));
     return scriptPath;
+  }
+
+  // Helper to remove lines that are just carets (Python 3.11+ traceback style)
+  static std::string normalizeTraceback(const std::string& error) {
+    std::istringstream iss(error);
+    std::string line;
+    std::string result;
+    bool first = true;
+    while (std::getline(iss, line)) {
+      // Remove CR if present (Windows/mixed endings)
+      if (!line.empty() && line.back() == '\r') {
+        line.pop_back();
+      }
+
+      // Check if line contains only whitespace and carets, and at least one caret
+      bool only_carets = false;
+      if (line.find('^') != std::string::npos) {
+         only_carets = true;
+         for (char c : line) {
+           if (c != ' ' && c != '^') {
+             only_carets = false;
+             break;
+           }
+         }
+      }
+      
+      if (!only_carets) {
+        if (!first) {
+          result += "\n";
+        }
+        result += line;
+        first = false;
+      }
+    }
+    return result;
   }
 
  protected:
@@ -87,7 +123,6 @@ TEST_F(PythonEngineFixture, WrongMethodMeasure) {
 Traceback (most recent call last):
   File "{}", line 19, in arguments
     model.nonExistingMethod()
-    ^^^^^^^^^^^^^^^^^^^^^^^
 AttributeError: 'Model' object has no attribute 'nonExistingMethod')",
                 scriptPath.generic_string());
 
@@ -97,7 +132,7 @@ AttributeError: 'Model' object has no attribute 'nonExistingMethod')",
     ASSERT_FALSE(true) << "Expected measure arguments(model) to throw";
   } catch (std::exception& e) {
     std::string error = e.what();
-    EXPECT_EQ(expected_exception, error);
+    EXPECT_EQ(normalizeTraceback(expected_exception), normalizeTraceback(error));
   }
 }
 
@@ -119,13 +154,10 @@ Traceback (most recent call last):
     s(10)
   File "{0}", line 11, in s
     return s(x)
-           ^^^^
   File "{0}", line 11, in s
     return s(x)
-           ^^^^
   File "{0}", line 11, in s
     return s(x)
-           ^^^^
   [Previous line repeated 996 more times]
 RecursionError: maximum recursion depth exceeded)",
                 scriptPath.generic_string());
@@ -136,7 +168,7 @@ RecursionError: maximum recursion depth exceeded)",
     ASSERT_FALSE(true) << "Expected measure arguments(model) to throw";
   } catch (std::exception& e) {
     std::string error = e.what();
-    EXPECT_EQ(expected_exception, error);
+    EXPECT_EQ(normalizeTraceback(expected_exception), normalizeTraceback(error));
   }
 }
 

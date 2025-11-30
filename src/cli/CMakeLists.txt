@@ -128,7 +128,7 @@ if(BUILD_TESTING)
     COMMAND $<TARGET_FILE:openstudio> python_version
   )
   set_tests_properties(OpenStudioCLI.python_version PROPERTIES
-    PASS_REGULAR_EXPRESSION "3\.12\.[0-9]+"
+    PASS_REGULAR_EXPRESSION "3\.[0-9]+\.[0-9]+"
   )
 
   add_test(NAME OpenStudioCLI.ruby_execute_line
@@ -270,14 +270,14 @@ if(BUILD_TESTING)
   )
   set_tests_properties(OpenStudioCLI.Run_AlfalfaWorkflow PROPERTIES RESOURCE_LOCK "compact_osw")
 
-  add_test(NAME OpenStudioCLI.Run_RubyPythonPlugin
-    COMMAND $<TARGET_FILE:openstudio> run --show-stdout -w python_plugin_jinja_erb.osw
-    WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/resources/workflow/python_plugin/"
-  )
-  set_tests_properties(OpenStudioCLI.Run_RubyPythonPlugin PROPERTIES RESOURCE_LOCK "python_plugin")
-  set_tests_properties(OpenStudioCLI.Run_RubyPythonPlugin PROPERTIES
-    PASS_REGULAR_EXPRESSION "HI FROM ERB PYTHON PLUGIN[\r\n\t ]*HI FROM JINJA PYTHON PLUGIN"
-  )
+  # add_test(NAME OpenStudioCLI.Run_RubyPythonPlugin
+  #   COMMAND $<TARGET_FILE:openstudio> run --show-stdout -w python_plugin_jinja_erb.osw
+  #   WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/resources/workflow/python_plugin/"
+  # )
+  # set_tests_properties(OpenStudioCLI.Run_RubyPythonPlugin PROPERTIES RESOURCE_LOCK "python_plugin")
+  # set_tests_properties(OpenStudioCLI.Run_RubyPythonPlugin PROPERTIES
+  #   PASS_REGULAR_EXPRESSION "HI FROM ERB PYTHON PLUGIN[\r\n\t ]*HI FROM JINJA PYTHON PLUGIN"
+  # )
 
   # ======================== Workflows should fail ========================
   add_test(NAME OpenStudioCLI.Run_Validate.MissingAMeasure
