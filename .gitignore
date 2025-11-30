@@ -40,10 +40,7 @@ Testing/
 CMakeUserPresets.json
 .env
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 21d7edbe9c (Cherry-pick .gitignore from jenkins_lint_consistent)
+
 AGENTS.md
 
 # Virtual Environments
@@ -62,9 +59,7 @@ src/cli/test/bundle_git/
 .cursor/
 .windsurf/
 .cline/
-<<<<<<< HEAD
 .continue/
-=======
 AGENTS.md
 
 # Virtual Environments
