@@ -6,12 +6,12 @@
 #include "WorkflowJSON.hpp"
 #include "WorkflowJSON_Impl.hpp"
 
-#include "WorkflowStep_Impl.hpp"
 #include "RunOptions_Impl.hpp"
+#include "WorkflowStep_Impl.hpp"
 
 #include "../core/Assert.hpp"
-#include "../core/PathHelpers.hpp"
 #include "../core/Checksum.hpp"
+#include "../core/PathHelpers.hpp"
 #include "../time/DateTime.hpp"
 
 namespace openstudio {

@@ -3,6 +3,8 @@
 *  See also https://openstudio.net/license
 ***********************************************************************************************************************/
 
+// Force recompilation to ensure idfs key is present
+
 #include "MeasureManager.hpp"
 #include "../utilities/bcl/RemoteBCL.hpp"
 #include "../utilities/bcl/BCLMeasure.hpp"

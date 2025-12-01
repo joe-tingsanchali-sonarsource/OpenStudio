@@ -186,6 +186,7 @@ namespace energyplus {
           fieldIndex = addUntil(idfObject, fieldIndex, 24, 0, values[i]);
           lastDate += dayDelta * nDays;
           fieldIndex = startNewDay(idfObject, fieldIndex, lastDate);
+          lastDay = today;
         } else {
           // This still could be on a different day
           if (today != lastDay) {

@@ -91,7 +91,9 @@ namespace energyplus {
     int secondShift = firstReportDateTime.time().totalSeconds();
     unsigned int start = 0;
     if (secondShift == 0) {
-      start = 1;
+      if (secondsFromFirst[0] == 0) {
+        start = 1;
+      }
     } else {
       for (unsigned int i = 0; i < secondsFromFirst.size(); i++) {
         secondsFromFirst[i] += secondShift;
@@ -132,6 +134,7 @@ namespace energyplus {
         fieldIndex = addUntil(idfObject, fieldIndex, 24, 0, values[i]);
         lastDate += dayDelta;
         fieldIndex = startNewDay(idfObject, fieldIndex, lastDate);
+        lastDay = today;
       } else {
         // This still could be on a different day
         if (today != lastDay) {
