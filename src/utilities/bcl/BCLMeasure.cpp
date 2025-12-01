@@ -48,8 +48,7 @@ static constexpr std::array<std::pair<std::string_view, std::string_view>, 5> ro
   {"measure.py", "script"},
   {"LICENSE.md", "license"},
   {"README.md", "readme"},
-  {"README.md.erb", "readmeerb"}
-  // ".gitkeep"      // assuming .gitkeep outside a subfolder makes zero sense...
+  {"README.md.erb", "readmeerb"}  // ".gitkeep"      // assuming .gitkeep outside a subfolder makes zero sense...
   // "measure.xml"   // not included in itself!
 }};
 

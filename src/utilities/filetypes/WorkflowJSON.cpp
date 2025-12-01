@@ -33,7 +33,11 @@ namespace detail {
       // weakly_canonical requires parent directory to exist
       path parent = result.parent_path();
       if (exists(parent)) {
-        result = boost::filesystem::weakly_canonical(result);
+        try {
+          result = boost::filesystem::weakly_canonical(result);
+        } catch (...) {
+          // ignore
+        }
       }
       // else: parent doesn't exist, just return the absolute path
     }
