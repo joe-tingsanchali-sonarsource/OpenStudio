@@ -185,6 +185,7 @@ namespace energyplus {
             fieldIndex = addUntil(idfObject, fieldIndex, 24, 0, values[i]);
             lastDate += dayDelta * nDays;
             fieldIndex = startNewDay(idfObject, fieldIndex, lastDate);
+            lastDay = today;  // Update lastDay to keep day counter in sync
           }
           if (values[i] == values[i + 1]) {
             // Bail on values that match the next value
