@@ -98,8 +98,6 @@ PythonEngine::PythonEngine(int argc, char* argv[]) : ScriptEngine(argc, argv), p
   //   so it takes precedence (to limit incompatibility issues...)
   // * If the user didn't pass it, we use Py_SetPath set to the E+ standard_lib
 
-  std::vector<std::string> args(argv, std::next(argv, static_cast<std::ptrdiff_t>(argc)));
-
   Py_SetProgramName(program);  // optional but recommended
 
   Py_Initialize();

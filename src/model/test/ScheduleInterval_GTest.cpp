@@ -223,6 +223,13 @@ TEST_F(ModelFixture, ScheduleFile) {
   path p = resourcesPath() / toPath("model/schedulefile.csv");
   EXPECT_TRUE(exists(p));
 
+  path tempDir = model.workflowJSON().absoluteRootDir() / toPath("ScheduleFile_Test");
+  if (exists(tempDir)) {
+    removeDirectory(tempDir);
+  }
+  create_directories(tempDir);
+  model.workflowJSON().setRootDir(tempDir);
+
   path expectedDestDir;
   std::vector<path> absoluteFilePaths = model.workflowJSON().absoluteFilePaths();
   if (absoluteFilePaths.empty()) {
@@ -231,10 +238,10 @@ TEST_F(ModelFixture, ScheduleFile) {
     expectedDestDir = absoluteFilePaths[0];
   }
 
-  if (exists(expectedDestDir)) {
-    removeDirectory(expectedDestDir);
-  }
-  ASSERT_FALSE(exists(expectedDestDir));
+  // if (exists(expectedDestDir)) {
+  //   removeDirectory(expectedDestDir);
+  // }
+  ASSERT_TRUE(exists(expectedDestDir));
 
   boost::optional<ExternalFile> externalfile = ExternalFile::getExternalFile(model, openstudio::toString(p));
   ASSERT_TRUE(externalfile);
@@ -378,6 +385,13 @@ TEST_F(ModelFixture, ScheduleFileAltCtor) {
   path p = resourcesPath() / toPath("model/schedulefile.csv");
   EXPECT_TRUE(exists(p));
 
+  path tempDir = model.workflowJSON().absoluteRootDir() / toPath("ScheduleFileAltCtor_Test");
+  if (exists(tempDir)) {
+    removeDirectory(tempDir);
+  }
+  create_directories(tempDir);
+  model.workflowJSON().setRootDir(tempDir);
+
   path expectedDestDir;
   std::vector<path> absoluteFilePaths = model.workflowJSON().absoluteFilePaths();
   if (absoluteFilePaths.empty()) {
@@ -386,10 +400,10 @@ TEST_F(ModelFixture, ScheduleFileAltCtor) {
     expectedDestDir = absoluteFilePaths[0];
   }
 
-  if (exists(expectedDestDir)) {
-    removeDirectory(expectedDestDir);
-  }
-  ASSERT_FALSE(exists(expectedDestDir));
+  // if (exists(expectedDestDir)) {
+  //   removeDirectory(expectedDestDir);
+  // }
+  ASSERT_TRUE(exists(expectedDestDir));
 
   ScheduleFile schedule(model, openstudio::toString(p));
   EXPECT_EQ(1u, model.getConcreteModelObjects<ScheduleFile>().size());

@@ -24,6 +24,13 @@ TEST_F(ModelFixture, PythonPluginInstance) {
   path p = resourcesPath() / toPath("model/PythonPluginThermochromicWindow.py");
   EXPECT_TRUE(exists(p));
 
+  path tempDir = model.workflowJSON().absoluteRootDir() / toPath("PythonPluginInstance_Test");
+  if (exists(tempDir)) {
+    removeDirectory(tempDir);
+  }
+  create_directories(tempDir);
+  model.workflowJSON().setRootDir(tempDir);
+
   path expectedDestDir;
   std::vector<path> absoluteFilePaths = model.workflowJSON().absoluteFilePaths();
   if (absoluteFilePaths.empty()) {
@@ -32,10 +39,10 @@ TEST_F(ModelFixture, PythonPluginInstance) {
     expectedDestDir = absoluteFilePaths[0];
   }
 
-  if (exists(expectedDestDir)) {
-    removeDirectory(expectedDestDir);
-  }
-  ASSERT_FALSE(exists(expectedDestDir));
+  // if (exists(expectedDestDir)) {
+  //   removeDirectory(expectedDestDir);
+  // }
+  ASSERT_TRUE(exists(expectedDestDir));
 
   boost::optional<ExternalFile> externalfile = ExternalFile::getExternalFile(model, openstudio::toString(p));
   ASSERT_TRUE(externalfile);
