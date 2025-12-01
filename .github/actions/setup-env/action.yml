@@ -66,7 +66,7 @@ runs:
       if: runner.os == 'Windows'
       shell: pwsh
       run: |
-        pip install conan aqtinstall
+        python -m pip install conan aqtinstall pytest requests
         choco install ccache -y --no-progress
         if (Get-Command ccache -ErrorAction SilentlyContinue) { ccache -M 5G }
     
@@ -81,7 +81,7 @@ runs:
       run: |
         # Assumes python3 is available (e.g. from pyenv setup in main workflow)
         python3 -m pip install --upgrade pip
-        python3 -m pip install conan numpy aqtinstall
+        python3 -m pip install conan numpy aqtinstall pytest
 
     - name: Install QtIFW (macOS)
       if: runner.os == 'macOS' && inputs.install_qt == 'true'

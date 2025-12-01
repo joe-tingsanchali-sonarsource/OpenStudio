@@ -328,7 +328,7 @@ TEST_F(BCLFixture, PatApplicationMeasures)
 
 struct TestPath
 {
-  TestPath(fs::path t_path, bool t_allowed) : path(std::move(t_path)), allowed(t_allowed){};
+  TestPath(fs::path t_path, bool t_allowed) : path(std::move(t_path)), allowed(t_allowed) {}
   fs::path path;
   bool allowed;
 };
@@ -338,7 +338,10 @@ std::vector<TestPath> generateTestMeasurePaths() {
   std::vector<TestPath> testPaths;
 
   std::vector<std::string> approvedRootFiles{
-    "measure.rb", "README.md", "README.md.erb", "LICENSE.md",
+    "measure.rb",
+    "README.md",
+    "README.md.erb",
+    "LICENSE.md",
     // ".gitkeep"      // assuming .gitkeep outside a subfolder makes zero sense...
     // "measure.xml"   // not included in itself!
   };
@@ -1035,7 +1038,10 @@ TEST_F(BCLFixture, BCLMeasure_Ctor_PythonEnergyPlusMeasure) {
   // └── ./tests
   //     └── ./tests/test_my_python_measure.py
   std::vector<fs::path> expectedInitialPaths = {
-    "docs/.gitkeep", "LICENSE.md", "measure.py", "tests/test_my_python_measure.py",
+    "docs/.gitkeep",
+    "LICENSE.md",
+    "measure.py",
+    "tests/test_my_python_measure.py",
     // "measure.xml": it's not included in itself!
   };
 
@@ -1142,19 +1148,27 @@ TEST_F(BCLFixture, BCLMeasure_CTor_throw_invalid_xml) {
   EXPECT_TRUE(BCLXML::load(xmlPath));
 
   // Missing required "Measure Type"
-  EXPECT_ANY_THROW(BCLMeasure{srcDir});
-  std::string msg = logFile->logMessages().back().logMessage();
-  EXPECT_TRUE(msg.find("is missing the required attribute \"Measure Type\"") != std::string::npos) << msg;
+  try {
+    BCLMeasure{srcDir};
+    FAIL() << "Expected std::runtime_error";
+  } catch (const std::exception& e) {
+    std::string msg = e.what();
+    EXPECT_TRUE(msg.find("is missing the required attribute \"Measure Type\"") != std::string::npos) << msg;
+  }
 
   // Missing a measure.rb/.py
   bclXML.addAttribute(Attribute("Measure Type", MeasureType(MeasureType::ModelMeasure).valueName()));
   bclXML.saveAs(xmlPath);
-  EXPECT_ANY_THROW(BCLMeasure{srcDir});
-  msg = logFile->logMessages().back().logMessage();
-  EXPECT_TRUE(msg.find("has neither measure.rb nor measure.py") != std::string::npos) << logFile->logMessages().back().logMessage();
+  try {
+    BCLMeasure{srcDir};
+    FAIL() << "Expected std::runtime_error";
+  } catch (const std::exception& e) {
+    std::string msg = e.what();
+    EXPECT_TRUE(msg.find("has neither measure.rb nor measure.py") != std::string::npos) << msg;
+  }
 
   // Add a measure.rb, all good
-  BCLFileReference rubyFileref(srcDir, "measure.rb", true);
+  BCLFileReference rubyFileref(srcDir, "measure.rb", false);  // Don't create file on disk
   rubyFileref.setUsageType("script");
   bclXML.addFile(rubyFileref);
   bclXML.saveAs(xmlPath);
@@ -1163,10 +1177,13 @@ TEST_F(BCLFixture, BCLMeasure_CTor_throw_invalid_xml) {
   // if MeasureLanguage is set, we enforce it matches
   bclXML.addAttribute(Attribute("Measure Language", MeasureLanguage(MeasureLanguage::Python).valueName()));
   bclXML.saveAs(xmlPath);
-  EXPECT_ANY_THROW(BCLMeasure{srcDir});
-  msg = logFile->logMessages().back().logMessage();
-  EXPECT_TRUE(msg.find("has a measure.rb; but \"Measure Language\" is not 'Ruby', it's 'Python'") != std::string::npos)
-    << logFile->logMessages().back().logMessage();
+  try {
+    BCLMeasure{srcDir};
+    FAIL() << "Expected std::runtime_error";
+  } catch (const std::exception& e) {
+    std::string msg = e.what();
+    EXPECT_TRUE(msg.find("has a measure.rb; but \"Measure Language\" is not 'Ruby', it's 'Python'") != std::string::npos) << msg;
+  }
 
   bclXML.removeAttributes("Measure Language");
   bclXML.addAttribute(Attribute("Measure Language", MeasureLanguage(MeasureLanguage::Ruby).valueName()));
@@ -1174,22 +1191,28 @@ TEST_F(BCLFixture, BCLMeasure_CTor_throw_invalid_xml) {
   EXPECT_NO_THROW(BCLMeasure{srcDir});
 
   // We can't have both a measure.rb and measure.py
-  BCLFileReference pythonFileref(srcDir, "measure.py", true);
+  BCLFileReference pythonFileref(srcDir, "measure.py", false);  // Don't create file on disk
   pythonFileref.setUsageType("script");
   bclXML.addFile(pythonFileref);
   bclXML.saveAs(xmlPath);
-  EXPECT_ANY_THROW(BCLMeasure{srcDir});
-  msg = logFile->logMessages().back().logMessage();
-  EXPECT_TRUE(msg.find("has both measure.rb and measure.py, and they cannot be used at the same time") != std::string::npos)
-    << logFile->logMessages().back().logMessage();
+  try {
+    BCLMeasure{srcDir};
+    FAIL() << "Expected std::runtime_error";
+  } catch (const std::exception& e) {
+    std::string msg = e.what();
+    EXPECT_TRUE(msg.find("has both measure.rb and measure.py, and they cannot be used at the same time") != std::string::npos) << msg;
+  }
 
   // Now I only have measure.py. Enforce Measure Language matches
   bclXML.removeFile(rubyFileref.path());
   bclXML.saveAs(xmlPath);
-  EXPECT_ANY_THROW(BCLMeasure{srcDir});
-  msg = logFile->logMessages().back().logMessage();
-  EXPECT_TRUE(msg.find("has a measure.py; but \"Measure Language\" is not 'Python', it's 'Ruby'") != std::string::npos)
-    << logFile->logMessages().back().logMessage();
+  try {
+    BCLMeasure{srcDir};
+    FAIL() << "Expected std::runtime_error";
+  } catch (const std::exception& e) {
+    std::string msg = e.what();
+    EXPECT_TRUE(msg.find("has a measure.py; but \"Measure Language\" is not 'Python', it's 'Ruby'") != std::string::npos) << msg;
+  }
 
   bclXML.removeAttributes("Measure Language");
   bclXML.addAttribute(Attribute("Measure Language", MeasureLanguage(MeasureLanguage::Python).valueName()));
@@ -1199,10 +1222,13 @@ TEST_F(BCLFixture, BCLMeasure_CTor_throw_invalid_xml) {
   // Can't have multiple copies of MeasureLanguage
   bclXML.addAttribute(Attribute("Measure Language", MeasureLanguage(MeasureLanguage::Ruby).valueName()));
   bclXML.saveAs(xmlPath);
-  EXPECT_ANY_THROW(BCLMeasure{srcDir});
-  msg = logFile->logMessages().back().logMessage();
-  EXPECT_TRUE(msg.find("has multiple copies of required attribute \"Measure Language\"") != std::string::npos)
-    << logFile->logMessages().back().logMessage();
+  try {
+    BCLMeasure{srcDir};
+    FAIL() << "Expected std::runtime_error";
+  } catch (const std::exception& e) {
+    std::string msg = e.what();
+    EXPECT_TRUE(msg.find("has multiple copies of required attribute \"Measure Language\"") != std::string::npos) << msg;
+  }
 
   bclXML.removeAttributes("Measure Language");
   bclXML.saveAs(xmlPath);
@@ -1212,7 +1238,11 @@ TEST_F(BCLFixture, BCLMeasure_CTor_throw_invalid_xml) {
   bclXML.removeAttributes("Measure Type");
   bclXML.addAttribute(Attribute("Measure Type", 10.0));
   bclXML.saveAs(xmlPath);
-  EXPECT_ANY_THROW(BCLMeasure{srcDir});
-  msg = logFile->logMessages().back().logMessage();
-  EXPECT_TRUE(msg.find("has wrong type for required attribute \"Measure Type\"") != std::string::npos) << logFile->logMessages().back().logMessage();
+  try {
+    BCLMeasure{srcDir};
+    FAIL() << "Expected std::runtime_error";
+  } catch (const std::exception& e) {
+    std::string msg = e.what();
+    EXPECT_TRUE(msg.find("has wrong type for required attribute \"Measure Type\"") != std::string::npos) << msg;
+  }
 }

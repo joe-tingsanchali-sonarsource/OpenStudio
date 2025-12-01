@@ -53,7 +53,7 @@ boost::optional<T> findByName(const std::vector<T>& vec, const std::string& name
   it = find_if(vec.begin(), vec.end(), finder);
   if (it != vec.end()) {
     result = *it;
-  };
+  }
   return result;
 }
 
@@ -67,7 +67,7 @@ std::shared_ptr<T> findByName(const std::vector<std::shared_ptr<T>>& vec, const 
   it = find_if(vec.begin(), vec.end(), finder);
   if (it != vec.end()) {
     result = *it;
-  };
+  }
   return result;
 }
 
@@ -131,7 +131,7 @@ boost::optional<T> findStructByName(const std::vector<T>& vec, const std::string
   it = find_if(vec.begin(), vec.end(), finder);
   if (it != vec.end()) {
     result = *it;
-  };
+  }
   return result;
 }
 
@@ -145,7 +145,7 @@ std::shared_ptr<T> findStructByName(const std::vector<std::shared_ptr<T>>& vec, 
   it = find_if(vec.begin(), vec.end(), finder);
   if (it != vec.end()) {
     result = *it;
-  };
+  }
   return result;
 }
 
@@ -177,7 +177,7 @@ template <class T, typename U>
 class ValueFinder
 {
  public:
-  ValueFinder(const U& value) : m_value(value){};
+  ValueFinder(const U& value) : m_value(value) {};
 
   bool operator()(const T& object) const {
     return (m_value == object.value());

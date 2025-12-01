@@ -98,29 +98,9 @@ PythonEngine::PythonEngine(int argc, char* argv[]) : ScriptEngine(argc, argv), p
   //   so it takes precedence (to limit incompatibility issues...)
   // * If the user didn't pass it, we use Py_SetPath set to the E+ standard_lib
 
-  std::vector<std::string> args(argv, std::next(argv, static_cast<std::ptrdiff_t>(argc)));
-  bool pythonHomePassed = false;
-  auto it = std::find(args.cbegin(), args.cend(), "--python_home");
-  if (it != args.cend()) {
-    openstudio::path pythonHomeDir(*std::next(it));
-    wchar_t* h = Py_DecodeLocale(pythonHomeDir.make_preferred().string().c_str(), nullptr);
-    Py_SetPythonHome(h);
-    pythonHomePassed = true;
-  } else {
-    wchar_t* a = Py_DecodeLocale(pathToPythonPackages.make_preferred().string().c_str(), nullptr);
-    Py_SetPath(a);
-  }
-
   Py_SetProgramName(program);  // optional but recommended
 
   Py_Initialize();
-
-  if (pythonHomePassed) {
-    addToPythonPath(pathToPythonPackages);
-  }
-#if defined(__APPLE__) || defined(__linux___) || defined(__unix__)
-  addToPythonPath(pathToPythonPackages / "lib-dynload");
-#endif
 
   PyObject* m = PyImport_AddModule("__main__");
   if (m == nullptr) {

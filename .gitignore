@@ -60,3 +60,22 @@ src/cli/test/bundle_git/
 .windsurf/
 .cline/
 .continue/
+AGENTS.md
+
+# Virtual Environments
+venv/
+.venv/
+.venv_*/
+env/
+.env/
+
+# OpenStudio Test Artifacts
+src/cli/test/bundle_git/
+
+# Agent/Tooling
+.gemini/
+.opencode/
+.cursor/
+.windsurf/
+.cline/
+.continue/

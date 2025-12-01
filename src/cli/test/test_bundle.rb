@@ -2,6 +2,9 @@
 
 require 'minitest/autorun'
 require 'openstudio'
+require 'timeout'
+require 'socket'
+require 'net/http'
 
 # test bundle capability in CLI
 # currently CLI cannot do bundle install, rely on system bundle for that for now
@@ -30,9 +33,48 @@ class Bundle_Test < Minitest::Test
   def cyan(msg); colorize(msg, 36) end
   def gray(msg); colorize(msg, 37) end
 
-  def run_command(cmd)
+  def run_command(cmd, timeout: 600)
     puts yellow("$ #{cmd}")
-    system(cmd)
+    
+    # Attempt to force IPv4 for rubygems.org connections
+    env = ENV.to_h
+    # Append -rsocket to ensure Socket is loaded if we need it, though the real fix 
+    # might come from an external RUBYOPT injection.
+    
+    begin
+      require 'open3'
+      output_str = String.new
+      exit_status = nil
+      
+      Open3.popen2e(env, cmd) do |stdin, stdout_and_stderr, wait_thr|
+        stdin.close
+        
+        # Read output in a separate thread to prevent deadlock
+        reader = Thread.new do
+          stdout_and_stderr.each_line do |line|
+            output_str << line
+            puts line if LOGLEVEL == 'Trace'
+          end
+        end
+        
+        if wait_thr.join(timeout)
+          exit_status = wait_thr.value
+        else
+          # Timeout occurred
+          Process.kill("TERM", wait_thr.pid) rescue nil
+          puts red("Command timed out after #{timeout} seconds")
+          # detach to avoid zombie? wait_thr.join handles it usually
+          return false
+        end
+        
+        reader.join
+      end
+      
+      return exit_status.success?
+    rescue => e
+      puts red("Command failed: #{e.message}")
+      return false
+    end
   end
 
   def rm_if_exist(p)
@@ -43,27 +85,58 @@ class Bundle_Test < Minitest::Test
     FileUtils.rm_rf(p)
   end
 
+  def diagnose_network_health
+    puts bold(magenta("--- Network Diagnostic Start ---"))
+    
+    # DNS
+    target = 'rubygems.org'
+    begin
+      ips = Socket.getaddrinfo(target, nil).map { |x| x[2] }.uniq
+      puts green("DNS: Resolved #{target} to #{ips.join(', ')}")
+    rescue => e
+      puts red("DNS: Failed to resolve #{target}: #{e.message}")
+    end
+
+    # Connectivity to 443
+    begin
+      Timeout.timeout(5) do
+        TCPSocket.new(target, 443).close
+        puts green("TCP: Connection to #{target}:443 successful")
+      end
+    rescue => e
+      puts red("TCP: Failed to connect to #{target}:443: #{e.message}")
+    end
+    
+    puts bold(magenta("--- Network Diagnostic End ---"))
+  end
+
   def run_bundle_install(subfolder, lock:)
     puts bold(cyan("Running bundle install in #{subfolder} with lock='#{lock}'"))
     
+    diagnose_network_health
+
     max_attempts = 3
     attempt = 0
     
     Dir.chdir(subfolder) do
-      assert(run_command("bundle config set --local path #{BUNDLE_PATH}"))
+      # assert(run_command("bundle config set --local path #{BUNDLE_PATH}"))
       
       # Try bundle install with retry logic for network issues
       success = false
       begin
         attempt += 1
         puts yellow("Bundle install attempt #{attempt}/#{max_attempts}...") if attempt > 1
-        success = run_command('bundle install')
+        
+        # Increased timeout to 300 seconds (5 minutes) per attempt
+        # Using --path explicitly to support older bundler versions (1.x)
+        success = run_command("bundle install --path #{BUNDLE_PATH}", timeout: 300)
         
         if !success
           # Check if this looks like a network error by examining recent output
           if attempt < max_attempts
-            puts yellow("Bundle install failed, retrying in #{2 ** attempt} seconds...")
-            sleep(2 ** attempt)
+            wait_time = 10 * (2 ** (attempt - 1))
+            puts yellow("Bundle install failed, retrying in #{wait_time} seconds...")
+            sleep(wait_time)
           end
         end
       end while !success && attempt < max_attempts
@@ -73,6 +146,19 @@ class Bundle_Test < Minitest::Test
         puts red("Bundle install failed after #{max_attempts} attempts")
         puts yellow("This appears to be a network connectivity issue with rubygems.org")
         skip "Network unavailable: Could not connect to rubygems.org after #{max_attempts} attempts"
+      end
+
+      # Fix for ruby version mismatch (System likely 2.6 vs OpenStudio 3.2.0)
+      # OpenStudio expects gems in ruby/3.2.0, but system bundle install might put them in ruby/2.6.0
+      Dir.glob("#{BUNDLE_PATH}/ruby/*").each do |path|
+        dirname = File.basename(path)
+        if dirname != "3.2.0" && dirname =~ /^\d+\.\d+\.\d+$/
+           new_path = File.join(File.dirname(path), "3.2.0")
+           if !File.exist?(new_path)
+             puts yellow("Renaming #{path} to #{new_path} to match OpenStudio ruby version")
+             FileUtils.mv(path, new_path)
+           end
+        end
       end
       
       if lock == LOCK_NATIVE

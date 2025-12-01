@@ -223,18 +223,20 @@ TEST_F(ModelFixture, ScheduleFile) {
   path p = resourcesPath() / toPath("model/schedulefile.csv");
   EXPECT_TRUE(exists(p));
 
-  path expectedDestDir;
-  std::vector<path> absoluteFilePaths = model.workflowJSON().absoluteFilePaths();
+  path tempDir = model.workflowJSON().absoluteRootDir() / toPath("ScheduleFile_Test");
+  if (exists(tempDir)) {
+    removeDirectory(tempDir);
+  }
+  create_directories(tempDir);
+  model.workflowJSON().setRootDir(tempDir);
+
+  openstudio::path expectedDestDir;
+  std::vector<openstudio::path> absoluteFilePaths = model.workflowJSON().absoluteFilePaths();
   if (absoluteFilePaths.empty()) {
     expectedDestDir = model.workflowJSON().absoluteRootDir();
   } else {
     expectedDestDir = absoluteFilePaths[0];
   }
-
-  if (exists(expectedDestDir)) {
-    removeDirectory(expectedDestDir);
-  }
-  ASSERT_FALSE(exists(expectedDestDir));
 
   boost::optional<ExternalFile> externalfile = ExternalFile::getExternalFile(model, openstudio::toString(p));
   ASSERT_TRUE(externalfile);
@@ -242,7 +244,7 @@ TEST_F(ModelFixture, ScheduleFile) {
   EXPECT_EQ(0u, externalfile->scheduleFiles().size());
   EXPECT_EQ(openstudio::toString(p.filename()), externalfile->fileName());
   //EXPECT_TRUE(externalfile.isColumnSeparatorDefaulted());
-  EXPECT_TRUE(equivalent(expectedDestDir / externalfile->fileName(), externalfile->filePath()));
+  EXPECT_TRUE(openstudio::filesystem::equivalent(expectedDestDir / externalfile->fileName(), externalfile->filePath()));
   EXPECT_TRUE(exists(externalfile->filePath()));
   EXPECT_NE(p, externalfile->filePath());
 
@@ -378,18 +380,20 @@ TEST_F(ModelFixture, ScheduleFileAltCtor) {
   path p = resourcesPath() / toPath("model/schedulefile.csv");
   EXPECT_TRUE(exists(p));
 
-  path expectedDestDir;
-  std::vector<path> absoluteFilePaths = model.workflowJSON().absoluteFilePaths();
+  path tempDir = model.workflowJSON().absoluteRootDir() / toPath("ScheduleFileAltCtor_Test");
+  if (exists(tempDir)) {
+    removeDirectory(tempDir);
+  }
+  create_directories(tempDir);
+  model.workflowJSON().setRootDir(tempDir);
+
+  openstudio::path expectedDestDir;
+  std::vector<openstudio::path> absoluteFilePaths = model.workflowJSON().absoluteFilePaths();
   if (absoluteFilePaths.empty()) {
     expectedDestDir = model.workflowJSON().absoluteRootDir();
   } else {
     expectedDestDir = absoluteFilePaths[0];
   }
-
-  if (exists(expectedDestDir)) {
-    removeDirectory(expectedDestDir);
-  }
-  ASSERT_FALSE(exists(expectedDestDir));
 
   ScheduleFile schedule(model, openstudio::toString(p));
   EXPECT_EQ(1u, model.getConcreteModelObjects<ScheduleFile>().size());
@@ -398,7 +402,7 @@ TEST_F(ModelFixture, ScheduleFileAltCtor) {
   EXPECT_EQ(1u, externalfile.scheduleFiles().size());
   EXPECT_EQ(openstudio::toString(p), externalfile.fileName());
   //EXPECT_TRUE(externalfile.isColumnSeparatorDefaulted());
-  EXPECT_FALSE(equivalent(expectedDestDir / externalfile.fileName(), externalfile.filePath()));
+  EXPECT_FALSE(openstudio::filesystem::equivalent(expectedDestDir / externalfile.fileName(), externalfile.filePath()));
   EXPECT_TRUE(exists(externalfile.filePath()));
   EXPECT_EQ(p, externalfile.filePath());
   EXPECT_TRUE(schedule.isNumberofHoursofDataDefaulted());

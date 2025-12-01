@@ -91,7 +91,9 @@ namespace energyplus {
     int secondShift = firstReportDateTime.time().totalSeconds();
     unsigned int start = 0;
     if (secondShift == 0) {
-      start = 1;
+      if (secondsFromFirst[0] == 0) {
+        start = 1;
+      }
     } else {
       for (unsigned int i = 0; i < secondsFromFirst.size(); i++) {
         secondsFromFirst[i] += secondShift;
@@ -102,6 +104,14 @@ namespace energyplus {
     unsigned fieldIndex = Schedule_CompactFields::ScheduleTypeLimitsName + 1;
     //idfObject.setString(fieldIndex, interpolateField);
     //++fieldIndex;
+
+    // Initialize lastDay based on the first data point we'll process
+    // This prevents off-by-one errors in day counting
+    // if (start < secondsFromFirst.size()) {
+    //   int secondsFromStartOfDay = secondsFromFirst[start] % 86400;
+    //   lastDay = (secondsFromFirst[start] - secondsFromStartOfDay) / 86400;
+    // }
+
     fieldIndex = startNewDay(idfObject, fieldIndex, lastDate);
 
     for (unsigned int i = start; i < values.size() - 1; i++) {
@@ -124,13 +134,23 @@ namespace energyplus {
         fieldIndex = addUntil(idfObject, fieldIndex, 24, 0, values[i]);
         lastDate += dayDelta;
         fieldIndex = startNewDay(idfObject, fieldIndex, lastDate);
+        lastDay = today;
       } else {
         // This still could be on a different day
         if (today != lastDay) {
           // We're on a new day, need a 24:00:00 value and set up the next day
           fieldIndex = addUntil(idfObject, fieldIndex, 24, 0, values[i]);
+
+          // If we have skipped one or more days, we need to fill them in
+          if (today > lastDay + 1) {
+            lastDate += dayDelta * (today - lastDay - 1);
+            fieldIndex = startNewDay(idfObject, fieldIndex, lastDate);
+            fieldIndex = addUntil(idfObject, fieldIndex, 24, 0, values[i]);
+          }
+
           lastDate += dayDelta;
           fieldIndex = startNewDay(idfObject, fieldIndex, lastDate);
+          lastDay = today;  // Update lastDay to keep day counter in sync
         }
         if (values[i] == values[i + 1]) {
           // Bail on values that match the next value
@@ -148,7 +168,7 @@ namespace energyplus {
         }
         fieldIndex = addUntil(idfObject, fieldIndex, hours, minutes, values[i]);
       }
-      lastDay = today;
+      // lastDay is updated inside the if (today != lastDay) block above when needed
     }
     // Handle the last point a little differently to make sure that the schedule ends exactly on the end of a day
     unsigned int i = values.size() - 1;
