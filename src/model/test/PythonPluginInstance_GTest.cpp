@@ -31,26 +31,20 @@ TEST_F(ModelFixture, PythonPluginInstance) {
   create_directories(tempDir);
   model.workflowJSON().setRootDir(tempDir);
 
-  // path expectedDestDir;
-  // std::vector<path> absoluteFilePaths = model.workflowJSON().absoluteFilePaths();
-  // if (absoluteFilePaths.empty()) {
-  //   expectedDestDir = model.workflowJSON().absoluteRootDir();
-  // } else {
-  //   expectedDestDir = absoluteFilePaths[0];
-  // }
-
-  // if (exists(expectedDestDir)) {
-  //   removeDirectory(expectedDestDir);
-  // }
-  // create_directories(expectedDestDir);
-  // ASSERT_TRUE(exists(expectedDestDir));
+  openstudio::path expectedDestDir;
+  std::vector<openstudio::path> absoluteFilePaths = model.workflowJSON().absoluteFilePaths();
+  if (absoluteFilePaths.empty()) {
+    expectedDestDir = model.workflowJSON().absoluteRootDir();
+  } else {
+    expectedDestDir = absoluteFilePaths[0];
+  }
 
   boost::optional<ExternalFile> externalfile = ExternalFile::getExternalFile(model, openstudio::toString(p));
   ASSERT_TRUE(externalfile);
   EXPECT_EQ(1u, model.getConcreteModelObjects<ExternalFile>().size());
   EXPECT_EQ(0u, externalfile->pythonPluginInstances().size());
   EXPECT_EQ(openstudio::toString(p.filename()), externalfile->fileName());
-  EXPECT_TRUE(equivalent(expectedDestDir / externalfile->fileName(), externalfile->filePath()));
+  EXPECT_TRUE(openstudio::filesystem::equivalent(expectedDestDir / externalfile->fileName(), externalfile->filePath()));
   EXPECT_TRUE(exists(externalfile->filePath()));
   EXPECT_NE(p, externalfile->filePath());
 
