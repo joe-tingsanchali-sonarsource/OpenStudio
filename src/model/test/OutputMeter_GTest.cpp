@@ -53,11 +53,11 @@ TEST_F(ModelFixture, OutputMeter_GettersSetters) {
   // Meter File Only: Optional Boolean
   // Default value from IDD
   EXPECT_TRUE(outputMeter.isMeterFileOnlyDefaulted());
-  EXPECT_FALSE(outputMeter.meterFileOnly());
-  EXPECT_TRUE(outputMeter.setMeterFileOnly(true));
   EXPECT_TRUE(outputMeter.meterFileOnly());
   EXPECT_TRUE(outputMeter.setMeterFileOnly(false));
   EXPECT_FALSE(outputMeter.meterFileOnly());
+  EXPECT_TRUE(outputMeter.setMeterFileOnly(true));
+  EXPECT_TRUE(outputMeter.meterFileOnly());
 
   // Cumulative: Optional Boolean
   // Default value from IDD

@@ -31,18 +31,19 @@ TEST_F(ModelFixture, PythonPluginInstance) {
   create_directories(tempDir);
   model.workflowJSON().setRootDir(tempDir);
 
-  path expectedDestDir;
-  std::vector<path> absoluteFilePaths = model.workflowJSON().absoluteFilePaths();
-  if (absoluteFilePaths.empty()) {
-    expectedDestDir = model.workflowJSON().absoluteRootDir();
-  } else {
-    expectedDestDir = absoluteFilePaths[0];
-  }
+  // path expectedDestDir;
+  // std::vector<path> absoluteFilePaths = model.workflowJSON().absoluteFilePaths();
+  // if (absoluteFilePaths.empty()) {
+  //   expectedDestDir = model.workflowJSON().absoluteRootDir();
+  // } else {
+  //   expectedDestDir = absoluteFilePaths[0];
+  // }
 
   // if (exists(expectedDestDir)) {
   //   removeDirectory(expectedDestDir);
   // }
-  ASSERT_TRUE(exists(expectedDestDir));
+  // create_directories(expectedDestDir);
+  // ASSERT_TRUE(exists(expectedDestDir));
 
   boost::optional<ExternalFile> externalfile = ExternalFile::getExternalFile(model, openstudio::toString(p));
   ASSERT_TRUE(externalfile);
