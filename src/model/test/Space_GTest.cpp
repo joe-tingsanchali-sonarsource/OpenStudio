@@ -3099,7 +3099,7 @@ TEST_F(ModelFixture, Space_setVolumeAndCeilingHeightAndFloorArea) {
 *****************************************************************************************************************************************************/
 
 // This takes 20secs but passes: TODO enable? (this is a bit too long)
-TEST_F(ModelFixture, DISABLED_Issue_1322) {
+TEST_F(ModelFixture, Issue_1322) {
 
   osversion::VersionTranslator translator;
   openstudio::path modelPath = resourcesPath() / toPath("model/7-7_Windows_Complete.osm");
@@ -3113,7 +3113,7 @@ TEST_F(ModelFixture, DISABLED_Issue_1322) {
 }
 
 // This takes 5secs but passes: TODO: enable? (borderline too long to pass)
-TEST_F(ModelFixture, DISABLED_Issue_1683) {
+TEST_F(ModelFixture, Issue_1683) {
 
   osversion::VersionTranslator translator;
   openstudio::path modelPath = resourcesPath() / toPath("model/15023_Model12.osm");
