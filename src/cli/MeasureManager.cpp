@@ -1013,10 +1013,9 @@ void MeasureManagerServer::print_feedback(const web::http::http_request& message
              method, uri, http_version, status_code);
 }
 
-void MeasureManagerServer::handle_request(const web::http::http_request& message, const web::json::value& body,
-                                          memRequestHandlerFunPtr request_handler) {
+void MeasureManagerServer::handle_request(const web::http::http_request& message, web::json::value body, memRequestHandlerFunPtr request_handler) {
 
-  std::packaged_task<ResponseType()> task([this, &body, &request_handler]() { return (this->*request_handler)(body); });
+  std::packaged_task<ResponseType()> task([this, body = std::move(body), request_handler]() { return (this->*request_handler)(body); });
 
   auto future_result = task.get_future();  // The task hasn't been started yet
   tasks.push_back(std::move(task));        // It gets queued, the **main** thread will process it

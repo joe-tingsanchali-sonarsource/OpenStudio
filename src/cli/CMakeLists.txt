@@ -507,13 +507,15 @@ if(BUILD_TESTING)
     PASS_REGULAR_EXPRESSION "Hello from -x, at .\\\\test_folder\\\\hello.xml"
   )
 
-  add_test(NAME OpenStudioCLI.execute_python_script.no_memory_leak
-    COMMAND $<TARGET_FILE:openstudio> execute_python_script memleak_source.py
-    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/test/"
-  )
-  set_tests_properties(OpenStudioCLI.execute_python_script.no_memory_leak PROPERTIES
-    FAIL_REGULAR_EXPRESSION "swig/python detected a memory leak of type"
-  )
+  if (Pytest_AVAILABLE)
+    add_test(NAME OpenStudioCLI.execute_python_script.no_memory_leak
+      COMMAND $<TARGET_FILE:openstudio> execute_python_script memleak_source.py
+      WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/test/"
+    )
+    set_tests_properties(OpenStudioCLI.execute_python_script.no_memory_leak PROPERTIES
+      FAIL_REGULAR_EXPRESSION "swig/python detected a memory leak of type"
+    )
+  endif()
 
   # ============ EndForward a Path properly no matter the slashes employed ============
 
