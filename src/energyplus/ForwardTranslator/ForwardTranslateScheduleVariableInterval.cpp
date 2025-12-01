@@ -102,6 +102,14 @@ namespace energyplus {
     unsigned fieldIndex = Schedule_CompactFields::ScheduleTypeLimitsName + 1;
     //idfObject.setString(fieldIndex, interpolateField);
     //++fieldIndex;
+
+    // Initialize lastDay based on the first data point we'll process
+    // This prevents off-by-one errors in day counting
+    if (start < secondsFromFirst.size()) {
+      int secondsFromStartOfDay = secondsFromFirst[start] % 86400;
+      lastDay = (secondsFromFirst[start] - secondsFromStartOfDay) / 86400;
+    }
+
     fieldIndex = startNewDay(idfObject, fieldIndex, lastDate);
 
     for (unsigned int i = start; i < values.size() - 1; i++) {
@@ -149,7 +157,7 @@ namespace energyplus {
         }
         fieldIndex = addUntil(idfObject, fieldIndex, hours, minutes, values[i]);
       }
-      lastDay = today;
+      // lastDay is updated inside the if (today != lastDay) block above when needed
     }
     // Handle the last point a little differently to make sure that the schedule ends exactly on the end of a day
     unsigned int i = values.size() - 1;

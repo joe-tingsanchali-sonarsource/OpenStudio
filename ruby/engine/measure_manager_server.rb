@@ -123,7 +123,12 @@ class MeasureManagerServlet < WEBrick::HTTPServlet::AbstractServlet
         my_measures_dir = data[:my_measures_dir]
 
         if my_measures_dir
-          @my_measures_dir = my_measures_dir.to_s
+          my_measures_dir_str = my_measures_dir.to_s
+          # Validate that the directory exists
+          if !File.directory?(my_measures_dir_str)
+            raise "Directory '#{my_measures_dir_str}' does not exist"
+          end
+          @my_measures_dir = my_measures_dir_str
         end
 
         response.body = JSON.generate(result)

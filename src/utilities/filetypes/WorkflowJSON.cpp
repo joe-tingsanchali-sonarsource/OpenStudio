@@ -30,7 +30,12 @@ namespace detail {
     if (exists(result)) {
       result = boost::filesystem::canonical(result);
     } else {
-      result = boost::filesystem::weakly_canonical(result);
+      // weakly_canonical requires parent directory to exist
+      path parent = result.parent_path();
+      if (exists(parent)) {
+        result = boost::filesystem::weakly_canonical(result);
+      }
+      // else: parent doesn't exist, just return the absolute path
     }
 
     return result;
@@ -182,7 +187,8 @@ namespace detail {
       }
     }
 
-    LOG(Error, "Unable to write file to path '" << toString(*p) << "', because parent directory " << "could not be created.");
+    LOG(Error, "Unable to write file to path '" << toString(*p) << "', because parent directory "
+                                                << "could not be created.");
 
     return false;
   }

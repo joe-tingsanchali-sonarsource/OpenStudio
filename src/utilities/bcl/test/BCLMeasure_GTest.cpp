@@ -1154,7 +1154,7 @@ TEST_F(BCLFixture, BCLMeasure_CTor_throw_invalid_xml) {
   EXPECT_TRUE(msg.find("has neither measure.rb nor measure.py") != std::string::npos) << logFile->logMessages().back().logMessage();
 
   // Add a measure.rb, all good
-  BCLFileReference rubyFileref(srcDir, "measure.rb", true);
+  BCLFileReference rubyFileref(srcDir, "measure.rb", false);  // Don't create file on disk
   rubyFileref.setUsageType("script");
   bclXML.addFile(rubyFileref);
   bclXML.saveAs(xmlPath);
@@ -1174,7 +1174,7 @@ TEST_F(BCLFixture, BCLMeasure_CTor_throw_invalid_xml) {
   EXPECT_NO_THROW(BCLMeasure{srcDir});
 
   // We can't have both a measure.rb and measure.py
-  BCLFileReference pythonFileref(srcDir, "measure.py", true);
+  BCLFileReference pythonFileref(srcDir, "measure.py", false);  // Don't create file on disk
   pythonFileref.setUsageType("script");
   bclXML.addFile(pythonFileref);
   bclXML.saveAs(xmlPath);

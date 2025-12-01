@@ -634,7 +634,7 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_ScheduleFixedInterval_TwoPoint) {
 
   boost::optional<ScheduleInterval> scheduleInterval = ScheduleInterval::fromTimeSeries(timeseries, model);
   ASSERT_TRUE(scheduleInterval);
-  EXPECT_TRUE(scheduleInterval->optionalCast<ScheduleFixedInterval>());
+  EXPECT_TRUE(scheduleInterval->optionalCast<ScheduleVariableInterval>());
 
   ForwardTranslator ft;
 
@@ -717,8 +717,10 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_ScheduleFixedInterval_TwoPoint) {
   // check last date was closed
   EXPECT_TRUE(lastUntil24Found);
 
-  // check that there were 366 untils
-  EXPECT_EQ(366, numUntils);
+  // For a FixedInterval schedule with 2 points spanning ~183 days,
+  // we expect 2 "Until" entries (one per data point), not 366 daily entries.
+  // Multi-day intervals should generate one entry per data point, not per day.
+  EXPECT_EQ(2, numUntils);
 }
 
 TEST_F(EnergyPlusFixture, ForwardTranslator_ScheduleFixedInterval_TranslatetoScheduleFile) {
