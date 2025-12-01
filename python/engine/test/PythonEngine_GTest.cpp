@@ -39,15 +39,15 @@ class PythonEngineFixture : public testing::Test
       // Check if line contains only whitespace and carets, and at least one caret
       bool only_carets = false;
       if (line.find('^') != std::string::npos) {
-         only_carets = true;
-         for (char c : line) {
-           if (c != ' ' && c != '^') {
-             only_carets = false;
-             break;
-           }
-         }
+        only_carets = true;
+        for (char c : line) {
+          if (c != ' ' && c != '^') {
+            only_carets = false;
+            break;
+          }
+        }
       }
-      
+
       if (!only_carets) {
         if (!first) {
           result += "\n";

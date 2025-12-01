@@ -100,8 +100,6 @@ PythonEngine::PythonEngine(int argc, char* argv[]) : ScriptEngine(argc, argv), p
 
   std::vector<std::string> args(argv, std::next(argv, static_cast<std::ptrdiff_t>(argc)));
 
-
-
   Py_SetProgramName(program);  // optional but recommended
 
   Py_Initialize();
