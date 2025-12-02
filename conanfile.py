@@ -69,6 +69,9 @@ class OpenStudioBuildRecipe(ConanFile):
 
     # Let people provide their own CMake for now
     # def build_requirements(self):
+    #     # nasm is required for Windows builds. Uncomment when generating lockfile on non-Windows.
+    #     if self.settings.os == "Windows":
+    #         self.tool_requires("nasm/2.15.05")
     #     self.tool_requires("cmake/3.29.0")
 
     def generate(self):
