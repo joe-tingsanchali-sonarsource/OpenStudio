@@ -194,6 +194,12 @@ void OSWorkflow::saveOSMToRootDirIfDebug() {
     return;
   }
 
+  // Skip saving the OSM if halted
+  if (runner.halted()) {
+    LOG(Info, "Workflow halted, skipping saving the OSM");
+    return;
+  }
+
   LOG(Info, "Saving OSM to Root Directory");
   auto savePath = workflowJSON.absoluteRootDir() / "in.osm";
   detailedTimeBlock("Saving OSM", [this, &savePath]() {
