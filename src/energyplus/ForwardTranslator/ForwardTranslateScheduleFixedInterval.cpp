@@ -156,6 +156,14 @@ namespace energyplus {
       unsigned fieldIndex = Schedule_CompactFields::ScheduleTypeLimitsName + 1;
       //idfObject.setString(fieldIndex, interpolateField);
       //++fieldIndex;
+
+      // Initialize lastDay based on the first data point we'll process
+      // This prevents off-by-one errors in day counting
+      if (start < secondsFromFirst.size()) {
+        const int secondsFromStartOfDay = secondsFromFirst[start] % 86400;
+        lastDay = (secondsFromFirst[start] - secondsFromStartOfDay) / 86400;
+      }
+
       fieldIndex = startNewDay(idfObject, fieldIndex, lastDate);
 
       for (unsigned int i = start; i < values.size() - 1; i++) {
@@ -178,6 +186,7 @@ namespace energyplus {
           fieldIndex = addUntil(idfObject, fieldIndex, 24, 0, values[i]);
           lastDate += dayDelta * nDays;
           fieldIndex = startNewDay(idfObject, fieldIndex, lastDate);
+          lastDay = today;
         } else {
           // This still could be on a different day
           if (today != lastDay) {
@@ -185,6 +194,7 @@ namespace energyplus {
             fieldIndex = addUntil(idfObject, fieldIndex, 24, 0, values[i]);
             lastDate += dayDelta * nDays;
             fieldIndex = startNewDay(idfObject, fieldIndex, lastDate);
+            lastDay = today;  // Update lastDay to keep day counter in sync
           }
           if (values[i] == values[i + 1]) {
             // Bail on values that match the next value
@@ -202,7 +212,7 @@ namespace energyplus {
           }
           fieldIndex = addUntil(idfObject, fieldIndex, hours, minutes, values[i]);
         }
-        lastDay = today;
+        // lastDay is updated inside the if (today != lastDay) block above when needed
       }
       // Handle the last point a little differently to make sure that the schedule ends exactly on the end of a day
       const unsigned int i = values.size() - 1;

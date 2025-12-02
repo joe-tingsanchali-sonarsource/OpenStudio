@@ -235,7 +235,7 @@ struct MeterInfo
   bool cumulative;
 
   MeterInfo(std::string t_name, std::string t_reportingFrequency, bool meterFileOnly, bool cumulative)
-    : name(std::move(t_name)), reportingFrequency(std::move(t_reportingFrequency)), meterFileOnly(meterFileOnly), cumulative(cumulative){};
+    : name(std::move(t_name)), reportingFrequency(std::move(t_reportingFrequency)), meterFileOnly(meterFileOnly), cumulative(cumulative) {}
 
   MeterInfo(const WorkspaceObject& wo) {
     switch (wo.iddObject().type().value()) {

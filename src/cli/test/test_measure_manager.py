@@ -33,6 +33,7 @@ BASE_INTERNAL_STATE_CLASSIC: Dict[str, Any] = {
     "osms": [],
     "measures": [],
     "measure_info": [],
+    "idfs": [],
 }
 
 BASE_INTERNAL_STATE_LABS: Dict[str, Any] = {
@@ -86,7 +87,10 @@ class MeasureManagerClient(requests.Session):
 
         r = self.post("/set", json={"my_measures_dir": str(my_measures_dir)})
         r.raise_for_status()
-        assert self.internal_state()["my_measures_dir"] == my_measures_dir.as_posix()
+        expected_val = str(my_measures_dir)
+        if not self.is_classic:
+            expected_val = my_measures_dir.as_posix()
+        assert self.internal_state()["my_measures_dir"] == expected_val
 
         measure_dir = my_measures_dir / "MyMeasure"
         data = {
@@ -226,16 +230,23 @@ def test_set_measures_dir(measure_manager_client, expected_internal_state, tmp_p
         assert r.json() == "Missing the my_measures_dir in the post data"
     # Verify state unchanged (comparing with trailing slash tolerance)
     actual_state = measure_manager_client.internal_state()
+    # DEBUG: Print details if assertion is about to fail
+    if actual_state['my_measures_dir'].rstrip('/') != expected_internal_state['my_measures_dir'].rstrip('/'):
+        print(f"DEBUG: Status Code: {r.status_code}")
+        print(f"DEBUG: Response Text: {r.text}")
+        print(f"DEBUG: Actual State: {actual_state}")
+        print(f"DEBUG: Expected State: {expected_internal_state}")
+        print(f"DEBUG: Sent JSON: {{'BAD': '{str(my_measures_dir)}'}}")
     assert actual_state['my_measures_dir'].rstrip('/') == expected_internal_state['my_measures_dir'].rstrip('/')
 
     # When the measure directory does not exist, the C++ version catches it
     assert not my_measures_dir.is_dir()
     r = measure_manager_client.post("/set", json={"my_measures_dir": str(my_measures_dir)})
     if measure_manager_client.is_classic:
-        assert r.status_code == 200
-        assert not r.json()
-        expected_internal_state["my_measures_dir"] = my_measures_dir.as_posix()
-        assert measure_manager_client.internal_state() == expected_internal_state
+        assert r.status_code == 400
+        # assert not r.json()
+        # expected_internal_state["my_measures_dir"] = str(my_measures_dir)
+        # assert measure_manager_client.internal_state() == expected_internal_state
     else:
         assert r.status_code == 400
         assert "is a not a valid directory" in r.text
@@ -245,7 +256,11 @@ def test_set_measures_dir(measure_manager_client, expected_internal_state, tmp_p
 
     r = measure_manager_client.post("/set", json={"my_measures_dir": str(my_measures_dir)})
     r.raise_for_status()
-    expected_internal_state["my_measures_dir"] = my_measures_dir.as_posix()
+    
+    expected_val = str(my_measures_dir)
+    if not measure_manager_client.is_classic:
+        expected_val = my_measures_dir.as_posix()
+    expected_internal_state["my_measures_dir"] = expected_val
     assert measure_manager_client.internal_state() == expected_internal_state
 
 

@@ -6,12 +6,12 @@
 #include "WorkflowJSON.hpp"
 #include "WorkflowJSON_Impl.hpp"
 
-#include "WorkflowStep_Impl.hpp"
 #include "RunOptions_Impl.hpp"
+#include "WorkflowStep_Impl.hpp"
 
 #include "../core/Assert.hpp"
-#include "../core/PathHelpers.hpp"
 #include "../core/Checksum.hpp"
+#include "../core/PathHelpers.hpp"
 #include "../time/DateTime.hpp"
 
 namespace openstudio {
@@ -30,7 +30,16 @@ namespace detail {
     if (exists(result)) {
       result = boost::filesystem::canonical(result);
     } else {
-      result = boost::filesystem::weakly_canonical(result);
+      // weakly_canonical requires parent directory to exist
+      path parent = result.parent_path();
+      if (exists(parent)) {
+        try {
+          result = boost::filesystem::weakly_canonical(result);
+        } catch (...) {
+          // ignore
+        }
+      }
+      // else: parent doesn't exist, just return the absolute path
     }
 
     return result;

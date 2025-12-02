@@ -1,0 +1,82 @@
+name: Build and Upload Windows Dependencies
+
+on:
+  workflow_dispatch:
+    inputs:
+      upload:
+        description: 'Upload packages to remote'
+        required: true
+        type: boolean
+        default: false
+
+env:
+  BUILD_TYPE: Release
+  OPENSTUDIO_BUILD: OS-build-release-v2
+  PY_VERSION: "3.12.2"
+  RUBY_VERSION: "3.2.2"
+
+jobs:
+  build-windows-deps:
+    name: Windows 2022 x64 Deps
+    runs-on: windows-2022
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PY_VERSION }}
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ env.RUBY_VERSION }}
+          bundler-cache: true
+
+      - name: Install Conan
+        run: |
+          pip install conan
+
+      - name: Configure Conan remotes
+        run: |
+          conan remote add conancenter https://center2.conan.io --force
+          conan remote update conancenter --insecure
+          conan remote add nrel-v2 https://conan.openstudio.net/artifactory/api/conan/conan-v2 --force
+          conan remote update nrel-v2 --insecure
+          if (-not (Test-Path "$env:USERPROFILE/.conan2/profiles/default")) {
+            conan profile detect
+          }
+
+      - name: Authenticate Conan
+        if: ${{ inputs.upload }}
+        env:
+          CONAN_USER: ${{ secrets.CONAN_USER }}
+          CONAN_PASSWORD: ${{ secrets.CONAN_PASSWORD }}
+        run: |
+          if ($env:CONAN_USER -and $env:CONAN_PASSWORD) {
+            conan remote login nrel-v2 "$env:CONAN_USER" -p "$env:CONAN_PASSWORD"
+          } else {
+            Write-Warning "Conan credentials not found in secrets (CONAN_USER, CONAN_PASSWORD). Upload will likely fail."
+          }
+
+      - name: Build Dependencies
+        run: |
+          # We run conan install with --build=missing to build any missing dependencies from source
+          # specifically forcing compiler.cppstd=20 to match the main build
+          conan install . `
+            --output-folder="./${{ env.OPENSTUDIO_BUILD }}" `
+            --build=missing `
+            -c tools.cmake.cmaketoolchain:generator=Ninja `
+            -s compiler.cppstd=20 `
+            -s build_type=${{ env.BUILD_TYPE }}
+
+      - name: Upload Packages
+        if: ${{ inputs.upload }}
+        run: |
+          # Upload all packages to the nrel-v2 remote
+          # We use --confirm to avoid interactive prompts
+          conan upload -r nrel-v2 "*" --confirm

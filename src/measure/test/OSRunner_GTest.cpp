@@ -316,6 +316,8 @@ TEST_F(MeasureFixture, OSRunner_getPastStepValues) {
   EXPECT_EQ(2, workflow.workflowSteps().size());
   EXPECT_EQ(workflow.string(), runner.workflow().string());
 
+  // Ensure directory exists before saving (may be deleted between test retries)
+  openstudio::filesystem::create_directories(scratchDir);
   workflow.saveAs(scratchDir / "OSRunner_getPastStepValues_2steps.osw");
 
   {
@@ -360,6 +362,8 @@ TEST_F(MeasureFixture, OSRunner_getPastStepValues) {
     EXPECT_EQ(3, workflow.workflowSteps().size());
   }
 
+  // Ensure directory exists before saving (may be deleted between test retries)
+  openstudio::filesystem::create_directories(scratchDir);
   workflow.saveAs(scratchDir / "OSRunner_getPastStepValues_3steps.osw");
 
   {
@@ -426,6 +430,8 @@ TEST_F(MeasureFixture, OSRunner_getPastStepValues_step_name_not_initialized) {
   EXPECT_EQ(1, workflow.workflowSteps().size());
   EXPECT_EQ(workflow.string(), runner.workflow().string());
 
+  // Ensure directory exists before saving (may be deleted between test retries)
+  openstudio::filesystem::create_directories(scratchDir);
   workflow.saveAs(scratchDir / "OSRunner_getPastStepValues_step_name_not_initialized.osw");
 
   {

@@ -233,11 +233,15 @@ if(APPLE)
 
   set(ENERGYPLUS_SYSTEM_VERSION "")
 
-  find_program(UNAME uname)
-  execute_process(COMMAND ${UNAME} -m
-    OUTPUT_VARIABLE ARCH
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-  )
+  if (DEFINED CMAKE_OSX_ARCHITECTURES AND NOT "${CMAKE_OSX_ARCHITECTURES}" STREQUAL "")
+    set(ARCH "${CMAKE_OSX_ARCHITECTURES}")
+  else()
+    find_program(UNAME uname)
+    execute_process(COMMAND ${UNAME} -m
+      OUTPUT_VARIABLE ARCH
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+  endif()
 
 elseif(UNIX)
   # OS_RELEASE is the result of `uname -r` which is unhelpful (eg '5.4.0-42-generic')
@@ -1295,6 +1299,9 @@ set(CPACK_PACKAGE_CONTACT "openstudio@nrel.gov")
 if(APPLE)
   set(CPACK_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}-${OPENSTUDIO_LONG_VERSION}-${CMAKE_SYSTEM_NAME}-${ARCH}")
   set(CPACK_IFW_TARGET_DIRECTORY /Applications/OpenStudio-${OpenStudio_VERSION}/)
+  if(DEFINED ENV{APPLE_DEV_ID})
+    set(CPACK_IFW_PACKAGE_SIGNING_IDENTITY "$ENV{APPLE_DEV_ID}")
+  endif()
 elseif(UNIX)
   # Default method doesn't use IFW but Deb, so this one is probably useless (but harmless)
   set(CPACK_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}-${OPENSTUDIO_LONG_VERSION}-${LSB_RELEASE_ID_SHORT}-${LSB_RELEASE_VERSION_SHORT}-${ARCH}")
@@ -1532,6 +1539,17 @@ cpack_ifw_configure_component(Unspecified
   REQUIRES_ADMIN_RIGHTS
 )
 
+if(BUILD_PYTHON_BINDINGS)
+  cpack_add_component(Python
+    DISPLAY_NAME "Python API"
+    DESCRIPTION "Python API"
+  )
+
+  cpack_ifw_configure_component(Python
+    REQUIRES_ADMIN_RIGHTS
+  )
+endif()
+
 if(BUILD_CSHARP_BINDINGS)
   cpack_add_component(CSharpAPI
     DISPLAY_NAME "C# API"
@@ -1585,4 +1603,3 @@ if (MSVC)
     endif()
   endif()
 endif()
-

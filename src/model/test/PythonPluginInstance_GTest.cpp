@@ -24,25 +24,27 @@ TEST_F(ModelFixture, PythonPluginInstance) {
   path p = resourcesPath() / toPath("model/PythonPluginThermochromicWindow.py");
   EXPECT_TRUE(exists(p));
 
-  path expectedDestDir;
-  std::vector<path> absoluteFilePaths = model.workflowJSON().absoluteFilePaths();
+  path tempDir = model.workflowJSON().absoluteRootDir() / toPath("PythonPluginInstance_Test");
+  if (exists(tempDir)) {
+    removeDirectory(tempDir);
+  }
+  create_directories(tempDir);
+  model.workflowJSON().setRootDir(tempDir);
+
+  openstudio::path expectedDestDir;
+  std::vector<openstudio::path> absoluteFilePaths = model.workflowJSON().absoluteFilePaths();
   if (absoluteFilePaths.empty()) {
     expectedDestDir = model.workflowJSON().absoluteRootDir();
   } else {
     expectedDestDir = absoluteFilePaths[0];
   }
 
-  if (exists(expectedDestDir)) {
-    removeDirectory(expectedDestDir);
-  }
-  ASSERT_FALSE(exists(expectedDestDir));
-
   boost::optional<ExternalFile> externalfile = ExternalFile::getExternalFile(model, openstudio::toString(p));
   ASSERT_TRUE(externalfile);
   EXPECT_EQ(1u, model.getConcreteModelObjects<ExternalFile>().size());
   EXPECT_EQ(0u, externalfile->pythonPluginInstances().size());
   EXPECT_EQ(openstudio::toString(p.filename()), externalfile->fileName());
-  EXPECT_TRUE(equivalent(expectedDestDir / externalfile->fileName(), externalfile->filePath()));
+  EXPECT_TRUE(openstudio::filesystem::equivalent(expectedDestDir / externalfile->fileName(), externalfile->filePath()));
   EXPECT_TRUE(exists(externalfile->filePath()));
   EXPECT_NE(p, externalfile->filePath());
 

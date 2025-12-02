@@ -734,7 +734,7 @@ namespace model {
             originalEnd(t_originalEnd),
             clonedStartOrEndOfPath(t_clonedStartOrEndOfPath),
             clonedAddNode(t_clonedAddNode),
-            reverse(t_reverse){};
+            reverse(t_reverse) {}
 
         HVACComponent originalStart;
         HVACComponent originalEnd;

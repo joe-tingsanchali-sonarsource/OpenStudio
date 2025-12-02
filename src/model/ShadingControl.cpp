@@ -77,23 +77,39 @@ namespace model {
     }
 
     bool ShadingControl_Impl::isControlTypeValueNeedingSetpoint2(const std::string& controlType) {
-      static constexpr std::array data{"OnIfHighOutdoorAirTempAndHighSolarOnWindow", "OnIfHighOutdoorAirTempAndHighHorizontalSolar",
-                                       "OnIfHighZoneAirTempAndHighSolarOnWindow", "OnIfHighZoneAirTempAndHighHorizontalSolar"};
+      static constexpr std::array data{
+        "OnIfHighOutdoorAirTempAndHighSolarOnWindow",
+        "OnIfHighOutdoorAirTempAndHighHorizontalSolar",
+        "OnIfHighZoneAirTempAndHighSolarOnWindow",
+        "OnIfHighZoneAirTempAndHighHorizontalSolar",
+      };
       return std::find_if(data.begin(), data.end(), [&controlType](auto c) { return openstudio::istringEqual(controlType, c); }) != data.end();
     }
 
     bool ShadingControl_Impl::isControlTypeValueAllowingSchedule(const std::string& controlType) {
-      static constexpr std::array data{//"AlwaysOn",
-                                       //"AlwaysOff",
-                                       "OnIfScheduleAllows", "OnIfHighSolarOnWindow", "OnIfHighHorizontalSolar", "OnIfHighOutdoorAirTemperature",
-                                       "OnIfHighZoneAirTemperature", "OnIfHighZoneCooling",
-                                       //"OnIfHighGlare",
-                                       //"MeetDaylightIlluminanceSetpoint",
-                                       "OnNightIfLowOutdoorTempAndOffDay", "OnNightIfLowInsideTempAndOffDay", "OnNightIfHeatingAndOffDay",
-                                       "OnNightIfLowOutdoorTempAndOnDayIfCooling", "OnNightIfHeatingAndOnDayIfCooling",
-                                       "OffNightAndOnDayIfCoolingAndHighSolarOnWindow", "OnNightAndOnDayIfCoolingAndHighSolarOnWindow",
-                                       "OnIfHighOutdoorAirTempAndHighSolarOnWindow", "OnIfHighOutdoorAirTempAndHighHorizontalSolar",
-                                       "OnIfHighZoneAirTempAndHighSolarOnWindow", "OnIfHighZoneAirTempAndHighHorizontalSolar"};
+      static constexpr std::array data{
+        //"AlwaysOn",
+        //"AlwaysOff",
+        "OnIfScheduleAllows",
+        "OnIfHighSolarOnWindow",
+        "OnIfHighHorizontalSolar",
+        "OnIfHighOutdoorAirTemperature",
+        "OnIfHighZoneAirTemperature",
+        "OnIfHighZoneCooling",
+        //"OnIfHighGlare",
+        //"MeetDaylightIlluminanceSetpoint",
+        "OnNightIfLowOutdoorTempAndOffDay",
+        "OnNightIfLowInsideTempAndOffDay",
+        "OnNightIfHeatingAndOffDay",
+        "OnNightIfLowOutdoorTempAndOnDayIfCooling",
+        "OnNightIfHeatingAndOnDayIfCooling",
+        "OffNightAndOnDayIfCoolingAndHighSolarOnWindow",
+        "OnNightAndOnDayIfCoolingAndHighSolarOnWindow",
+        "OnIfHighOutdoorAirTempAndHighSolarOnWindow",
+        "OnIfHighOutdoorAirTempAndHighHorizontalSolar",
+        "OnIfHighZoneAirTempAndHighSolarOnWindow",
+        "OnIfHighZoneAirTempAndHighHorizontalSolar",
+      };
       return std::find_if(data.begin(), data.end(), [&controlType](auto c) { return openstudio::istringEqual(controlType, c); }) != data.end();
     }
 
