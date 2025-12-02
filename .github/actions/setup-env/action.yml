@@ -94,16 +94,19 @@ runs:
     - name: Configure Conan remotes
       shell: bash
       run: |
+        conan remote add nrel-v2 https://conan.openstudio.net/artifactory/api/conan/conan-v2 --index 0--force
+        conan remote update nrel-v2 --insecure
         conan remote add conancenter https://center2.conan.io --force
         conan remote update conancenter --insecure
-        conan remote add nrel-v2 https://conan.openstudio.net/artifactory/api/conan/conan-v2 --force
-        conan remote update nrel-v2 --insecure
         if [ ! -f "$HOME/.conan2/profiles/default" ]; then conan profile detect; fi
 
     - name: Conan install
       shell: bash
       working-directory: ${{ github.workspace }}
       run: |
+
+        export CMAKE_POLICY_VERSION_MINIMUM=3.5
+
         # Determine generator based on OS
         GEN="Ninja"
 

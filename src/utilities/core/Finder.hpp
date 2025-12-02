@@ -177,7 +177,7 @@ template <class T, typename U>
 class ValueFinder
 {
  public:
-  ValueFinder(const U& value) : m_value(value) {};
+  ValueFinder(const U& value) : m_value(value) {}
 
   bool operator()(const T& object) const {
     return (m_value == object.value());

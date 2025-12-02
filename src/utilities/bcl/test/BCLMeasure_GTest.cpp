@@ -338,10 +338,7 @@ std::vector<TestPath> generateTestMeasurePaths() {
   std::vector<TestPath> testPaths;
 
   std::vector<std::string> approvedRootFiles{
-    "measure.rb",
-    "README.md",
-    "README.md.erb",
-    "LICENSE.md",
+    "measure.rb", "README.md", "README.md.erb", "LICENSE.md",
     // ".gitkeep"      // assuming .gitkeep outside a subfolder makes zero sense...
     // "measure.xml"   // not included in itself!
   };
@@ -1038,10 +1035,7 @@ TEST_F(BCLFixture, BCLMeasure_Ctor_PythonEnergyPlusMeasure) {
   // └── ./tests
   //     └── ./tests/test_my_python_measure.py
   std::vector<fs::path> expectedInitialPaths = {
-    "docs/.gitkeep",
-    "LICENSE.md",
-    "measure.py",
-    "tests/test_my_python_measure.py",
+    "docs/.gitkeep", "LICENSE.md", "measure.py", "tests/test_my_python_measure.py",
     // "measure.xml": it's not included in itself!
   };
 
