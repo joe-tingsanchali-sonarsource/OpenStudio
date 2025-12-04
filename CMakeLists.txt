@@ -451,7 +451,7 @@ configure_file("${PROJECT_SOURCE_DIR}/dependencies/cpprestsdk_char_traits_workar
 find_package(websocketpp)
 find_package(Boost)
 find_package(geographiclib)
-find_package(SWIG 4.3.0 EXACT REQUIRED CONFIG)
+find_package(SWIG 4.4.0 EXACT REQUIRED CONFIG)
 message("SWIG_EXECUTABLE=${SWIG_EXECUTABLE}")
 message("SWIG_DIR=${SWIG_DIR}")
 message("SWIG_LIB=${SWIG_LIB}")

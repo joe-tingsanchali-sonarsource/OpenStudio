@@ -39,20 +39,20 @@ class OpenStudioBuildRecipe(ConanFile):
             )
         else:
             self.requires("boost/1.86.0", force=True) # cpprestsdk doesn't build with boost 1.87.0
-        self.requires("pugixml/1.14")
+        self.requires("pugixml/1.15")
         self.requires(
             "libxml2/[<2.12.0]"
         )  # deprecated xmlSubstituteEntitiesDefault and co https://github.com/GNOME/libxml2/commit/db8b9722cb2a1f7dca7374ec38ecaa4936ab3869
-        self.requires("libxslt/1.1.37")  # 9085031f5b9b2bb328ad615cd1bf1282
+        self.requires("libxslt/1.1.37")  # TODO use libxslt/1.1.43 after porting the libxml2 code
         self.requires("jsoncpp/1.9.6")
-        self.requires("fmt/11.1.4")
-        self.requires("sqlite3/3.49.1")
+        self.requires("fmt/12.1.0")
+        self.requires("sqlite3/3.51.0")
         self.requires("cpprestsdk/2.10.19")  # df2f6ac88e47cadd9c9e8e0971e00d89
         self.requires("websocketpp/0.8.2")  # 3fd704c4c5388d9c08b11af86f79f616
-        self.requires("geographiclib/2.4")
-        self.requires("swig/4.3.0")
+        self.requires("geographiclib/2.6")
+        self.requires("swig/4.4.0")
         self.requires("tinygltf/2.9.0")
-        self.requires("cli11/2.5.0")
+        self.requires("cli11/2.6.0")
 
         self.requires(
             "minizip/1.3.1"
@@ -63,9 +63,9 @@ class OpenStudioBuildRecipe(ConanFile):
         self.requires("openssl/[>=3 <4]")
 
         if self.options.with_testing:
-            self.requires("gtest/1.16.0")
+            self.requires("gtest/1.17.0")
         if self.options.with_benchmark:
-            self.requires("benchmark/1.9.1")
+            self.requires("benchmark/1.9.4")
 
     # Let people provide their own CMake for now
     # def build_requirements(self):
