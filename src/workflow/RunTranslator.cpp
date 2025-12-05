@@ -33,7 +33,7 @@ void OSWorkflow::runTranslator() {
     LOG(Info, "Workflow halted, skipping OSM to IDF translation");
     // This allows model arguments to still be calculated
     workspace_ = Workspace{};
-    return;  // should this be before or after the line above?
+    return;
   }
 
   auto runDir = workflowJSON.absoluteRunDir();
