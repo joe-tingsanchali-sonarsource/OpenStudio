@@ -29,6 +29,12 @@ namespace openstudio {
 void OSWorkflow::runPreProcess() {
   state = State::PreProcess;
 
+  // Skip the pre-processor if halted
+  if (runner.halted()) {
+    LOG(Info, "Workflow halted, skipping the EnergyPlus pre-processor");
+    return;
+  }
+
   auto runDirPath = workflowJSON.absoluteRunDir();
   const bool skipEnergyPlusPreprocess = workflowJSON.runOptions()->skipEnergyPlusPreprocess();
 
@@ -46,12 +52,6 @@ void OSWorkflow::runPreProcess() {
   LOG(Info, "Beginning to collect EnergyPlus output requests from Reporting measures.");
   applyMeasures(MeasureType::ReportingMeasure, ApplyMeasureType::EnergyPlusOutputRequest);
   LOG(Info, "Finished collecting EnergyPlus output requests from Reporting measures.");
-
-  // Skip the pre-processor if halted
-  if (runner.halted()) {
-    LOG(Info, "Workflow halted, skipping the EnergyPlus pre-processor");
-    return;
-  }
 
   // TODO: I am extremely confused as to why we force add this stuff...
   if (!skipEnergyPlusPreprocess) {
