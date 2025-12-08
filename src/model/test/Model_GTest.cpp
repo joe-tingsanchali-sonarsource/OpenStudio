@@ -1214,5 +1214,5 @@ TEST_F(ModelFixture, Model_nowarn_GenericModelObject_CommentOnly) {
   StringStreamLogSink sink;
   sink.setLogLevel(Warn);
   EXPECT_TRUE(m.addObject(i));
-  EXPECT_EQ(0, sink.logMessages().size());
+  EXPECT_EQ(0, sink.logMessages().size()) << "Expected zero log messages but found " << sink.logMessages().size() << ": " << sink.string();
 }
