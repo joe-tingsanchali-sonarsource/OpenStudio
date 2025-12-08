@@ -134,6 +134,7 @@
 #include "../PythonPluginSearchPaths_Impl.hpp"
 
 #include "../../utilities/core/PathHelpers.hpp"
+#include "../../utilities/core/StringStreamLogSink.hpp"
 #include "../../utilities/data/TimeSeries.hpp"
 #include "../../utilities/idf/IdfFile.hpp"
 #include "../../utilities/idf/Workspace.hpp"
@@ -1202,4 +1203,16 @@ TEST_F(ModelFixture, Model_load) {
 
   ASSERT_TRUE(workflowJSON.seedFile());
   EXPECT_EQ(workflowJSON.seedFile().get(), openstudio::toPath("../empty361.osm"));
+}
+
+TEST_F(ModelFixture, Model_nowarn_GenericModelObject_CommentOnly) {
+  // Test for #5544
+  Model m;
+  openstudio::IdfObject i(openstudio::IddObjectType::CommentOnly);
+  i.setComment("This is a (free) comment");
+
+  StringStreamLogSink sink;
+  sink.setLogLevel(Warn);
+  EXPECT_TRUE(m.addObject(i));
+  EXPECT_EQ(0, sink.logMessages().size()) << "Expected zero log messages but found " << sink.logMessages().size() << ": " << sink.string();
 }
