@@ -53,9 +53,9 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_WaterHeaterHeatPumpWrappedCondenser)
   ScheduleConstant scheduleConstant2(m);
   scheduleConstant2.setValue(0.2);
   EXPECT_TRUE(hpwh.setInletAirTemperatureSchedule(scheduleConstant2));
-  ScheduleConstant scheduleConstant2(m);
-  scheduleConstant2.setValue(0.2);
-  EXPECT_TRUE(hpwh.setInletAirHumiditySchedule(scheduleConstant2));
+  ScheduleConstant scheduleConstant3(m);
+  scheduleConstant3.setValue(0.3);
+  EXPECT_TRUE(hpwh.setInletAirHumiditySchedule(scheduleConstant3));
   EXPECT_TRUE(hpwh.setTank(wh));
   EXPECT_TRUE(hpwh.setDXCoil(coil));
   EXPECT_TRUE(hpwh.setMinimumInletAirTemperatureforCompressorOperation(15));
@@ -101,8 +101,8 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_WaterHeaterHeatPumpWrappedCondenser)
   EXPECT_EQ("Schedule", idfObject.getString(WaterHeater_HeatPump_WrappedCondenserFields::InletAirConfiguration).get());
   EXPECT_EQ("HPWH Air Inlet Node", idfObject.getString(WaterHeater_HeatPump_WrappedCondenserFields::AirInletNodeName).get());
   EXPECT_EQ("HPWH Air Outlet Node", idfObject.getString(WaterHeater_HeatPump_WrappedCondenserFields::AirOutletNodeName).get());
-  EXPECT_EQ(idfObject.isEmpty(WaterHeater_HeatPump_WrappedCondenserFields::OutdoorAirNodeName));
-  EXPECT_EQ(idfObject.isEmpty(WaterHeater_HeatPump_WrappedCondenserFields::ExhaustAirNodeName));
+  EXPECT_TRUE(idfObject.isEmpty(WaterHeater_HeatPump_WrappedCondenserFields::OutdoorAirNodeName));
+  EXPECT_TRUE(idfObject.isEmpty(WaterHeater_HeatPump_WrappedCondenserFields::ExhaustAirNodeName));
   EXPECT_EQ(scheduleConstant2.nameString(), idfObject.getString(WaterHeater_HeatPump_WrappedCondenserFields::InletAirTemperatureScheduleName).get());
   EXPECT_EQ(scheduleConstant3.nameString(), idfObject.getString(WaterHeater_HeatPump_WrappedCondenserFields::InletAirHumidityScheduleName).get());
   EXPECT_EQ(tz.nameString(), idfObject.getString(WaterHeater_HeatPump_WrappedCondenserFields::InletAirZoneName).get());
@@ -125,8 +125,8 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_WaterHeaterHeatPumpWrappedCondenser)
   EXPECT_EQ(40, idfObject.getDouble(WaterHeater_HeatPump_WrappedCondenserFields::OnCycleParasiticElectricLoad).get());
   EXPECT_EQ(50, idfObject.getDouble(WaterHeater_HeatPump_WrappedCondenserFields::OffCycleParasiticElectricLoad).get());
   EXPECT_EQ("Zone", idfObject.getString(WaterHeater_HeatPump_WrappedCondenserFields::ParasiticHeatRejectionLocation).get());
-  EXPECT_EQ(idfObject.isEmpty(WaterHeater_HeatPump_WrappedCondenserFields::InletAirMixerNodeName));
-  EXPECT_EQ(idfObject.isEmpty(WaterHeater_HeatPump_WrappedCondenserFields::OutletAirSplitterNodeName));
+  EXPECT_TRUE(idfObject.isEmpty(WaterHeater_HeatPump_WrappedCondenserFields::InletAirMixerNodeName));
+  EXPECT_TRUE(idfObject.isEmpty(WaterHeater_HeatPump_WrappedCondenserFields::OutletAirSplitterNodeName));
   EXPECT_EQ(scheduleConstant5.nameString(), idfObject.getString(WaterHeater_HeatPump_WrappedCondenserFields::InletAirMixerScheduleName).get());
   EXPECT_EQ("Simultaneous", idfObject.getString(WaterHeater_HeatPump_WrappedCondenserFields::TankElementControlLogic).get());
   EXPECT_EQ(60, idfObject.getDouble(WaterHeater_HeatPump_WrappedCondenserFields::ControlSensor1HeightInStratifiedTank).get());
