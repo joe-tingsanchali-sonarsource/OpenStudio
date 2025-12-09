@@ -242,4 +242,30 @@ class EmbeddedRuby_Test < Minitest::Test
     assert(!schemer.valid?({ 'abc' => 10 }))
   end
 
+  def test_json_schema
+    require 'json-schema'
+
+    schema = {
+      "type" => "object",
+      "required" => ["a"],
+      "properties" => {
+        "a" => {
+          "type" => "integer"
+        }
+      }
+    }
+
+    data_valid = { "a" => 5 }
+    JSON::Validator.validate(schema, data_valid)
+
+    data_invalid = { "a" => "taco" }
+
+    error = assert_raises(JSON::Schema::ValidationError) do
+      # "The property '#/a' of type String did not match the following type: integer"
+      JSON::Validator.validate!(schema, data_invalid)
+    end
+    assert_match(/The property '#\/a' of type string did not match the following type: integer/, error.message)
+
+  end
+
 end

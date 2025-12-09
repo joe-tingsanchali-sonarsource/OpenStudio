@@ -667,6 +667,8 @@ class Dir
     override_args_extglob = true
 
     flags = flags | File::FNM_EXTGLOB if override_args_extglob
+    # Without this 'path/**/*.rb' will match 'path/sub/file.rb' but not 'path/file.rb', cf #5546
+    flags = flags | File::FNM_PATHNAME
     result = []
     pattern_array.each do |pattern|
 
