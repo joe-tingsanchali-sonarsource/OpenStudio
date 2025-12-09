@@ -41,11 +41,11 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_CoilWaterHeatingAirToWaterHeatPumpWr
   ForwardTranslator ft;
   const Workspace w = ft.translateModel(m);
 
-  auto idfs_hpwhs = w.getObjectsByType(IddObjectType::WaterHeater_HeatPump_WrappedCondenser);
-  ASSERT_EQ(1, idfs_hpwhs.size());
-  const WorkspaceObject& idfs_hpwh = idfs_hpwhs[0];
+  const auto idfObjs = w.getObjectsByType(IddObjectType::WaterHeater_HeatPump_WrappedCondenser);
+  ASSERT_EQ(1u, idfObjs.size());
+  const auto& idfObject = idfObjs.front();
 
-  EXPECT_EQ("HPWH", idf_coil.getString(WaterHeater_HeatPump_WrappedCondenserFields::Name).get());
+  EXPECT_EQ("HPWH", idfObject.getString(WaterHeater_HeatPump_WrappedCondenserFields::Name).get());
   EXPECT_EQ("HPWH Air Inlet Node", idfObject.getString(WaterHeater_HeatPump_WrappedCondenserFields::AirInletNodeName).get());
   EXPECT_EQ("HPWH Air Outlet Node", idfObject.getString(WaterHeater_HeatPump_WrappedCondenserFields::AirOutletNodeName).get());
 }
