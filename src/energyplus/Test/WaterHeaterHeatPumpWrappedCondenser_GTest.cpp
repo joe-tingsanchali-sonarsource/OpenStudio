@@ -22,6 +22,8 @@
 #include "../../model/FanOnOff_Impl.hpp"
 #include "../../model/PlantLoop.hpp"
 #include "../../model/PlantLoop_Impl.hpp"
+#include "../../model/Node.hpp"
+#include "../../model/Node_Impl.hpp"
 
 #include <utilities/idd/WaterHeater_HeatPump_WrappedCondenser_FieldEnums.hxx>
 #include <utilities/idd/IddEnums.hxx>
@@ -102,8 +104,8 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_WaterHeaterHeatPumpWrappedCondenser)
     EXPECT_EQ(3, idfObject.getDouble(WaterHeater_HeatPump_WrappedCondenserFields::CondenserTopLocation).get());
     EXPECT_EQ(4, idfObject.getDouble(WaterHeater_HeatPump_WrappedCondenserFields::EvaporatorAirFlowRate).get());
     EXPECT_EQ("Schedule", idfObject.getString(WaterHeater_HeatPump_WrappedCondenserFields::InletAirConfiguration).get());
-    EXPECT_EQ(hpwh.inletNode()->name().get(), idfObject.getString(WaterHeater_HeatPump_WrappedCondenserFields::AirInletNodeName).get());
-    EXPECT_EQ(hpwh.outletNode()->name().get(), idfObject.getString(WaterHeater_HeatPump_WrappedCondenserFields::AirOutletNodeName).get());
+    EXPECT_EQ(hpwh.inletNode().get().nameString(), idfObject.getString(WaterHeater_HeatPump_WrappedCondenserFields::AirInletNodeName).get());
+    EXPECT_EQ(hpwh.outletNode().get().nameString(), idfObject.getString(WaterHeater_HeatPump_WrappedCondenserFields::AirOutletNodeName).get());
     EXPECT_TRUE(idfObject.isEmpty(WaterHeater_HeatPump_WrappedCondenserFields::OutdoorAirNodeName));
     EXPECT_TRUE(idfObject.isEmpty(WaterHeater_HeatPump_WrappedCondenserFields::ExhaustAirNodeName));
     EXPECT_EQ(scheduleConstant2.nameString(),
