@@ -32,7 +32,7 @@ using namespace openstudio::energyplus;
 using namespace openstudio::model;
 using namespace openstudio;
 
-TEST_F(EnergyPlusFixture, ForwardTranslator_WaterHeaterHeatPumpWrappedCondenser) {
+TEST_F(EnergyPlusFixture, ForwardTranslator_WaterHeaterHeatPumpWrappedCondenser1) {
   // Do not set air inlet/outlet node names
   // addToThermalZone
   {
@@ -140,7 +140,9 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_WaterHeaterHeatPumpWrappedCondenser)
     EXPECT_EQ(0.75, idfObject.getDouble(WaterHeater_HeatPump_WrappedCondenserFields::ControlSensor1Weight).get());
     EXPECT_EQ(70, idfObject.getDouble(WaterHeater_HeatPump_WrappedCondenserFields::ControlSensor2HeightInStratifiedTank).get());
   }
+}
 
+TEST_F(EnergyPlusFixture, ForwardTranslator_WaterHeaterHeatPumpWrappedCondenser2) {
   // Set air inlet/outlet node names
   // addToThermalZone
   {
@@ -250,7 +252,9 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_WaterHeaterHeatPumpWrappedCondenser)
     EXPECT_EQ(0.75, idfObject.getDouble(WaterHeater_HeatPump_WrappedCondenserFields::ControlSensor1Weight).get());
     EXPECT_EQ(70, idfObject.getDouble(WaterHeater_HeatPump_WrappedCondenserFields::ControlSensor2HeightInStratifiedTank).get());
   }
+}
 
+TEST_F(EnergyPlusFixture, ForwardTranslator_WaterHeaterHeatPumpWrappedCondenser3) {
   // Set air inlet/outlet node names
   // addSupplyBranchForComponent
   {
