@@ -16,10 +16,10 @@
 #include "../../model/Space.hpp"
 #include "../../model/ScheduleConstant.hpp"
 #include "../../model/ScheduleConstant_Impl.hpp"
-#include "../../WaterHeaterStratified.hpp"
-#include "../../WaterHeaterStratified_Impl.hpp"
-#include "../../FanOnOff.hpp"
-#include "../../FanOnOff_Impl.hpp"
+#include "../../model/WaterHeaterStratified.hpp"
+#include "../../model/WaterHeaterStratified_Impl.hpp"
+#include "../../model/FanOnOff.hpp"
+#include "../../model/FanOnOff_Impl.hpp"
 
 #include <utilities/idd/WaterHeater_HeatPump_WrappedCondenser_FieldEnums.hxx>
 #include <utilities/idd/IddEnums.hxx>
