@@ -130,6 +130,6 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_WaterHeaterHeatPumpWrappedCondenser)
   EXPECT_EQ(scheduleConstant5.nameString(), idfObject.getString(WaterHeater_HeatPump_WrappedCondenserFields::InletAirMixerScheduleName).get());
   EXPECT_EQ("Simultaneous", idfObject.getString(WaterHeater_HeatPump_WrappedCondenserFields::TankElementControlLogic).get());
   EXPECT_EQ(60, idfObject.getDouble(WaterHeater_HeatPump_WrappedCondenserFields::ControlSensor1HeightInStratifiedTank).get());
-  EXPECT_EQ(0.75, idfObject.getString(WaterHeater_HeatPump_WrappedCondenserFields::ControlSensor1Weight).get());
+  EXPECT_EQ(0.75, idfObject.getDouble(WaterHeater_HeatPump_WrappedCondenserFields::ControlSensor1Weight).get());
   EXPECT_EQ(70, idfObject.getDouble(WaterHeater_HeatPump_WrappedCondenserFields::ControlSensor2HeightInStratifiedTank).get());
 }
