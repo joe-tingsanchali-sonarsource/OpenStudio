@@ -130,11 +130,11 @@ namespace energyplus {
         if (auto thermalZone = modelObject.thermalZone()) {
           auto inletNode = modelObject.inletNode();
           OS_ASSERT(inletNode);
-          airInletNodeName = inletNode->name().get();
+          airInletNodeName = modelObject.airInletNodeName().value_or(inletNode->name().get());
 
           auto outletNode = modelObject.outletNode();
           OS_ASSERT(outletNode);
-          airOutletNodeName = outletNode->name().get();
+          airOutletNodeName = modelObject.airOutletNodeName().value_or(outletNode->name().get());
 
           inletAirZoneName = thermalZone->name().get();
           fanInletNodeName = modelObject.name().get() + " Evap Outlet - Fan Inlet";
@@ -146,11 +146,11 @@ namespace energyplus {
         if (auto thermalZone = modelObject.thermalZone()) {
           auto inletNode = modelObject.inletNode();
           OS_ASSERT(inletNode);
-          airInletNodeName = inletNode->name().get();
+          airInletNodeName = modelObject.airInletNodeName().value_or(inletNode->name().get());
 
           auto outletNode = modelObject.outletNode();
           OS_ASSERT(outletNode);
-          airOutletNodeName = outletNode->name().get();
+          airOutletNodeName = modelObject.airOutletNodeName().value_or(outletNode->name().get());
 
           outdoorAirNodeName = modelObject.name().get() + " Outdoor Air";
           exhaustAirNodeName = modelObject.name().get() + " Exhaust Air";
@@ -170,8 +170,8 @@ namespace energyplus {
         evapInletNodeName = outdoorAirNodeName;
         evapOutletNodeName = fanInletNodeName;
       } else if (istringEqual(inletAirConfiguration, "Schedule")) {
-        airInletNodeName = modelObject.name().get() + " Inlet";
-        airOutletNodeName = modelObject.name().get() + " Outlet";
+        airInletNodeName = modelObject.airInletNodeName().value_or(modelObject.name().get() + " Inlet");
+        airOutletNodeName = modelObject.airOutletNodeName().value_or(modelObject.name().get() + " Outlet");
         fanInletNodeName = modelObject.name().get() + " Evap Outlet - Fan Inlet";
         fanOutletNodeName = airOutletNodeName;
         evapInletNodeName = airInletNodeName;
@@ -185,11 +185,11 @@ namespace energyplus {
         if (auto thermalZone = modelObject.thermalZone()) {
           auto inletNode = modelObject.inletNode();
           OS_ASSERT(inletNode);
-          airInletNodeName = inletNode->name().get();
+          airInletNodeName = modelObject.airInletNodeName().value_or(inletNode->name().get());
 
           auto outletNode = modelObject.outletNode();
           OS_ASSERT(outletNode);
-          airOutletNodeName = outletNode->name().get();
+          airOutletNodeName = modelObject.airOutletNodeName().value_or(outletNode->name().get());
 
           inletAirZoneName = thermalZone->name().get();
           fanInletNodeName = airInletNodeName;
@@ -201,11 +201,11 @@ namespace energyplus {
         if (auto thermalZone = modelObject.thermalZone()) {
           auto inletNode = modelObject.inletNode();
           OS_ASSERT(inletNode);
-          airInletNodeName = inletNode->name().get();
+          airInletNodeName = modelObject.airInletNodeName().value_or(inletNode->name().get());
 
           auto outletNode = modelObject.outletNode();
           OS_ASSERT(outletNode);
-          airOutletNodeName = outletNode->name().get();
+          airOutletNodeName = modelObject.airOutletNodeName().value_or(outletNode->name().get());
 
           outdoorAirNodeName = modelObject.name().get() + " Outdoor Air";
           exhaustAirNodeName = modelObject.name().get() + " Exhaust Air";
@@ -225,8 +225,8 @@ namespace energyplus {
         evapInletNodeName = fanOutletNodeName;
         evapOutletNodeName = exhaustAirNodeName;
       } else if (istringEqual(inletAirConfiguration, "Schedule")) {
-        airInletNodeName = modelObject.name().get() + " Inlet";
-        airOutletNodeName = modelObject.name().get() + " Outlet";
+        airInletNodeName = modelObject.airInletNodeName().value_or(modelObject.name().get() + " Inlet");
+        airOutletNodeName = modelObject.airOutletNodeName().value_or(modelObject.name().get() + " Outlet");
         fanInletNodeName = airInletNodeName;
         fanOutletNodeName = modelObject.name().get() + " Fan Outlet - Evap Inlet";
         evapInletNodeName = fanOutletNodeName;
