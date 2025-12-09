@@ -32841,7 +32841,6 @@ OS:WaterHeater:HeatPump:WrappedCondenser,
   A6 , \field Air Inlet Node Name
        \type object-list
        \object-list ConnectionNames
-       \type alpha
        \note Zone air exhaust node name if Inlet Air Configuration is ZoneAirOnly or
        \note ZoneAndOutdoorAir.
        \note Simply a unique Node Name if Inlet Air Configuration is Schedule.
@@ -32849,7 +32848,6 @@ OS:WaterHeater:HeatPump:WrappedCondenser,
   A7 , \field Air Outlet Node Name
        \type object-list
        \object-list ConnectionNames
-       \type alpha
        \note Zone Air Inlet Node Name if Inlet Air Configuration is ZoneAirOnly or
        \note ZoneAndOutdoorAir.
        \note Simply a unique Node Name if Inlet Air Configuration is Schedule.
