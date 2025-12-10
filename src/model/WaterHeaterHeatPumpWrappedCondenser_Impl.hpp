@@ -67,6 +67,10 @@ namespace model {
 
       std::string inletAirConfiguration() const;
 
+      boost::optional<std::string> airInletNodeName() const;
+
+      boost::optional<std::string> airOutletNodeName() const;
+
       boost::optional<Schedule> inletAirTemperatureSchedule() const;
 
       boost::optional<Schedule> inletAirHumiditySchedule() const;
@@ -124,6 +128,14 @@ namespace model {
       void autocalculateEvaporatorAirFlowRate();
 
       bool setInletAirConfiguration(const std::string& inletAirConfiguration);
+
+      bool setAirInletNodeName(const std::string& airInletNodeName);
+
+      void resetAirInletNodeName();
+
+      bool setAirOutletNodeName(const std::string& airOutletNodeName);
+
+      void resetAirOutletNodeName();
 
       bool setInletAirTemperatureSchedule(Schedule& schedule);
 

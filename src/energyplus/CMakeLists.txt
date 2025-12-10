@@ -856,6 +856,7 @@ set(${target_name}_test_src
   Test/ThermostatSetpointDualSetpoint_GTest.cpp
   Test/UnitarySystemPerformanceMultispeed_GTest.cpp
   Test/WindowPropertyFrameAndDivider_GTest.cpp
+  Test/WaterHeaterHeatPumpWrappedCondenser_GTest.cpp
   Test/WaterHeaterMixed_GTest.cpp
   Test/WaterHeaterSizing_GTest.cpp
   Test/WaterHeaterStratified_GTest.cpp

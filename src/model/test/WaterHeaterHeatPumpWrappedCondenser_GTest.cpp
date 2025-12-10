@@ -85,6 +85,18 @@ TEST_F(ModelFixture, WaterHeaterHeatPumpWrappedCondenser_GettersSetters) {
   EXPECT_FALSE(hpwh.setInletAirConfiguration("BADENUM"));
   EXPECT_EQ("OutdoorAirOnly", hpwh.inletAirConfiguration());
 
+  // Air Inlet Node Name: Optional String
+  EXPECT_FALSE(hpwh.airInletNodeName());
+  EXPECT_TRUE(hpwh.setAirInletNodeName("HPWH Air Inlet Node"));
+  ASSERT_TRUE(hpwh.airInletNodeName());
+  EXPECT_EQ("HPWH Air Inlet Node", hpwh.airInletNodeName().get());
+
+  // Air Outlet Node Name: Optional String
+  EXPECT_FALSE(hpwh.airOutletNodeName());
+  EXPECT_TRUE(hpwh.setAirOutletNodeName("HPWH Air Outlet Node"));
+  ASSERT_TRUE(hpwh.airOutletNodeName());
+  EXPECT_EQ("HPWH Air Outlet Node", hpwh.airOutletNodeName().get());
+
   // Inlet Air Temperature Schedule: Optional Object but set in Ctor
   {
     ScheduleConstant obj(m);

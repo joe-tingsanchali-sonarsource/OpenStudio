@@ -144,6 +144,14 @@ namespace model {
       return value.get();
     }
 
+    boost::optional<std::string> WaterHeaterHeatPumpWrappedCondenser_Impl::airInletNodeName() const {
+      return getString(OS_WaterHeater_HeatPump_WrappedCondenserFields::AirInletNodeName, false, true);  // Return empty if not initialized
+    }
+
+    boost::optional<std::string> WaterHeaterHeatPumpWrappedCondenser_Impl::airOutletNodeName() const {
+      return getString(OS_WaterHeater_HeatPump_WrappedCondenserFields::AirOutletNodeName, false, true);  // Return empty if not initialized
+    }
+
     boost::optional<Schedule> WaterHeaterHeatPumpWrappedCondenser_Impl::inletAirTemperatureSchedule() const {
       return getObject<ModelObject>().getModelObjectTarget<Schedule>(OS_WaterHeater_HeatPump_WrappedCondenserFields::InletAirTemperatureScheduleName);
     }
@@ -297,6 +305,28 @@ namespace model {
     bool WaterHeaterHeatPumpWrappedCondenser_Impl::setInletAirConfiguration(const std::string& inletAirConfiguration) {
       bool result = setString(OS_WaterHeater_HeatPump_WrappedCondenserFields::InletAirConfiguration, inletAirConfiguration);
       return result;
+    }
+
+    bool WaterHeaterHeatPumpWrappedCondenser_Impl::setAirInletNodeName(const std::string& airInletNodeName) {
+      const bool result = setString(OS_WaterHeater_HeatPump_WrappedCondenserFields::AirInletNodeName, airInletNodeName);
+      OS_ASSERT(result);
+      return result;
+    }
+
+    void WaterHeaterHeatPumpWrappedCondenser_Impl::resetAirInletNodeName() {
+      const bool result = setString(OS_WaterHeater_HeatPump_WrappedCondenserFields::AirInletNodeName, "");
+      OS_ASSERT(result);
+    }
+
+    bool WaterHeaterHeatPumpWrappedCondenser_Impl::setAirOutletNodeName(const std::string& airOutletNodeName) {
+      const bool result = setString(OS_WaterHeater_HeatPump_WrappedCondenserFields::AirOutletNodeName, airOutletNodeName);
+      OS_ASSERT(result);
+      return result;
+    }
+
+    void WaterHeaterHeatPumpWrappedCondenser_Impl::resetAirOutletNodeName() {
+      const bool result = setString(OS_WaterHeater_HeatPump_WrappedCondenserFields::AirOutletNodeName, "");
+      OS_ASSERT(result);
     }
 
     bool WaterHeaterHeatPumpWrappedCondenser_Impl::setInletAirTemperatureSchedule(Schedule& schedule) {
@@ -706,6 +736,14 @@ namespace model {
     return getImpl<detail::WaterHeaterHeatPumpWrappedCondenser_Impl>()->inletAirConfiguration();
   }
 
+  boost::optional<std::string> WaterHeaterHeatPumpWrappedCondenser::airInletNodeName() const {
+    return getImpl<detail::WaterHeaterHeatPumpWrappedCondenser_Impl>()->airInletNodeName();
+  }
+
+  boost::optional<std::string> WaterHeaterHeatPumpWrappedCondenser::airOutletNodeName() const {
+    return getImpl<detail::WaterHeaterHeatPumpWrappedCondenser_Impl>()->airOutletNodeName();
+  }
+
   boost::optional<Schedule> WaterHeaterHeatPumpWrappedCondenser::inletAirTemperatureSchedule() const {
     return getImpl<detail::WaterHeaterHeatPumpWrappedCondenser_Impl>()->inletAirTemperatureSchedule();
   }
@@ -812,6 +850,22 @@ namespace model {
 
   bool WaterHeaterHeatPumpWrappedCondenser::setInletAirConfiguration(const std::string& inletAirConfiguration) {
     return getImpl<detail::WaterHeaterHeatPumpWrappedCondenser_Impl>()->setInletAirConfiguration(inletAirConfiguration);
+  }
+
+  bool WaterHeaterHeatPumpWrappedCondenser::setAirInletNodeName(const std::string& airInletNodeName) {
+    return getImpl<detail::WaterHeaterHeatPumpWrappedCondenser_Impl>()->setAirInletNodeName(airInletNodeName);
+  }
+
+  void WaterHeaterHeatPumpWrappedCondenser::resetAirInletNodeName() {
+    getImpl<detail::WaterHeaterHeatPumpWrappedCondenser_Impl>()->resetAirInletNodeName();
+  }
+
+  bool WaterHeaterHeatPumpWrappedCondenser::setAirOutletNodeName(const std::string& airOutletNodeName) {
+    return getImpl<detail::WaterHeaterHeatPumpWrappedCondenser_Impl>()->setAirOutletNodeName(airOutletNodeName);
+  }
+
+  void WaterHeaterHeatPumpWrappedCondenser::resetAirOutletNodeName() {
+    getImpl<detail::WaterHeaterHeatPumpWrappedCondenser_Impl>()->resetAirOutletNodeName();
   }
 
   bool WaterHeaterHeatPumpWrappedCondenser::setInletAirTemperatureSchedule(Schedule& schedule) {
