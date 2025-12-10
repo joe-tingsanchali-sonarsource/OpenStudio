@@ -103,9 +103,9 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_WaterHeaterHeatPumpWrappedCondenser1
     EXPECT_EQ(2, idfObject.getDouble(WaterHeater_HeatPump_WrappedCondenserFields::CondenserBottomLocation).get());
     EXPECT_EQ(3, idfObject.getDouble(WaterHeater_HeatPump_WrappedCondenserFields::CondenserTopLocation).get());
     EXPECT_EQ(4, idfObject.getDouble(WaterHeater_HeatPump_WrappedCondenserFields::EvaporatorAirFlowRate).get());
-    EXPECT_EQ("Schedule", idfObject.getString(WaterHeater_HeatPump_WrappedCondenserFields::InletAirConfiguration).get());
-    EXPECT_EQ(hpwh.inletNode().get().nameString(), idfObject.getString(WaterHeater_HeatPump_WrappedCondenserFields::AirInletNodeName).get());
-    EXPECT_EQ(hpwh.outletNode().get().nameString(), idfObject.getString(WaterHeater_HeatPump_WrappedCondenserFields::AirOutletNodeName).get());
+    EXPECT_EQ("ZoneAirOnly", idfObject.getString(WaterHeater_HeatPump_WrappedCondenserFields::InletAirConfiguration).get());
+    EXPECT_EQ(hpwh.nameString() + " Inlet Node", idfObject.getString(WaterHeater_HeatPump_WrappedCondenserFields::AirInletNodeName).get());
+    EXPECT_EQ(hpwh.nameString() + " Outlet Node", idfObject.getString(WaterHeater_HeatPump_WrappedCondenserFields::AirOutletNodeName).get());
     EXPECT_TRUE(idfObject.isEmpty(WaterHeater_HeatPump_WrappedCondenserFields::OutdoorAirNodeName));
     EXPECT_TRUE(idfObject.isEmpty(WaterHeater_HeatPump_WrappedCondenserFields::ExhaustAirNodeName));
     EXPECT_EQ(scheduleConstant2.nameString(),
@@ -123,9 +123,8 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_WaterHeaterHeatPumpWrappedCondenser1
     EXPECT_EQ(coil.nameString(), idfObject.getString(WaterHeater_HeatPump_WrappedCondenserFields::DXCoilName).get());
     EXPECT_EQ(15, idfObject.getDouble(WaterHeater_HeatPump_WrappedCondenserFields::MinimumInletAirTemperatureforCompressorOperation).get());
     EXPECT_EQ(30, idfObject.getDouble(WaterHeater_HeatPump_WrappedCondenserFields::MaximumInletAirTemperatureforCompressorOperation).get());
-    EXPECT_EQ("Outdoors", idfObject.getString(WaterHeater_HeatPump_WrappedCondenserFields::CompressorLocation).get());
-    EXPECT_EQ(scheduleConstant4.nameString(),
-              idfObject.getString(WaterHeater_HeatPump_WrappedCondenserFields::CompressorAmbientTemperatureScheduleName).get());
+    EXPECT_EQ("Zone", idfObject.getString(WaterHeater_HeatPump_WrappedCondenserFields::CompressorLocation).get());
+    EXPECT_TRUE(idfObject.isEmpty(WaterHeater_HeatPump_WrappedCondenserFields::CompressorAmbientTemperatureScheduleName));
     EXPECT_EQ("Fan:OnOff", idfObject.getString(WaterHeater_HeatPump_WrappedCondenserFields::FanObjectType).get());
     EXPECT_EQ(fan.nameString(), idfObject.getString(WaterHeater_HeatPump_WrappedCondenserFields::FanName).get());
     EXPECT_EQ("DrawThrough", idfObject.getString(WaterHeater_HeatPump_WrappedCondenserFields::FanPlacement).get());
@@ -215,7 +214,7 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_WaterHeaterHeatPumpWrappedCondenser2
     EXPECT_EQ(2, idfObject.getDouble(WaterHeater_HeatPump_WrappedCondenserFields::CondenserBottomLocation).get());
     EXPECT_EQ(3, idfObject.getDouble(WaterHeater_HeatPump_WrappedCondenserFields::CondenserTopLocation).get());
     EXPECT_EQ(4, idfObject.getDouble(WaterHeater_HeatPump_WrappedCondenserFields::EvaporatorAirFlowRate).get());
-    EXPECT_EQ("Schedule", idfObject.getString(WaterHeater_HeatPump_WrappedCondenserFields::InletAirConfiguration).get());
+    EXPECT_EQ("ZoneAirOnly", idfObject.getString(WaterHeater_HeatPump_WrappedCondenserFields::InletAirConfiguration).get());
     EXPECT_EQ("HPWH Air Inlet Node", idfObject.getString(WaterHeater_HeatPump_WrappedCondenserFields::AirInletNodeName).get());
     EXPECT_EQ("HPWH Air Outlet Node", idfObject.getString(WaterHeater_HeatPump_WrappedCondenserFields::AirOutletNodeName).get());
     EXPECT_TRUE(idfObject.isEmpty(WaterHeater_HeatPump_WrappedCondenserFields::OutdoorAirNodeName));
@@ -235,7 +234,7 @@ TEST_F(EnergyPlusFixture, ForwardTranslator_WaterHeaterHeatPumpWrappedCondenser2
     EXPECT_EQ(coil.nameString(), idfObject.getString(WaterHeater_HeatPump_WrappedCondenserFields::DXCoilName).get());
     EXPECT_EQ(15, idfObject.getDouble(WaterHeater_HeatPump_WrappedCondenserFields::MinimumInletAirTemperatureforCompressorOperation).get());
     EXPECT_EQ(30, idfObject.getDouble(WaterHeater_HeatPump_WrappedCondenserFields::MaximumInletAirTemperatureforCompressorOperation).get());
-    EXPECT_EQ("Outdoors", idfObject.getString(WaterHeater_HeatPump_WrappedCondenserFields::CompressorLocation).get());
+    EXPECT_EQ("Zone", idfObject.getString(WaterHeater_HeatPump_WrappedCondenserFields::CompressorLocation).get());
     EXPECT_EQ(scheduleConstant4.nameString(),
               idfObject.getString(WaterHeater_HeatPump_WrappedCondenserFields::CompressorAmbientTemperatureScheduleName).get());
     EXPECT_EQ("Fan:OnOff", idfObject.getString(WaterHeater_HeatPump_WrappedCondenserFields::FanObjectType).get());
