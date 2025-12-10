@@ -438,17 +438,7 @@ bool OSWorkflow::run() {
     }
   }
 
-  // TODO: Is this really necessary? Seems like it's done before already (in RunPreProcess)
-  if (workspace_) {
-    // Save final IDF
-    if (m_add_timings) {
-      m_timers->newTimer("Save IDF");
-    }
-    workspace_->save(runDirPath / "in.idf", true);
-    if (m_add_timings) {
-      m_timers->tockCurrentTimer();
-    }
-  }
+  // No need to save the workspace (IDF) here, done before already (in RunPreProcess)
 
   if (!workflowJSON.runOptions()->fast()) {
     communicateResults();
