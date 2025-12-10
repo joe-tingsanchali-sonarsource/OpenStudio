@@ -30,7 +30,7 @@ void OSWorkflow::runTranslator() {
   // skip if halted
   // TODO: I don't understand this
   if (runner.halted()) {
-    LOG(Info, "Workflow halted, skipping OSM to IDF translation");
+    LOG(Info, "Workflow halted, skipping the OSM to IDF translation");
     // This allows model arguments to still be calculated
     workspace_ = Workspace{};
     return;
