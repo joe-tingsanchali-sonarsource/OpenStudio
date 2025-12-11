@@ -14,6 +14,7 @@
 #include "HVACComponent_Impl.hpp"
 #include "FanOnOff.hpp"
 #include "FanOnOff_Impl.hpp"
+#include "Node.hpp"
 // #include "FanSystemModel.hpp"
 #include "WaterToWaterComponent.hpp"
 #include "WaterToWaterComponent_Impl.hpp"
@@ -142,6 +143,52 @@ namespace model {
       boost::optional<std::string> value = getString(OS_WaterHeater_HeatPump_WrappedCondenserFields::InletAirConfiguration, true);
       OS_ASSERT(value);
       return value.get();
+    }
+
+    std::string WaterHeaterHeatPumpWrappedCondenser_Impl::airInletNodeName() const {
+      auto inletAirConfiguration = this->inletAirConfiguration();
+
+      std::string airInletNodeName;
+      // Depending on inletAirConfiguration, what this returns will be different
+      // * "ZoneAirOnly" and "ZoneAndOutdoorAir" need to get nodes from the thermal zone
+      // * "OutdoorAirOnly" and "Schedule", it just constructs a node name.
+      // This is helpful if you need to control this via EMS
+      if (istringEqual(inletAirConfiguration, "ZoneAirOnly") || istringEqual(inletAirConfiguration, "ZoneAndOutdoorAir")) {
+        if (auto thermalZone = this->thermalZone()) {
+          auto inletNode = this->inletNode();
+          OS_ASSERT(inletNode);
+          airInletNodeName = inletNode->nameString();
+        }
+      } else if (istringEqual(inletAirConfiguration, "OutdoorAirOnly")) {
+        // Empty
+      } else if (istringEqual(inletAirConfiguration, "Schedule")) {
+        airInletNodeName = this->nameString() + " Inlet";
+      }
+
+      return airInletNodeName;
+    }
+
+    std::string WaterHeaterHeatPumpWrappedCondenser_Impl::airOutletNodeName() const {
+      auto inletAirConfiguration = this->inletAirConfiguration();
+
+      std::string airOutletNodeName;
+      // Depending on inletAirConfiguration, what this returns will be different
+      // * "ZoneAirOnly" and "ZoneAndOutdoorAir" need to get nodes from the thermal zone
+      // * "OutdoorAirOnly" and "Schedule", it just constructs a node name.
+      // This is helpful if you need to control this via EMS
+      if (istringEqual(inletAirConfiguration, "ZoneAirOnly") || istringEqual(inletAirConfiguration, "ZoneAndOutdoorAir")) {
+        if (auto thermalZone = this->thermalZone()) {
+          auto outletNode = this->outletNode();
+          OS_ASSERT(outletNode);
+          airOutletNodeName = outletNode->nameString();
+        }
+      } else if (istringEqual(inletAirConfiguration, "OutdoorAirOnly")) {
+        // Empty
+      } else if (istringEqual(inletAirConfiguration, "Schedule")) {
+        airOutletNodeName = this->nameString() + " Outlet";
+      }
+
+      return airOutletNodeName;
     }
 
     boost::optional<Schedule> WaterHeaterHeatPumpWrappedCondenser_Impl::inletAirTemperatureSchedule() const {
@@ -704,6 +751,14 @@ namespace model {
 
   std::string WaterHeaterHeatPumpWrappedCondenser::inletAirConfiguration() const {
     return getImpl<detail::WaterHeaterHeatPumpWrappedCondenser_Impl>()->inletAirConfiguration();
+  }
+
+  std::string WaterHeaterHeatPumpWrappedCondenser::airInletNodeName() const {
+    return getImpl<detail::WaterHeaterHeatPumpWrappedCondenser_Impl>()->airInletNodeName();
+  }
+
+  std::string WaterHeaterHeatPumpWrappedCondenser::airOutletNodeName() const {
+    return getImpl<detail::WaterHeaterHeatPumpWrappedCondenser_Impl>()->airOutletNodeName();
   }
 
   boost::optional<Schedule> WaterHeaterHeatPumpWrappedCondenser::inletAirTemperatureSchedule() const {

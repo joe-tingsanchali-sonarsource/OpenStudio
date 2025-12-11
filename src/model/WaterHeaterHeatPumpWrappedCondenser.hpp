@@ -184,6 +184,14 @@ namespace model {
     /** @name Other */
     //@{
 
+    /** Convenience methods to return the name of the inlet/outlet nodes
+      * Depending on inletAirConfiguration, what this returns will be different
+      * - "ZoneAirOnly" and "ZoneAndOutdoorAir" need to get nodes from the thermal zone
+      * - "OutdoorAirOnly" and "Schedule", it just constructs a node name.
+      * This is helpful if you need to control this via EMS */
+    std::string airInletNodeName() const;
+    std::string airOutletNodeName() const;
+
     //@}
    protected:
     /// @cond

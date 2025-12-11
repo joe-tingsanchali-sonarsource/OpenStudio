@@ -186,6 +186,9 @@ namespace model {
       bool addToThermalZone(ThermalZone& thermalZone) override;
       std::vector<IdfObject> remove() override;
 
+      std::string airInletNodeName() const;
+      std::string airOutletNodeName() const;
+
       //@}
      protected:
      private:
