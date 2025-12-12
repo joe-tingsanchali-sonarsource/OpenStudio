@@ -38,6 +38,7 @@
 #include <limits>
 #include <string_view>
 #include <stdexcept>
+#include <boost/filesystem/operations.hpp>
 
 // TODO: this should really in Variant.hpp, but I'm getting pwned by the fact that ruby defines int128_t as a macro, no time to track it down
 template <>
@@ -157,6 +158,39 @@ void OSWorkflow::updateLastWeatherFileFromModel() {
   LOG(Debug, "Weather file is not defined by the model");
 }
 
+void OSWorkflow::saveModelicaFileToPath(const openstudio::path& filePath) {
+  if (!modelicaFile) {
+    return;
+  }
+
+  auto parent = filePath.parent_path();
+  if (!parent.empty()) {
+    openstudio::filesystem::create_directories(parent);
+  }
+
+  openstudio::filesystem::ofstream out(filePath);
+  if (!out.is_open()) {
+    throw std::runtime_error(fmt::format("Unable to write Modelica seed file to '{}'", filePath.generic_string()));
+  }
+  out << modelicaFile->getText();
+  out.close();
+
+  m_latestModelicaFilePath = boost::filesystem::absolute(filePath);
+}
+
+void OSWorkflow::saveModelicaFileSnapshot(const openstudio::path& directory) {
+  if (!modelicaFile || !m_modelicaSeedFileName) {
+    return;
+  }
+
+  if (!directory.empty()) {
+    openstudio::filesystem::create_directories(directory);
+  }
+
+  auto targetPath = directory / m_modelicaSeedFileName.get();
+  saveModelicaFileToPath(targetPath);
+}
+
 void OSWorkflow::applyArguments(measure::OSArgumentMap& argumentMap, const std::string& argumentName, const openstudio::Variant& argumentValue) {
   LOG(Info, "Setting argument value '" << argumentName << "' to '" << argumentValue << "'");
 
@@ -241,10 +275,7 @@ bool OSWorkflow::run() {
 
   // If the user passed something like `openstudio --loglevel Trace run --debug -w workflow.osw`, we retain the Trace
   LogLevel oriLogLevel = openstudio::Logger::instance().standardOutLogger().logLevel().value_or(Warn);
-  LogLevel targetLogLevel = oriLogLevel;
-  if (workflowJSON.runOptions()->debug() && oriLogLevel > Debug) {
-    targetLogLevel = Debug;
-  }
+  LogLevel targetLogLevel = workflowJSON.runOptions()->debug() ? Debug : oriLogLevel;
 
   openstudio::Logger::instance().addTimeStampToLogger();  // Needed for run.log formatting
   openstudio::Logger::instance().standardOutLogger().setFormatter(&standardFormatterWithStringSeverity);
@@ -253,7 +284,7 @@ bool OSWorkflow::run() {
   // and stdOut logger should receive all the others. This is definitely doable (cf LogSink::updateFilter) but now is not the time.
   if (!m_show_stdout) {
     openstudio::Logger::instance().standardOutLogger().setLogLevel(Error);  // Still show errors
-  } else if (oriLogLevel != targetLogLevel) {
+  } else {
     openstudio::Logger::instance().standardOutLogger().setLogLevel(targetLogLevel);
   }
 
@@ -338,7 +369,7 @@ bool OSWorkflow::run() {
 
   struct JobMap
   {
-    std::array<std::pair<std::string_view, JobInfo>, 9> data;
+    std::array<std::pair<std::string_view, JobInfo>, 11> data;
 
     [[nodiscard]] JobInfo& at(const std::string_view& key) {
       auto itr = std::find_if(std::begin(data), std::end(data), [&key](const auto& v) { return v.first == key; });
@@ -371,38 +402,57 @@ bool OSWorkflow::run() {
   };
 
   // Can't use a regular map, it's not retaining order
-  static constexpr std::array<std::pair<std::string_view, JobInfo>, 9> known_jobs{{
-    {"Initialization", {&OSWorkflow::runInitialization, true}},
-    {"OpenStudioMeasures", {&OSWorkflow::runOpenStudioMeasures, true}},
-    {"Translator", {&OSWorkflow::runTranslator, true}},
-    {"EnergyPlusMeasures", {&OSWorkflow::runEnergyPlusMeasures, true}},
-    {"PreProcess", {&OSWorkflow::runPreProcess, true}},
-    {"EnergyPlus", {&OSWorkflow::runEnergyPlus, true}},
-    {"ReportingMeasures", {&OSWorkflow::runReportingMeasures, true}},
-    {"PostProcess", {&OSWorkflow::runPostProcess, true}},
-    {"Cleanup", {&OSWorkflow::runCleanup, true}},
+  static constexpr std::array<std::pair<std::string_view, JobInfo>, 11> known_jobs{{
+    {"Initialization", {.jobFun = &OSWorkflow::runInitialization, .selected = true}},
+    {"OpenStudioMeasures", {.jobFun = &OSWorkflow::runOpenStudioMeasures, .selected = true}},
+    {"Translator", {.jobFun = &OSWorkflow::runTranslator, .selected = true}},
+    {"EnergyPlusMeasures", {.jobFun = &OSWorkflow::runEnergyPlusMeasures, .selected = true}},
+    {"ModelicaMeasures", {.jobFun = &OSWorkflow::runModelicaMeasures, .selected = false}},
+    {"PreProcess", {.jobFun = &OSWorkflow::runPreProcess, .selected = true}},
+    {"EnergyPlus", {.jobFun = &OSWorkflow::runEnergyPlus, .selected = true}},
+    {"Modelica", {.jobFun = &OSWorkflow::runModelica, .selected = false}},
+    {"ReportingMeasures", {.jobFun = &OSWorkflow::runReportingMeasures, .selected = true}},
+    {"PostProcess", {.jobFun = &OSWorkflow::runPostProcess, .selected = true}},
+    {"Cleanup", {.jobFun = &OSWorkflow::runCleanup, .selected = true}},
   }};
 
   JobMap jobMap{{known_jobs}};
 
-  if (m_no_simulation) {
+  if (workflowJSON.seedModelicaModel()) {
     jobMap.at("Initialization").selected = true;
     jobMap.at("OpenStudioMeasures").selected = true;
     jobMap.at("Translator").selected = true;
     jobMap.at("EnergyPlusMeasures").selected = true;
+    jobMap.at("ModelicaMeasures").selected = true;
     jobMap.at("PreProcess").selected = true;
     jobMap.at("EnergyPlus").selected = false;
+    jobMap.at("Modelica").selected = true;
+    jobMap.at("ReportingMeasures").selected = true;
+    jobMap.at("PostProcess").selected = false;
+    jobMap.at("Cleanup").selected = true;
+
+    workflowJSON.runOptions()->forwardTranslatorOptions().setExcludeSpaceTranslation(true);
+  } else if (m_no_simulation) {
+    jobMap.at("Initialization").selected = true;
+    jobMap.at("OpenStudioMeasures").selected = true;
+    jobMap.at("Translator").selected = true;
+    jobMap.at("EnergyPlusMeasures").selected = true;
+    jobMap.at("ModelicaMeasures").selected = false;
+    jobMap.at("PreProcess").selected = true;
+    jobMap.at("EnergyPlus").selected = false;
+    jobMap.at("Modelica").selected = false;
     jobMap.at("ReportingMeasures").selected = false;
     jobMap.at("PostProcess").selected = true;
     jobMap.at("Cleanup").selected = true;
-
   } else if (m_post_process_only) {
     jobMap.at("Initialization").selected = true;
     jobMap.at("OpenStudioMeasures").selected = false;
     jobMap.at("Translator").selected = false;
     jobMap.at("EnergyPlusMeasures").selected = false;
+    jobMap.at("ModelicaMeasures").selected = false;
     jobMap.at("PreProcess").selected = false;
     jobMap.at("EnergyPlus").selected = false;
+    jobMap.at("Modelica").selected = false;
     jobMap.at("ReportingMeasures").selected = true;
     jobMap.at("PostProcess").selected = true;
     jobMap.at("Cleanup").selected = true;

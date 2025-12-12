@@ -581,6 +581,82 @@ namespace detail {
     onUpdate();
   }
 
+  boost::optional<openstudio::path> WorkflowJSON_Impl::seedModelicaFile() const {
+    Json::Value defaultValue("");
+    Json::Value seed = m_value.get("seed_modelica_file", defaultValue);
+    std::string result = seed.asString();
+    if (result.empty()) {
+      return boost::none;
+    }
+    return toPath(result);
+  }
+
+  boost::optional<std::string> WorkflowJSON_Impl::seedModelicaModel() const {
+    Json::Value defaultValue("");
+    Json::Value seed = m_value.get("seed_modelica_model", defaultValue);
+    std::string result = seed.asString();
+    if (result.empty()) {
+      return boost::none;
+    }
+    return result;
+  }
+
+  bool WorkflowJSON_Impl::setSeedModelicaFile(const openstudio::path& seedFile) {
+    m_value["seed_modelica_file"] = toString(seedFile);
+    onUpdate();
+    return true;
+  }
+
+  void WorkflowJSON_Impl::resetSeedModelicaFile() {
+    m_value.removeMember("seed_modelica_file");
+    onUpdate();
+  }
+
+  std::vector<openstudio::path> WorkflowJSON_Impl::modelicaPackages() const {
+    std::vector<openstudio::path> result;
+    const Json::Value& packages = m_value.get("modelica_packages", Json::Value());
+
+    auto appendIfValid = [&result](const Json::Value& value) {
+      if (value.isString()) {
+        const std::string str = value.asString();
+        if (!str.empty()) {
+          result.push_back(toPath(str));
+        }
+      }
+    };
+
+    if (packages.isArray()) {
+      for (const auto& entry : packages) {
+        appendIfValid(entry);
+      }
+    } else {
+      appendIfValid(packages);
+    }
+
+    return result;
+  }
+
+  bool WorkflowJSON_Impl::setModelicaPackages(const std::vector<openstudio::path>& packages) {
+    if (packages.empty()) {
+      resetModelicaPackages();
+      return true;
+    }
+
+    Json::Value packageArray(Json::arrayValue);
+    for (const auto& package : packages) {
+      packageArray.append(toString(package));
+    }
+
+    m_value["modelica_packages"] = std::move(packageArray);
+    onUpdate();
+    return true;
+  }
+
+  void WorkflowJSON_Impl::resetModelicaPackages() {
+    m_value.removeMember("modelica_packages");
+    onUpdate();
+  }
+
   boost::optional<openstudio::path> WorkflowJSON_Impl::weatherFile() const {
     Json::Value defaultValue("");
     Json::Value weather = m_value.get("weather_file", defaultValue);
@@ -916,12 +992,19 @@ namespace detail {
             LOG(Error, "OpenStudio measure '" << measureDirName << "' called after transition to EnergyPlus.");
             result = false;
           }
+          if (state == MeasureType::ModelicaMeasure) {
+            LOG(Error, "OpenStudio measure '" << measureDirName << "' called after Modelica measure.");
+            result = false;
+          }
           if (state == MeasureType::ReportingMeasure) {
             LOG(Error, "OpenStudio measure '" << measureDirName << "' called after Energyplus simulation.");
             result = false;
           }
-
         } else if (measureType == MeasureType::EnergyPlusMeasure) {
+          if (state == MeasureType::ModelicaMeasure) {
+            LOG(Error, "EnergyPlus measure '" << measureDirName << "' called after Modelica measure.");
+            result = false;
+          }
           if (state == MeasureType::ReportingMeasure) {
             LOG(Error, "EnergyPlus measure '" << measureDirName << "' called after Energyplus simulation.");
             result = false;
@@ -929,10 +1012,16 @@ namespace detail {
           if (state == MeasureType::ModelMeasure) {
             state = MeasureType::EnergyPlusMeasure;
           }
-
+        } else if (measureType == MeasureType::ModelicaMeasure) {
+          if (state == MeasureType::ReportingMeasure) {
+            LOG(Error, "Modelica measure '" << measureDirName << "' called after Energyplus simulation.");
+            result = false;
+          }
+          if (state == MeasureType::EnergyPlusMeasure) {
+            state = MeasureType::ModelicaMeasure;
+          }
         } else if (measureType == MeasureType::ReportingMeasure) {
           state = MeasureType::ReportingMeasure;
-
         } else {
           LOG(Error, "MeasureType " << measureType.valueName() << " of measure '" << measureDirName << "' is not supported");
           result = false;
@@ -1160,7 +1249,35 @@ bool WorkflowJSON::setSeedFile(const openstudio::path& seedFile) {
 }
 
 void WorkflowJSON::resetSeedFile() {
-  return getImpl<detail::WorkflowJSON_Impl>()->resetSeedFile();
+  getImpl<detail::WorkflowJSON_Impl>()->resetSeedFile();
+}
+
+boost::optional<openstudio::path> WorkflowJSON::seedModelicaFile() const {
+  return getImpl<detail::WorkflowJSON_Impl>()->seedModelicaFile();
+}
+
+boost::optional<std::string> WorkflowJSON::seedModelicaModel() const {
+  return getImpl<detail::WorkflowJSON_Impl>()->seedModelicaModel();
+}
+
+bool WorkflowJSON::setSeedModelicaFile(const openstudio::path& modelicaSeedFile) {
+  return getImpl<detail::WorkflowJSON_Impl>()->setSeedModelicaFile(modelicaSeedFile);
+}
+
+void WorkflowJSON::resetSeedModelicaFile() {
+  getImpl<detail::WorkflowJSON_Impl>()->resetSeedModelicaFile();
+}
+
+std::vector<openstudio::path> WorkflowJSON::modelicaPackages() const {
+  return getImpl<detail::WorkflowJSON_Impl>()->modelicaPackages();
+}
+
+bool WorkflowJSON::setModelicaPackages(const std::vector<openstudio::path>& packages) {
+  return getImpl<detail::WorkflowJSON_Impl>()->setModelicaPackages(packages);
+}
+
+void WorkflowJSON::resetModelicaPackages() {
+  getImpl<detail::WorkflowJSON_Impl>()->resetModelicaPackages();
 }
 
 boost::optional<openstudio::path> WorkflowJSON::weatherFile() const {

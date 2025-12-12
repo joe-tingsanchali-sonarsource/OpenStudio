@@ -10,6 +10,7 @@ target_link_libraries(
  openstudio_utilities
  openstudio_airflow
  openstudio_model
+ openstudio_modelica
  openstudio_energyplus
  openstudio_epjson
  openstudio_alfalfa

@@ -12,6 +12,8 @@ add_library(openstudio_workflow
   RunEnergyPlusMeasures.cpp
   RunPreProcess.cpp
   RunEnergyPlus.cpp
+  RunModelica.cpp
+  RunModelicaMeasures.cpp
   RunReportingMeasures.cpp
   RunPostProcess.cpp
   RunCleanup.cpp

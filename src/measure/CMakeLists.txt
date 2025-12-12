@@ -10,6 +10,10 @@ set(${target_name}_src
   MeasureAPI.hpp
   ModelMeasure.cpp
   ModelMeasure.hpp
+  ModelicaMeasure.cpp
+  ModelicaMeasure.hpp
+  ModelicaParameters.cpp
+  ModelicaParameters.hpp
   OSArgument.cpp
   OSArgument.hpp
   OSMeasure.cpp

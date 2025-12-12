@@ -10,7 +10,10 @@
 #include <OpenStudio.hxx>
 
 #include <fmt/format.h>
+#include <optional>
 #include <sstream>
+#include <vector>
+#include <fstream>
 #include <boost/regex.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/case_conv.hpp>
@@ -325,6 +328,202 @@ openstudio::path getEnergyPlusExecutable() {
   //}
 
   return openstudio::path();
+}
+
+namespace {
+  constexpr const char* kModelicaCompilerEnv = "OS_MODELICA_COMPILER";
+  constexpr const char* kOpenModelicaExecutableEnv = "OPENMODELICA_EXECUTABLE";
+  constexpr const char* kDymolaExecutableEnv = "DYMOLA_EXECUTABLE";
+
+  std::string_view compilerName(ModelicaCompilerType type) {
+    switch (type) {
+      case ModelicaCompilerType::OpenModelica:
+        return "OpenModelica";
+      case ModelicaCompilerType::Dymola:
+        return "Dymola";
+    }
+    return "";
+  }
+
+  std::optional<ModelicaCompilerType> parseCompilerType(const std::string& value) {
+    auto lower = boost::algorithm::to_lower_copy(value);
+    if ((lower == "openmodelica") || (lower == "omc") || (lower == "om")) {
+      return ModelicaCompilerType::OpenModelica;
+    }
+    if (lower == "dymola") {
+      return ModelicaCompilerType::Dymola;
+    }
+    return std::nullopt;
+  }
+
+  openstudio::path pathFromEnv(const char* envVar) {
+    if (const char* raw = std::getenv(envVar)) {
+      openstudio::path envPath = completeAndNormalize(openstudio::toPath(raw));
+      if (openstudio::filesystem::exists(envPath)) {
+        return envPath;
+      }
+      LOG_FREE(Warn, "ApplicationPathHelpers", fmt::format("Environment variable {}='{}' does not point to an existing file", envVar, raw));
+    }
+    return {};
+  }
+
+  openstudio::path findOpenModelicaExecutable() {
+    if (auto envPath = pathFromEnv(kOpenModelicaExecutableEnv); !envPath.empty()) {
+      return envPath;
+    }
+
+    auto candidate = findInSystemPath(openstudio::toPath(std::string("omc") + executableFileExtension()));
+    if (!candidate.empty() && openstudio::filesystem::exists(candidate)) {
+      return candidate;
+    }
+    return {};
+  }
+
+  openstudio::path findDymolaExecutable() {
+    if (auto envPath = pathFromEnv(kDymolaExecutableEnv); !envPath.empty()) {
+      return envPath;
+    }
+
+#ifdef _WIN32
+    const std::vector<std::string> candidateNames{"dymola.exe", "dymola64.exe"};
+#else
+    const std::vector<std::string> candidateNames{"dymola", "Dymola", "dymola.sh"};
+#endif
+    for (const auto& name : candidateNames) {
+      auto candidate = findInSystemPath(openstudio::toPath(name));
+      if (!candidate.empty() && openstudio::filesystem::exists(candidate)) {
+        return candidate;
+      }
+    }
+    return {};
+  }
+
+  std::optional<ModelicaCompilerInfo> tryResolveCompiler(ModelicaCompilerType type) {
+    openstudio::path executable;
+    switch (type) {
+      case ModelicaCompilerType::OpenModelica:
+        executable = findOpenModelicaExecutable();
+        break;
+      case ModelicaCompilerType::Dymola:
+        executable = findDymolaExecutable();
+        break;
+    }
+
+    if (executable.empty()) {
+      return std::nullopt;
+    }
+
+    ModelicaCompilerInfo info;
+    info.type = type;
+    info.executable = executable;
+    return info;
+  }
+
+  std::optional<ModelicaCompilerType> requestedCompilerType() {
+    if (const char* raw = std::getenv(kModelicaCompilerEnv)) {
+      if (auto parsed = parseCompilerType(raw)) {
+        if (*parsed != ModelicaCompilerType::OpenModelica) {
+          LOG_FREE(Warn, "ApplicationPathHelpers",
+                   fmt::format("Only OpenModelica is supported; ignoring {}='{}'", kModelicaCompilerEnv, raw));
+          return std::nullopt;
+        }
+        return parsed;
+      }
+      LOG_FREE(Warn, "ApplicationPathHelpers",
+               fmt::format("Unsupported Modelica compiler '{}' requested via {} (use 'openmodelica')", raw, kModelicaCompilerEnv));
+    }
+    return std::nullopt;
+  }
+}  // namespace
+
+ModelicaCompilerInfo getModelicaCompiler() {
+  // Resolution order (documented in developer/doc/GettingStartedModelica.md):
+  // 1. Respect OS_MODELICA_COMPILER=openmodelica + explicit executable overrides.
+  // 2. Auto-detect OpenModelica (preferred default).
+  if (auto requested = requestedCompilerType()) {
+    if (auto info = tryResolveCompiler(*requested)) {
+      return *info;
+    }
+    LOG_FREE(Warn, "ApplicationPathHelpers",
+             fmt::format("Modelica compiler '{}' requested via {} but not found", compilerName(*requested), kModelicaCompilerEnv));
+  }
+
+  if (auto info = tryResolveCompiler(ModelicaCompilerType::OpenModelica)) {
+    return *info;
+  }
+
+  LOG_FREE_AND_THROW("ApplicationPathHelpers",
+                     "Unable to locate OpenModelica (the only supported Modelica compiler). Install OpenModelica or set OPENMODELICA_EXECUTABLE.");
+}
+
+namespace {
+  constexpr const char* kModelicaPathEnv = "MODELICAPATH";
+
+  bool isModelicaBuildingsLibrary(const openstudio::path& candidate) {
+    auto packageMo = candidate / toPath("package.mo");
+    if (!openstudio::filesystem::exists(packageMo)) {
+      return false;
+    }
+
+    openstudio::filesystem::ifstream in(packageMo);
+    if (!in.is_open()) {
+      return false;
+    }
+    std::string line;
+    while (std::getline(in, line)) {
+      if (line.find("package Buildings") != std::string::npos) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  std::optional<openstudio::path> findMBLInModelicaPath() {
+    const char* raw = std::getenv(kModelicaPathEnv);
+    if (!raw) {
+      LOG_FREE(Info, "ApplicationPathHelpers", fmt::format("Modelica Buildings Library not found"));
+      return std::nullopt;
+    }
+
+#ifdef _WIN32
+    constexpr char separator = ';';
+#else
+    constexpr char separator = ':';
+#endif
+
+    std::vector<std::string> entries;
+    std::string pathList(raw);
+    boost::split(entries, pathList, boost::is_any_of(std::string(1, separator)), boost::token_compress_on);
+
+    for (const auto& entry : entries) {
+      if (entry.empty()) {
+        continue;
+      }
+      openstudio::path base = completeAndNormalize(openstudio::toPath(entry));
+      if (isModelicaBuildingsLibrary(base)) {
+        LOG_FREE(Info, "ApplicationPathHelpers",
+                 fmt::format("Modelica Buildings Library found via {} at '{}'", kModelicaPathEnv, base.generic_string()));
+        return base;
+      }
+      openstudio::path nested = base / toPath("Buildings");
+      if (isModelicaBuildingsLibrary(nested)) {
+        LOG_FREE(Info, "ApplicationPathHelpers",
+                 fmt::format("Modelica Buildings Library found via {} at '{}'", kModelicaPathEnv, nested.generic_string()));
+        return nested;
+      }
+    }
+
+    LOG_FREE(Info, "ApplicationPathHelpers",
+             fmt::format("Modelica Buildings Library not found in {} entries", kModelicaPathEnv));
+    return std::nullopt;
+  }
+}  // namespace
+
+openstudio::path getMBLPath() {
+  if (auto detected = findMBLInModelicaPath()) {
+    return *detected;
+  }
+  return {};
 }
 
 openstudio::path getRadianceDirectory() {

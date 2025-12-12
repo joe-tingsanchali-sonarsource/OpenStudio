@@ -15,6 +15,14 @@
 
 namespace openstudio {
 
+std::string executableFileExtension() {
+#ifdef _WIN32
+  return ".exe";
+#else
+  return "";
+#endif
+}
+
 std::string modelFileExtension() {
   return {"osm"};
 }

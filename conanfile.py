@@ -53,6 +53,7 @@ class OpenStudioBuildRecipe(ConanFile):
         self.requires("swig/4.1.1")  # Pending https://github.com/conan-io/conan-center-index/pull/19058
         self.requires("tinygltf/2.5.0")  # c8b2aca9505e86312bb42aa0e1c639ec
         self.requires("cli11/2.3.2")  # 8ccdf14fb1ad53532d498c16ae580b4b
+        self.requires("antlr4-cppruntime/4.13.1") # a173ea06e501a0f833003e679d5f3fb4 
 
         self.requires(
             "minizip/1.2.13"

@@ -17,6 +17,7 @@
 #include "../utilities/filetypes/WorkflowJSON.hpp"
 #include "../alfalfa/AlfalfaJSON.hpp"
 #include "../utilities/core/Logger.hpp"
+#include "../measure/ModelicaParameters.hpp"
 
 namespace openstudio {
 
@@ -55,6 +56,10 @@ namespace measure {
     /** Returns the alfalfa json contrainer */
     alfalfa::AlfalfaJSON alfalfa() const;
 
+    /** Returns Modelica Parameters. 
+     * This is a key/value store of parameters that will be set on a Modelica simulation  */
+    ModelicaParameters modelicaParameters() const;
+
     /** Returns preferred unit system, either 'IP' or 'SI'. New in OS 2.0. */
     std::string unitsPreference() const;
 
@@ -79,6 +84,9 @@ namespace measure {
 
     /** Returns a copy of the last EnergyPlus SqlFile generated in the workflow if available. */
     boost::optional<openstudio::SqlFile> lastEnergyPlusSqlFile() const;
+
+    /** Returns the path to the last Modelica result file generated in the workflow if available. */
+    boost::optional<openstudio::path> lastModelicaResultPath() const;
 
     /** Returns a copy of the last EpwFile generated in the workflow if available. */
     boost::optional<openstudio::EpwFile> lastEpwFile() const;
@@ -276,6 +284,9 @@ namespace measure {
     void setLastEnergyPlusSqlFilePath(const openstudio::path& lastEnergyPlusSqlFilePath);
     void resetLastEnergyPlusSqlFilePath();
 
+    void setLastModelicaResultPath(const openstudio::path& lastModelicaResultPath);
+    void resetLastModelicaResultPath();
+
     // clears m_lastEpwFilePath
     void setLastEpwFilePath(const openstudio::path& lastEpwFilePath);
     void resetLastEpwFilePath();
@@ -329,6 +340,7 @@ namespace measure {
     boost::optional<openstudio::path> m_lastEnergyPlusWorkspacePath;
     mutable boost::optional<openstudio::SqlFile> m_lastEnergyPlusSqlFile;
     boost::optional<openstudio::path> m_lastEnergyPlusSqlFilePath;
+    boost::optional<openstudio::path> m_lastModelicaResultPath;
     mutable boost::optional<openstudio::EpwFile> m_lastEpwFile;
     boost::optional<openstudio::path> m_lastEpwFilePath;
 
@@ -341,6 +353,7 @@ namespace measure {
     std::set<openstudio::path> m_currentDirFiles;
 
     openstudio::alfalfa::AlfalfaJSON m_alfalfa;
+    openstudio::measure::ModelicaParameters m_modelicaParameters;
   };
 
 }  // namespace measure

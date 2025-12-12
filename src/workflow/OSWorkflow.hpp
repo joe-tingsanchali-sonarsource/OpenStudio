@@ -14,6 +14,7 @@
 #include "../utilities/core/Filesystem.hpp"
 #include "../utilities/filetypes/WorkflowJSON.hpp"
 #include "../utilities/filetypes/RunOptions.hpp"
+#include "modelica/ModelicaFile.hpp"
 
 #include <functional>
 #include <map>
@@ -52,6 +53,10 @@ class OSWorkflow
   measure::OSRunner runner{workflowJSON};
   model::Model model;
   boost::optional<Workspace> workspace_;
+  boost::optional<modelica::ModelicaFile> modelicaFile;
+  boost::optional<openstudio::path> m_modelicaSeedFileName;
+  boost::optional<openstudio::path> m_latestModelicaFilePath;
+  boost::optional<openstudio::path> m_lastModelicaResultPath;
   openstudio::filesystem::path epwPath;
   openstudio::filesystem::path sqlPath;
 
@@ -85,8 +90,10 @@ class OSWorkflow
     OpenStudioMeasures,
     Translator,
     EnergyPlusMeasures,
+    ModelicaMeasures,
     PreProcess,
     EnergyPlus,
+    Modelica,
     ReportingMeasures,
     PostProcess,
     Cleanup,
@@ -113,8 +120,10 @@ class OSWorkflow
   void runOpenStudioMeasures();
   void runTranslator();
   void runEnergyPlusMeasures();
+  void runModelicaMeasures();
   void runPreProcess();
   void runEnergyPlus();
+  void runModelica();
   void runReportingMeasures();
   void runPostProcess();
 
@@ -132,6 +141,8 @@ class OSWorkflow
     EnergyPlusOutputRequest
   };
 
+  void saveModelicaFileToPath(const openstudio::path& filePath);
+  void saveModelicaFileSnapshot(const openstudio::path& directory);
   void applyMeasures(MeasureType measureType, ApplyMeasureType = ApplyMeasureType::Regular);
   static void applyArguments(measure::OSArgumentMap& argumentMap, const std::string& argumentName, const openstudio::Variant& argumentValue);
   void saveOSMToRootDirIfDebug();

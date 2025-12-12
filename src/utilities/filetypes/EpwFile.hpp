@@ -1115,6 +1115,8 @@ class UTILITIES_API EpwFile
 
   /// export to CONTAM WTH file
   bool translateToWth(openstudio::path path, std::string description = std::string());
+  /// export to Modelica (.mos) weather file
+  bool translateToMos(const openstudio::path& path);
 
   // Data status (?) functions
   /// Returns true if the file appears to be AMY (as opposed to TMY)

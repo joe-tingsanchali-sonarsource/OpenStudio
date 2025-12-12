@@ -13,6 +13,7 @@
 #include "../core/StringHelpers.hpp"
 
 #include <fmt/format.h>
+#include <array>
 #include <cmath>
 
 namespace openstudio {
@@ -4731,6 +4732,133 @@ bool EpwFile::translateToWth(openstudio::path path, std::string description) {
     }
     fp << output.get() << '\n';
   }
+  fp.close();
+  return true;
+}
+
+bool EpwFile::translateToMos(const openstudio::path& path) {
+  if (m_data.empty()) {
+    if (!openstudio::filesystem::exists(m_path) || !openstudio::filesystem::is_regular_file(m_path)) {
+      LOG_AND_THROW("Path '" << m_path << "' is not an EPW file");
+    }
+
+    m_checksum = openstudio::checksum(m_path);
+
+    std::ifstream ifs(openstudio::toSystemFilename(m_path));
+
+    if (!parse(ifs, true)) {
+      ifs.close();
+      LOG(Error, "EpwFile '" << toString(m_path) << "' cannot be processed");
+      return false;
+    }
+    ifs.close();
+  }
+
+  if (data().empty()) {
+    LOG(Error, "EPW file contains no data to translate");
+    return false;
+  }
+
+  std::vector<std::string> epwHeaderLines;
+  bool sawDataPeriods = false;
+  if (!m_path.empty() && openstudio::filesystem::exists(m_path)) {
+    std::ifstream headerStream(openstudio::toSystemFilename(m_path));
+    std::string rawLine;
+    while (std::getline(headerStream, rawLine)) {
+      epwHeaderLines.push_back(rawLine);
+      std::string trimmed = rawLine;
+      boost::trim(trimmed);
+      if (boost::istarts_with(trimmed, "DATA PERIODS")) {
+        sawDataPeriods = true;
+        break;
+      }
+    }
+  }
+
+  if (!sawDataPeriods) {
+    LOG(Error, "Failed to read EPW header information from '" << m_path << "' needed for MOS export");
+    return false;
+  }
+
+  openstudio::filesystem::ofstream fp(path);
+  if (!fp.is_open()) {
+    LOG(Error, "Failed to open file '" + openstudio::toString(path) + "'");
+    return false;
+  }
+
+  fp << "#1\n";
+  fp << fmt::format("double tab1({},{})\n", data().size(), 30);
+  for (const auto& headerLine : epwHeaderLines) {
+    fp << '#' << headerLine << '\n';
+  }
+
+  static const std::array<const char*, 30> kColumnDescriptions = {
+    "#C1 Time in seconds. Beginning of a year is 0s.",
+    "#C2 Dry bulb temperature in Celsius at indicated time",
+    "#C3 Dew point temperature in Celsius at indicated time",
+    "#C4 Relative humidity in percent at indicated time",
+    "#C5 Atmospheric station pressure in Pa at indicated time",
+    "#C6 Extraterrestrial horizontal radiation in Wh/m2",
+    "#C7 Extraterrestrial direct normal radiation in Wh/m2",
+    "#C8 Horizontal infrared radiation intensity in Wh/m2",
+    "#C9 Global horizontal radiation in Wh/m2",
+    "#C10 Direct normal radiation in Wh/m2",
+    "#C11 Diffuse horizontal radiation in Wh/m2",
+    "#C12 Averaged global horizontal illuminance in lux during minutes preceding the indicated time",
+    "#C13 Direct normal illuminance in lux during minutes preceding the indicated time",
+    "#C14 Diffuse horizontal illuminance in lux  during minutes preceding the indicated time",
+    "#C15 Zenith luminance in Cd/m2 during minutes preceding the indicated time",
+    "#C16 Wind direction at indicated time. N=0, E=90, S=180, W=270",
+    "#C17 Wind speed in m/s at indicated time",
+    "#C18 Total sky cover at indicated time",
+    "#C19 Opaque sky cover at indicated time",
+    "#C20 Visibility in km at indicated time",
+    "#C21 Ceiling height in m",
+    "#C22 Present weather observation",
+    "#C23 Present weather codes",
+    "#C24 Precipitable water in mm",
+    "#C25 Aerosol optical depth",
+    "#C26 Snow depth in cm",
+    "#C27 Days since last snowfall",
+    "#C28 Albedo",
+    "#C29 Liquid precipitation depth in mm at indicated time",
+    "#C30 Liquid precipitation quantity"};
+
+  for (const auto* description : kColumnDescriptions) {
+    fp << description << '\n';
+  }
+
+  static const std::array<EpwDataField, 29> kMosFields = {
+    EpwDataField::DryBulbTemperature,           EpwDataField::DewPointTemperature,          EpwDataField::RelativeHumidity,
+    EpwDataField::AtmosphericStationPressure,   EpwDataField::ExtraterrestrialHorizontalRadiation,
+    EpwDataField::ExtraterrestrialDirectNormalRadiation, EpwDataField::HorizontalInfraredRadiationIntensity,
+    EpwDataField::GlobalHorizontalRadiation,    EpwDataField::DirectNormalRadiation,        EpwDataField::DiffuseHorizontalRadiation,
+    EpwDataField::GlobalHorizontalIlluminance,  EpwDataField::DirectNormalIlluminance,      EpwDataField::DiffuseHorizontalIlluminance,
+    EpwDataField::ZenithLuminance,              EpwDataField::WindDirection,                EpwDataField::WindSpeed,
+    EpwDataField::TotalSkyCover,                EpwDataField::OpaqueSkyCover,               EpwDataField::Visibility,
+    EpwDataField::CeilingHeight,                EpwDataField::PresentWeatherObservation,    EpwDataField::PresentWeatherCodes,
+    EpwDataField::PrecipitableWater,            EpwDataField::AerosolOpticalDepth,          EpwDataField::SnowDepth,
+    EpwDataField::DaysSinceLastSnowfall,        EpwDataField::Albedo,                       EpwDataField::LiquidPrecipitationDepth,
+    EpwDataField::LiquidPrecipitationQuantity};
+
+  const int baseYear = data().front().year();
+  const DateTime baseDateTime(Date(MonthOfYear::Jan, 1, baseYear), Time(0, 0, 0));
+
+  for (const auto& point : data()) {
+    const Time offset = point.dateTime() - baseDateTime;
+    fp << fmt::format(fmt::runtime("{:.1f}"), static_cast<double>(offset.totalSeconds()));
+    const auto epwStrings = point.toEpwStrings();
+    for (const auto field : kMosFields) {
+      const size_t index = static_cast<size_t>(field.value());
+      if (index < epwStrings.size()) {
+        fp << '\t' << epwStrings[index];
+      } else {
+        fp << '\t' << 0;
+      }
+    }
+    fp << '\n';
+  }
+
   fp.close();
   return true;
 }
