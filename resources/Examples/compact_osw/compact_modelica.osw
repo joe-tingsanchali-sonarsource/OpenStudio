@@ -1,0 +1,14 @@
+{
+	"weather_file": "srrl_2013_amy.epw",
+	"seed_file": "seb.osm",
+	"seed_modelica_file": "modelica/OpenStudioExample/SeedBuilding.mo",
+	"seed_modelica_model": "OpenStudioExample.SeedBuilding",
+	"modelica_packages": [
+		"modelica/OpenStudioExample/package.mo"
+	],
+	"steps": [
+		{
+			"measure_dir_name": "SetModelicaZones"
+		}
+	]
+}

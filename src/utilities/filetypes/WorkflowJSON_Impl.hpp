@@ -123,6 +123,20 @@ namespace detail {
 
     bool setSeedFile(const openstudio::path& seedFile);
 
+    boost::optional<openstudio::path> seedModelicaFile() const;
+
+    boost::optional<std::string> seedModelicaModel() const;
+
+    bool setSeedModelicaFile(const openstudio::path& modelicaSeedFile);
+
+    void resetSeedModelicaFile();
+
+    std::vector<openstudio::path> modelicaPackages() const;
+
+    bool setModelicaPackages(const std::vector<openstudio::path>& packages);
+
+    void resetModelicaPackages();
+
     boost::optional<openstudio::path> weatherFile() const;
 
     bool setWeatherFile(const openstudio::path& weatherFile);

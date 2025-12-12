@@ -92,6 +92,18 @@ void OSWorkflow::runInitialization() {
 
   initializeWeatherFileFromOSW();
 
+  const auto seedModelicaPath = workflowJSON.seedModelicaFile();
+  if (seedModelicaPath) {
+    auto seedModelicaFileFullPath = workflowJSON.findFile(seedModelicaPath.get());
+    if (!seedModelicaFileFullPath) {
+      state = State::Errored;
+      throw std::runtime_error(fmt::format("Seed Modelica File: {}, specified in OSW cannot be found", seedModelicaPath->string()));
+    }
+    modelicaFile = modelica::ModelicaFile(seedModelicaFileFullPath.get());
+    m_modelicaSeedFileName = seedModelicaFileFullPath->filename();
+    m_latestModelicaFilePath = seedModelicaFileFullPath.get();
+  }
+
   // Set a clone of the WorkflowJSON for the model, so that it finds the filePaths (such as generated_files we added above)
   model.setWorkflowJSON(workflowJSON.clone());
 

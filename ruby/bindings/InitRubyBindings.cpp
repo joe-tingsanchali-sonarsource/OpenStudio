@@ -58,6 +58,7 @@ extern "C"
   void Init_openstudiomodelplantequipmentoperationscheme(void);
   void Init_openstudiomodelstraightcomponent(void);
   void Init_openstudiomodelairflow(void);
+  void Init_openstudiomodelica(void);
   void Init_openstudioutilities(void);
   void Init_openstudioutilitiesgeometry(void);
   void Init_openstudiomeasure(void);
@@ -128,6 +129,9 @@ namespace ruby {
     Init_openstudiomodel();
     rb_provide("openstudiomodel");
     rb_provide("openstudiomodel.so");
+    Init_openstudiomodelica();
+    rb_provide("openstudiomodelica");
+    rb_provide("openstudiomodelica.so");
     Init_openstudiomodelcore();
     rb_provide("openstudiomodelcore");
     rb_provide("openstudiomodelcore.so");
