@@ -1,5 +1,4 @@
 # Building with conan v2
-
 Check you have `conan >= 2`, and add the `nrel-v2` remote to grab `ruby` and `swig/4.1.1`.
 
 ```shell
